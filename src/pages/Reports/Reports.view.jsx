@@ -1,5 +1,5 @@
 import React from 'react'
-import Button from '../../components/Button'
+import Button from '../../components/Button/Button.component'
 import { formatCurrency } from '../../utils/helpers'
 
 export const Reports = () => {

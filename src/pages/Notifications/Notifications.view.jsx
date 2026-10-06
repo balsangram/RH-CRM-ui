@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Button from '../../components/Button'
+import Button from '../../components/Button/Button.component'
 
 export const Notifications = () => {
   const [notifications, setNotifications] = useState([

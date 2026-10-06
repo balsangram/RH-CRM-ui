@@ -1,8 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import ROUTES from '../../config/routes'
-import Table from '../../components/Table'
-import Button from '../../components/Button'
+import Table from '../../components/Table/Table.component'
+import Button from '../../components/Button/Button.component'
 import { formatCurrency, getStatusBadgeStyle } from '../../utils/helpers'
 
 export const Dashboard = () => {

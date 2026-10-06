@@ -1,6 +1,6 @@
 import React from 'react'
-import Button from '../../components/Button'
-import Table from '../../components/Table'
+import Button from '../../components/Button/Button.component'
+import Table from '../../components/Table/Table.component'
 
 export const Roles = () => {
   const roles = [

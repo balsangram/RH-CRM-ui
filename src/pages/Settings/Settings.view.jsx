@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Button from '../../components/Button'
+import Button from '../../components/Button/Button.component'
 
 export const Settings = () => {
   const [companyName, setCompanyName] = useState('RH Global Services Ltd.')

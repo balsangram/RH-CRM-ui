@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ROUTES from '../../config/routes'
-import Button from '../../components/Button'
+import Button from '../../components/Button/Button.component'
 
 export const Login = () => {
   const navigate = useNavigate()

@@ -4,15 +4,41 @@ export const ROUTES = {
 
   // Admin / Staff
   DASHBOARD: '/dashboard',
+
   LEADS: '/leads',
+  LEADS_ADD: '/leads/add',
+  LEADS_EDIT: '/leads/edit/:id',
+
   CUSTOMERS: '/customers',
+  CUSTOMERS_ADD: '/customers/add',
+  CUSTOMERS_EDIT: '/customers/edit/:id',
+
   TRAVELLERS: '/travellers',
+  TRAVELLERS_ADD: '/travellers/add',
+  TRAVELLERS_EDIT: '/travellers/edit/:id',
+
   APPLICATIONS: '/applications',
+  APPLICATIONS_ADD: '/applications/add',
+  APPLICATIONS_EDIT: '/applications/edit/:id',
+
   DOCUMENTS: '/documents',
+  DOCUMENTS_ADD: '/documents/add',
+  DOCUMENTS_EDIT: '/documents/edit/:id',
+
   TASKS: '/tasks',
+  TASKS_ADD: '/tasks/add',
+  TASKS_EDIT: '/tasks/edit/:id',
+
   VISA: '/visa',
+  VISA_ADD: '/visa/add',
+  VISA_EDIT: '/visa/edit/:id',
+
   REPORTS: '/reports',
+
   EMPLOYEES: '/employees',
+  EMPLOYEES_ADD: '/employees/add',
+  EMPLOYEES_EDIT: '/employees/edit/:id',
+
   ROLES: '/roles',
   NOTIFICATIONS: '/notifications',
   AUDIT_LOGS: '/audit-logs',
