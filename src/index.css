@@ -1,0 +1,134 @@
+/* ==========================================================================
+   RH GLOBAL CRM - GLOBAL THEME CONTROLLER (index.css)
+   Change colors, fonts, radius, and spacing here to control the entire project.
+   (ONLY LIGHT MODE)
+   ========================================================================== */
+
+@import "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap";
+@import "tailwindcss";
+
+/* Disable dark mode variant so OS dark mode never alters the light theme */
+@variant dark (&:where([data-dark-mode-disabled]));
+
+/* --------------------------------------------------------------------------
+   1. TAILWIND V4 THEME CONFIGURATION
+   Allows classes like `bg-primary`, `text-primary`, `font-sans` in JSX
+   -------------------------------------------------------------------------- */
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Brand Palette */
+  --color-primary: #4f46e5;
+  /* Indigo brand color */
+  --color-primary-hover: #4338ca;
+  /* Darker hover state */
+  --color-primary-light: #eef2ff;
+  /* Soft background tint */
+
+  --color-secondary: #0ea5e9;
+  /* Sky blue accent */
+  --color-success: #10b981;
+  /* Green positive state */
+  --color-warning: #f59e0b;
+  /* Amber warning state */
+  --color-danger: #ef4444;
+  /* Red error / alert */
+}
+
+/* --------------------------------------------------------------------------
+   2. ROOT CSS VARIABLES (PURE LIGHT MODE)
+   Use anywhere in CSS or JSX: var(--color-primary), var(--font-main), etc.
+   -------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+
+  /* --- Fonts & Typography --- */
+  --font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --text-xs: 0.75rem;
+  /* 12px */
+  --text-sm: 0.875rem;
+  /* 14px */
+  --text-base: 1rem;
+  /* 16px */
+  --text-lg: 1.125rem;
+  /* 18px */
+  --text-xl: 1.25rem;
+  /* 20px */
+  --text-2xl: 1.5rem;
+  /* 24px */
+  --text-3xl: 1.875rem;
+  /* 30px */
+
+  /* --- Brand & Status Colors --- */
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-primary-light: #eef2ff;
+  --color-secondary: #0ea5e9;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
+  /* --- Backgrounds & Surfaces --- */
+  --color-bg: #f8fafc;
+  /* Light gray page background */
+  --color-surface: #ffffff;
+  /* Clean white card & table background */
+  --color-surface-hover: #f1f5f9;
+  /* Table row hover */
+  --color-border: #e2e8f0;
+  /* Border dividers */
+
+  /* --- Text Colors --- */
+  --color-text-main: #0f172a;
+  /* Dark headings & body text */
+  --color-text-muted: #64748b;
+  /* Muted gray text & labels */
+
+  /* --- Spacing Scale --- */
+  --space-xs: 0.25rem;
+  /* 4px */
+  --space-sm: 0.5rem;
+  /* 8px */
+  --space-md: 1rem;
+  /* 16px */
+  --space-lg: 1.5rem;
+  /* 24px */
+  --space-xl: 2rem;
+  /* 32px */
+  --space-2xl: 3rem;
+  /* 48px */
+
+  /* --- Border Radius --- */
+  --radius-sm: 0.375rem;
+  /* 6px */
+  --radius-md: 0.5rem;
+  /* 8px */
+  --radius-lg: 0.75rem;
+  /* 12px */
+  --radius-xl: 1rem;
+  /* 16px */
+  --radius-full: 9999px;
+
+  /* --- Shadows --- */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* --------------------------------------------------------------------------
+   3. BASE APPLICATION RESET
+   -------------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  font-family: var(--font-main);
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
