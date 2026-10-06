@@ -22,17 +22,17 @@ export const Button = React.forwardRef(
 
     const variants = {
       primary:
-        'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 shadow-sm shadow-indigo-200',
+        'bg-primary text-white hover:bg-primary-hover focus:ring-primary shadow-sm shadow-primary/20',
       secondary:
-        'bg-slate-100 text-slate-800 hover:bg-slate-200 focus:ring-slate-400',
+        'bg-secondary text-main hover:opacity-90 focus:ring-secondary',
       outline:
-        'border border-slate-300 text-slate-700 hover:bg-slate-50 focus:ring-indigo-500',
+        'border border-border text-main hover:bg-primary-light focus:ring-primary',
       ghost:
-        'text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:ring-slate-400',
+        'text-muted hover:bg-primary-light hover:text-main focus:ring-primary',
       danger:
-        'bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-500 shadow-sm shadow-rose-200',
+        'bg-danger text-white hover:opacity-90 focus:ring-danger shadow-sm',
       success:
-        'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 shadow-sm shadow-emerald-200',
+        'bg-success text-white hover:opacity-90 focus:ring-success shadow-sm',
     }
 
     const sizes = {

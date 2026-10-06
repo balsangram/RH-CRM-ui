@@ -8,10 +8,10 @@ export const Table = ({
   onRowClick = null,
 }) => {
   return (
-    <div className="w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+    <div className="w-full overflow-hidden rounded-xl border border-border bg-surface shadow-xs">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm text-slate-600">
-          <thead className="bg-slate-50 text-xs font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200">
+        <table className="w-full text-left text-sm text-main">
+          <thead className="bg-primary-light/60 text-xs font-semibold text-muted uppercase tracking-wider border-b border-border">
             <tr>
               {columns.map((col, index) => (
                 <th
@@ -24,16 +24,16 @@ export const Table = ({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border">
             {isLoading ? (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-6 py-12 text-center text-slate-400"
+                  className="px-6 py-12 text-center text-muted"
                 >
                   <div className="flex items-center justify-center gap-2">
                     <svg
-                      className="animate-spin h-5 w-5 text-indigo-500"
+                      className="animate-spin h-5 w-5 text-primary"
                       fill="none"
                       viewBox="0 0 24 24"
                     >
@@ -59,11 +59,11 @@ export const Table = ({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-6 py-12 text-center text-slate-400"
+                  className="px-6 py-12 text-center text-muted"
                 >
                   <div className="flex flex-col items-center justify-center">
                     <svg
-                      className="w-10 h-10 mb-2 text-slate-300"
+                      className="w-10 h-10 mb-2 text-muted/60"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -84,7 +84,7 @@ export const Table = ({
                 <tr
                   key={row.id || rowIndex}
                   onClick={() => onRowClick && onRowClick(row)}
-                  className={`transition-colors hover:bg-slate-50/70 ${
+                  className={`transition-colors hover:bg-primary-light/40 ${
                     onRowClick ? 'cursor-pointer' : ''
                   }`}
                 >

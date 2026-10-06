@@ -46,8 +46,8 @@ export const Dashboard = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">CRM Dashboard</h1>
-          <p className="text-sm text-slate-500 mt-1">Real-time overview of leads, visas, and operations</p>
+          <h1 className="text-2xl font-bold text-main">CRM Dashboard</h1>
+          <p className="text-sm text-muted mt-1">Real-time overview of leads, visas, and operations</p>
         </div>
         <div className="flex items-center gap-3">
           <Link to={ROUTES.LEADS}>
@@ -64,11 +64,11 @@ export const Dashboard = () => {
         {stats.map((stat, i) => (
           <div
             key={i}
-            className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs"
+            className="p-5 rounded-2xl bg-surface border border-border shadow-xs"
           >
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{stat.label}</p>
+            <p className="text-xs font-medium text-muted uppercase tracking-wider">{stat.label}</p>
             <div className="mt-3 flex items-baseline justify-between">
-              <span className="text-2xl font-bold text-slate-900">{stat.value}</span>
+              <span className="text-2xl font-bold text-main">{stat.value}</span>
               <span className={`text-xs font-semibold ${stat.isUp ? 'text-emerald-600' : 'text-rose-600'}`}>
                 {stat.change}
               </span>
@@ -78,13 +78,13 @@ export const Dashboard = () => {
       </div>
 
       {/* Recent Applications Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+      <div className="bg-surface rounded-2xl border border-border p-6 shadow-xs">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">Recent Applications</h2>
-            <p className="text-xs text-slate-500">Latest visa submissions and their progress status</p>
+            <h2 className="text-lg font-semibold text-main">Recent Applications</h2>
+            <p className="text-xs text-muted">Latest visa submissions and their progress status</p>
           </div>
-          <Link to={ROUTES.APPLICATIONS} className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+          <Link to={ROUTES.APPLICATIONS} className="text-sm font-medium text-primary hover:text-primary-hover">
             View All &rarr;
           </Link>
         </div>

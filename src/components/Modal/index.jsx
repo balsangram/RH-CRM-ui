@@ -46,17 +46,17 @@ export const Modal = ({
 
       {/* Dialog box */}
       <div
-        className={`relative w-full ${sizeClasses[size] || sizeClasses.md} bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all z-10`}
+        className={`relative w-full ${sizeClasses[size] || sizeClasses.md} bg-surface rounded-2xl shadow-2xl border border-border overflow-hidden transform transition-all z-10`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h3 className="text-lg font-semibold text-slate-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h3 className="text-lg font-semibold text-main">
             {title}
           </h3>
           <button
             onClick={onClose}
             type="button"
-            className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
+            className="text-muted hover:text-main p-1 rounded-lg hover:bg-primary-light transition-colors"
           >
             <span className="sr-only">Close</span>
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,13 +66,13 @@ export const Modal = ({
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 max-h-[calc(85vh-140px)] overflow-y-auto text-slate-600">
+        <div className="px-6 py-5 max-h-[calc(85vh-140px)] overflow-y-auto text-main">
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end items-center gap-3">
+          <div className="px-6 py-4 bg-primary-light/40 border-t border-border flex justify-end items-center gap-3">
             {footer}
           </div>
         )}

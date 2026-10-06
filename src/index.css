@@ -18,15 +18,44 @@
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   /* Brand Palette */
-  --color-primary: #4f46e5;
-  /* Indigo brand color */
-  --color-primary-hover: #4338ca;
-  /* Darker hover state */
-  --color-primary-light: #eef2ff;
-  /* Soft background tint */
+  --color-primary: #0E4343;
+  /* Deep Dark Teal brand color */
+  --color-primary-hover: #093232;
+  /* Darker emerald teal hover state */
+  --color-primary-light: #EAF5F4;
+  /* Soft mint background tint */
 
-  --color-secondary: #0ea5e9;
-  /* Sky blue accent */
+  --color-secondary: #2DD4BF;
+  /* Bright mint cyan accent */
+
+  /* Backgrounds & Surfaces */
+  --color-bg: #F4F9F8;
+  --color-surface: #ffffff;
+  --color-surface-hover: #EBF5F4;
+  --color-border: #DCE8E7;
+
+  /* Text Colors */
+  --color-main: #0D282E;
+  --color-text-main: #0D282E;
+  --color-muted: #4A6B6C;
+  --color-text-muted: #4A6B6C;
+
+  /* --- SIDEBAR CUSTOMIZABLE THEME --- */
+  --color-sidebar-bg: #0E4343;
+  --color-sidebar-text: #F0FDF9;
+  --color-sidebar-muted: #7EA9AA;
+  --color-sidebar-border: #165353;
+  --color-sidebar-active-bg: #1B6565;
+  --color-sidebar-active-text: #ffffff;
+  --color-sidebar-hover-bg: #145656;
+
+  /* --- HEADER CUSTOMIZABLE THEME --- */
+  --color-header-bg: #ffffff;
+  --color-header-text: #0D282E;
+  --color-header-muted: #4A6B6C;
+  --color-header-border: #DCE8E7;
+
+  /* Status Colors */
   --color-success: #10b981;
   /* Green positive state */
   --color-warning: #f59e0b;
@@ -60,29 +89,46 @@
   /* 30px */
 
   /* --- Brand & Status Colors --- */
-  --color-primary: #4f46e5;
-  --color-primary-hover: #4338ca;
-  --color-primary-light: #eef2ff;
-  --color-secondary: #0ea5e9;
+  --color-primary: #0E4343;
+  --color-primary-hover: #093232;
+  --color-primary-light: #EAF5F4;
+  --color-secondary: #2DD4BF;
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
 
   /* --- Backgrounds & Surfaces --- */
-  --color-bg: #f8fafc;
-  /* Light gray page background */
+  --color-bg: #F4F9F8;
+  /* Light ice mint page background */
   --color-surface: #ffffff;
   /* Clean white card & table background */
-  --color-surface-hover: #f1f5f9;
+  --color-surface-hover: #EBF5F4;
   /* Table row hover */
-  --color-border: #e2e8f0;
+  --color-border: #DCE8E7;
   /* Border dividers */
 
   /* --- Text Colors --- */
-  --color-text-main: #0f172a;
-  /* Dark headings & body text */
-  --color-text-muted: #64748b;
-  /* Muted gray text & labels */
+  --color-text-main: #0D282E;
+  /* Deep dark teal headings & body text */
+  --color-text-muted: #4A6B6C;
+  /* Muted slate teal text & labels */
+  --color-main: #0D282E;
+  --color-muted: #4A6B6C;
+
+  /* --- Sidebar Dedicated Theme --- */
+  --color-sidebar-bg: #0E4343;
+  --color-sidebar-text: #F0FDF9;
+  --color-sidebar-muted: #7EA9AA;
+  --color-sidebar-border: #165353;
+  --color-sidebar-active-bg: #1B6565;
+  --color-sidebar-active-text: #ffffff;
+  --color-sidebar-hover-bg: #145656;
+
+  /* --- Header Dedicated Theme --- */
+  --color-header-bg: #ffffff;
+  --color-header-text: #0D282E;
+  --color-header-muted: #4A6B6C;
+  --color-header-border: #DCE8E7;
 
   /* --- Spacing Scale --- */
   --space-xs: 0.25rem;

@@ -53,7 +53,7 @@ export const Login = () => {
     <div className="min-h-screen w-full flex items-center justify-center bg-slate-900 p-4">
       <div className="w-full max-w-md bg-slate-800/80 backdrop-blur-xl border border-slate-700/60 rounded-2xl p-8 shadow-2xl">
         <div className="text-center mb-8">
-          <div className="inline-flex h-12 w-12 rounded-2xl bg-indigo-600 items-center justify-center text-white font-bold text-xl mb-3 shadow-lg shadow-indigo-500/30">
+          <div className="inline-flex h-12 w-12 rounded-2xl bg-primary items-center justify-center text-white font-bold text-xl mb-3 shadow-lg shadow-primary/30">
             RH
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">RH Global CRM</h1>
@@ -61,7 +61,7 @@ export const Login = () => {
         </div>
 
         {error && (
-          <div className="mb-5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm">
+          <div className="mb-5 p-3 rounded-xl bg-danger/10 border border-danger/20 text-danger text-sm">
             {error}
           </div>
         )}
@@ -76,7 +76,7 @@ export const Login = () => {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-900/60 border border-slate-700 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-900/60 border border-slate-700 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="you@rhglobal.com"
             />
           </div>
@@ -86,7 +86,7 @@ export const Login = () => {
               <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
                 Password
               </label>
-              <a href="#forgot" className="text-xs text-indigo-400 hover:text-indigo-300">
+              <a href="#forgot" className="text-xs text-primary hover:text-primary-hover">
                 Forgot password?
               </a>
             </div>
@@ -95,7 +95,7 @@ export const Login = () => {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-900/60 border border-slate-700 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-900/60 border border-slate-700 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="••••••••"
             />
           </div>
