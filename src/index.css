@@ -1,7 +1,7 @@
 /* ==========================================================================
    RH GLOBAL CRM - GLOBAL THEME CONTROLLER (index.css)
-   Change colors, fonts, radius, and spacing here to control the entire project.
-   (ONLY LIGHT MODE)
+   Change colors, gradients, radius, and component themes here to control the entire project.
+   Palette: #2E2B6E | #E11D2E | #181445 | #0F0E2B | #EEEEFB | #F7F7FB | #4ADE80
    ========================================================================== */
 
 @import "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap";
@@ -12,157 +12,321 @@
 
 /* --------------------------------------------------------------------------
    1. TAILWIND V4 THEME CONFIGURATION
-   Allows classes like `bg-primary`, `text-primary`, `font-sans` in JSX
    -------------------------------------------------------------------------- */
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-  /* Brand Palette */
-  --color-primary: #0E4343;
-  /* Deep Dark Teal brand color */
-  --color-primary-hover: #093232;
-  /* Darker emerald teal hover state */
-  --color-primary-light: #EAF5F4;
-  /* Soft mint background tint */
+  /* Brand Colors */
+  --color-primary: #2E2B6E;
+  --color-primary-hover: #221F56;
+  --color-primary-light: #EEEEFB;
+  --color-primary-dark: #181445;
 
-  --color-secondary: #2DD4BF;
-  /* Bright mint cyan accent */
+  --color-secondary: #E11D2E;
+  --color-secondary-hover: #C51323;
+  --color-secondary-light: #FDE8EA;
+
+  --color-accent: #E11D2E;
+
+  /* Midnight Base Palette */
+  --color-midnight: #0F0E2B;
+  --color-midnight-light: #181445;
+  --color-indigo-royal: #2E2B6E;
+  --color-lavender-light: #EEEEFB;
+  --color-lavender-bg: #F7F7FB;
 
   /* Backgrounds & Surfaces */
-  --color-bg: #F4F9F8;
+  --color-bg: #F7F7FB;
   --color-surface: #ffffff;
-  --color-surface-hover: #EBF5F4;
-  --color-border: #DCE8E7;
+  --color-surface-hover: #EEEEFB;
+  --color-border: #E2E2F5;
 
   /* Text Colors */
-  --color-main: #0D282E;
-  --color-text-main: #0D282E;
-  --color-muted: #4A6B6C;
-  --color-text-muted: #4A6B6C;
-
-  /* --- SIDEBAR CUSTOMIZABLE THEME --- */
-  --color-sidebar-bg: #0E4343;
-  --color-sidebar-text: #F0FDF9;
-  --color-sidebar-muted: #7EA9AA;
-  --color-sidebar-border: #165353;
-  --color-sidebar-active-bg: #1B6565;
-  --color-sidebar-active-text: #ffffff;
-  --color-sidebar-hover-bg: #145656;
-
-  /* --- HEADER CUSTOMIZABLE THEME --- */
-  --color-header-bg: #ffffff;
-  --color-header-text: #0D282E;
-  --color-header-muted: #4A6B6C;
-  --color-header-border: #DCE8E7;
+  --color-main: #0F0E2B;
+  --color-text-main: #0F0E2B;
+  --color-muted: #5B588B;
+  --color-text-muted: #5B588B;
 
   /* Status Colors */
-  --color-success: #10b981;
-  /* Green positive state */
-  --color-warning: #f59e0b;
-  /* Amber warning state */
-  --color-danger: #ef4444;
-  /* Red error / alert */
+  --color-success: #4ADE80;
+  --color-warning: #F59E0B;
+  --color-danger: #E11D2E;
 }
 
 /* --------------------------------------------------------------------------
-   2. ROOT CSS VARIABLES (PURE LIGHT MODE)
-   Use anywhere in CSS or JSX: var(--color-primary), var(--font-main), etc.
+   2. ROOT CSS VARIABLES (GLOBAL CUSTOMIZABLE DESIGN SYSTEM)
    -------------------------------------------------------------------------- */
 :root {
   color-scheme: light;
 
-  /* --- Fonts & Typography --- */
+  /* --- Base Brand Hex Values --- */
+  --brand-primary: #2E2B6E;
+  --brand-primary-dark: #181445;
+  --brand-midnight: #0F0E2B;
+  --brand-red: #E11D2E;
+  --brand-red-hover: #C51323;
+  --brand-lavender: #EEEEFB;
+  --brand-page-bg: #F7F7FB;
+  --brand-success: #4ADE80;
+
+  /* --- Fonts & Spacing --- */
   --font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --text-xs: 0.75rem;
-  /* 12px */
-  --text-sm: 0.875rem;
-  /* 14px */
-  --text-base: 1rem;
-  /* 16px */
-  --text-lg: 1.125rem;
-  /* 18px */
-  --text-xl: 1.25rem;
-  /* 20px */
-  --text-2xl: 1.5rem;
-  /* 24px */
-  --text-3xl: 1.875rem;
-  /* 30px */
-
-  /* --- Brand & Status Colors --- */
-  --color-primary: #0E4343;
-  --color-primary-hover: #093232;
-  --color-primary-light: #EAF5F4;
-  --color-secondary: #2DD4BF;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-
-  /* --- Backgrounds & Surfaces --- */
-  --color-bg: #F4F9F8;
-  /* Light ice mint page background */
-  --color-surface: #ffffff;
-  /* Clean white card & table background */
-  --color-surface-hover: #EBF5F4;
-  /* Table row hover */
-  --color-border: #DCE8E7;
-  /* Border dividers */
 
   /* --- Text Colors --- */
-  --color-text-main: #0D282E;
-  /* Deep dark teal headings & body text */
-  --color-text-muted: #4A6B6C;
-  /* Muted slate teal text & labels */
-  --color-main: #0D282E;
-  --color-muted: #4A6B6C;
+  --color-text-main: #0F0E2B;
+  --color-text-muted: #5B588B;
 
-  /* --- Sidebar Dedicated Theme --- */
-  --color-sidebar-bg: #0E4343;
-  --color-sidebar-text: #F0FDF9;
-  --color-sidebar-muted: #7EA9AA;
-  --color-sidebar-border: #165353;
-  --color-sidebar-active-bg: #1B6565;
-  --color-sidebar-active-text: #ffffff;
-  --color-sidebar-hover-bg: #145656;
+  /* --- App Gradients --- */
+  --gradient-hero: linear-gradient(135deg, #0F0E2B 0%, #181445 45%, #2E2B6E 100%);
+  --gradient-dark: linear-gradient(180deg, #0F0E2B 0%, #181445 100%);
+  --gradient-primary-btn: linear-gradient(135deg, #181445 0%, #0F0E2B 100%);
+  --gradient-secondary-btn: linear-gradient(135deg, #E11D2E 0%, #C51323 100%);
+  --gradient-danger-btn: linear-gradient(135deg, #E11D2E 0%, #B91020 100%);
+  --gradient-avatar: linear-gradient(135deg, #E11D2E 0%, #2E2B6E 100%);
+  --gradient-glow: radial-gradient(ellipse at top right, rgba(225, 29, 46, 0.25) 0%, rgba(46, 43, 110, 0.45) 40%, rgba(15, 14, 43, 0) 70%);
 
   /* --- Header Dedicated Theme --- */
-  --color-header-bg: #ffffff;
-  --color-header-text: #0D282E;
-  --color-header-muted: #4A6B6C;
-  --color-header-border: #DCE8E7;
+  --header-bg-gradient: var(--gradient-hero);
+  --header-border-color: rgba(255, 255, 255, 0.12);
+  --header-text-color: #FFFFFF;
+  --header-muted-color: rgba(238, 238, 251, 0.8);
+  --header-icon-hover-bg: rgba(255, 255, 255, 0.1);
 
-  /* --- Spacing Scale --- */
-  --space-xs: 0.25rem;
-  /* 4px */
-  --space-sm: 0.5rem;
-  /* 8px */
-  --space-md: 1rem;
-  /* 16px */
-  --space-lg: 1.5rem;
-  /* 24px */
-  --space-xl: 2rem;
-  /* 32px */
-  --space-2xl: 3rem;
-  /* 48px */
+  /* --- Sidebar Dedicated Theme --- */
+  --sidebar-bg-gradient: var(--gradient-dark);
+  --sidebar-border-color: rgba(255, 255, 255, 0.1);
+  --sidebar-text-color: #FFFFFF;
+  --sidebar-muted-color: #8E8BB5;
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.06);
+  --sidebar-active-bg-gradient: linear-gradient(135deg, #2E2B6E 0%, #181445 100%);
+  --sidebar-active-border-accent: #E11D2E;
 
-  /* --- Border Radius --- */
-  --radius-sm: 0.375rem;
-  /* 6px */
-  --radius-md: 0.5rem;
-  /* 8px */
-  --radius-lg: 0.75rem;
-  /* 12px */
-  --radius-xl: 1rem;
-  /* 16px */
-  --radius-full: 9999px;
+  /* --- Search Bar Theme --- */
+  --search-bg: rgba(255, 255, 255, 0.14);
+  --search-bg-hover: rgba(255, 255, 255, 0.18);
+  --search-bg-focus: rgba(255, 255, 255, 0.22);
+  --search-border: rgba(255, 255, 255, 0.25);
+  --search-text: #FFFFFF;
+  --search-placeholder: rgba(238, 238, 251, 0.75);
+  --search-focus-ring: rgba(225, 29, 46, 0.35);
+
+  /* --- Dropdown Menu Theme --- */
+  --dropdown-bg: #181445;
+  --dropdown-border: rgba(255, 255, 255, 0.15);
+  --dropdown-text: #FFFFFF;
+  --dropdown-muted: rgba(238, 238, 251, 0.7);
+  --dropdown-hover-bg: rgba(255, 255, 255, 0.1);
+
+  /* --- Global Chart Theme Variables --- */
+  --chart-primary: var(--brand-primary);
+  --chart-secondary: var(--brand-red);
+  --chart-accent: #3B82F6;
+  --chart-lavender: #8B5CF6;
+  --chart-track-pattern: repeating-linear-gradient(135deg, rgba(226, 232, 240, 0.6), rgba(226, 232, 240, 0.6) 6px, rgba(241, 245, 249, 0.6) 6px, rgba(241, 245, 249, 0.6) 12px);
 
   /* --- Shadows --- */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-primary: 0 4px 14px rgba(46, 43, 110, 0.35);
+  --shadow-secondary: 0 4px 14px rgba(225, 29, 46, 0.35);
+  --shadow-glow: 0 0 20px rgba(225, 29, 46, 0.35);
 }
 
 /* --------------------------------------------------------------------------
-   3. BASE APPLICATION RESET
+   3. GLOBAL COMPONENT CSS CLASSES (CENTRALIZED FOR EASY THEMING)
+   -------------------------------------------------------------------------- */
+
+/* --- Header Component Styles --- */
+.crm-header {
+  background: var(--header-bg-gradient) !important;
+  border-bottom: 1px solid var(--header-border-color) !important;
+  color: var(--header-text-color) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(15, 14, 43, 0.2);
+}
+
+.crm-header-icon-btn {
+  color: var(--header-muted-color);
+  transition: all 0.2s ease;
+}
+
+.crm-header-icon-btn:hover {
+  color: var(--header-text-color);
+  background-color: var(--header-icon-hover-bg);
+}
+
+/* --- Search Bar Input --- */
+.crm-search-input {
+  width: 100%;
+  background: var(--search-bg) !important;
+  border: 1px solid var(--search-border) !important;
+  color: var(--search-text) !important;
+  border-radius: 0.75rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(15, 14, 43, 0.25);
+}
+
+.crm-search-input::placeholder {
+  color: var(--search-placeholder) !important;
+}
+
+.crm-search-input:hover {
+  background: var(--search-bg-hover) !important;
+  border-color: rgba(238, 238, 251, 0.4) !important;
+}
+
+.crm-search-input:focus {
+  background: var(--search-bg-focus) !important;
+  border-color: var(--brand-red) !important;
+  box-shadow: 0 0 0 3px var(--search-focus-ring), 0 4px 16px rgba(15, 14, 43, 0.4) !important;
+  outline: none !important;
+}
+
+/* --- Profile Avatar & Dropdown --- */
+.crm-avatar {
+  background: var(--gradient-avatar) !important;
+  color: #FFFFFF !important;
+  box-shadow: var(--shadow-secondary);
+}
+
+.crm-dropdown-menu {
+  background: var(--dropdown-bg) !important;
+  border: 1px solid var(--dropdown-border) !important;
+  color: var(--dropdown-text) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(15, 14, 43, 0.5);
+}
+
+.crm-dropdown-item {
+  color: var(--dropdown-text) !important;
+  transition: background-color 0.15s ease;
+}
+
+.crm-dropdown-item:hover {
+  background-color: var(--dropdown-hover-bg) !important;
+}
+
+/* --- Sidebar Component Styles --- */
+.crm-sidebar {
+  background: linear-gradient(180deg, #0F0E2B 0%, #181445 100%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
+}
+
+.crm-sidebar-brand-badge {
+  background: linear-gradient(135deg, #E11D2E 0%, #B91020 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 12px rgba(225, 29, 46, 0.35);
+}
+
+.crm-sidebar-nav-item {
+  color: #8E8BB5 !important;
+  transition: all 0.2s ease;
+}
+
+.crm-sidebar-nav-item:hover {
+  color: #FFFFFF !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.crm-sidebar-nav-active {
+  background: linear-gradient(135deg, #2E2B6E 0%, #181445 100%) !important;
+  color: #FFFFFF !important;
+  border-left: 4px solid #E11D2E !important;
+  box-shadow: 0 4px 14px rgba(46, 43, 110, 0.4) !important;
+  font-weight: 600 !important;
+}
+
+.crm-sidebar-nav-active svg {
+  color: #FFFFFF !important;
+}
+
+/* --- Button Component Styles --- */
+.crm-btn-primary {
+  background: var(--gradient-primary-btn) !important;
+  color: #FFFFFF !important;
+  box-shadow: var(--shadow-primary);
+  border: none !important;
+  transition: all 0.2s ease;
+}
+
+.crm-btn-primary:hover:not(:disabled) {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.crm-btn-secondary {
+  background: var(--gradient-secondary-btn) !important;
+  color: #FFFFFF !important;
+  box-shadow: var(--shadow-secondary);
+  border: none !important;
+  transition: all 0.2s ease;
+}
+
+.crm-btn-secondary:hover:not(:disabled) {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.crm-btn-danger {
+  background: var(--gradient-danger-btn) !important;
+  color: #FFFFFF !important;
+  box-shadow: var(--shadow-secondary);
+  border: none !important;
+}
+
+.crm-btn-success {
+  background-color: var(--brand-success) !important;
+  color: #0F0E2B !important;
+  font-weight: 600;
+}
+
+.crm-btn-outline {
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-main) !important;
+  background-color: transparent !important;
+}
+
+.crm-btn-outline:hover:not(:disabled) {
+  background-color: var(--color-primary-light) !important;
+  color: var(--color-primary) !important;
+}
+
+.crm-btn-ghost {
+  color: var(--color-text-muted) !important;
+  background-color: transparent !important;
+}
+
+.crm-btn-ghost:hover:not(:disabled) {
+  background-color: var(--color-primary-light) !important;
+  color: var(--color-text-main) !important;
+}
+
+/* --- Helper Gradient Utilities --- */
+.bg-gradient-hero {
+  background: var(--gradient-hero) !important;
+}
+
+.bg-gradient-dark {
+  background: var(--gradient-dark) !important;
+}
+
+.text-gradient-primary {
+  background: var(--gradient-primary-btn);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-accent {
+  background: var(--gradient-secondary-btn);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   4. BASE APPLICATION RESET
    -------------------------------------------------------------------------- */
 * {
   box-sizing: border-box;

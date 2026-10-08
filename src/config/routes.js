@@ -21,9 +21,9 @@ export const ROUTES = {
   APPLICATIONS_ADD: '/applications/add',
   APPLICATIONS_EDIT: '/applications/edit/:id',
 
-  DOCUMENTS: '/documents',
-  DOCUMENTS_ADD: '/documents/add',
-  DOCUMENTS_EDIT: '/documents/edit/:id',
+  HOLIDAYS: '/holidays',
+  HOLIDAYS_ADD: '/holidays/add',
+  HOLIDAYS_EDIT: '/holidays/edit/:id',
 
   TASKS: '/tasks',
   TASKS_ADD: '/tasks/add',
@@ -48,7 +48,7 @@ export const ROUTES = {
   CUSTOMER_PORTAL: {
     DASHBOARD: '/portal',
     APPLICATIONS: '/portal/applications',
-    DOCUMENTS: '/portal/documents',
+    HOLIDAYS: '/portal/holidays',
     PROFILE: '/portal/profile',
   },
 }

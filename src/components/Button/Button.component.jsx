@@ -21,18 +21,12 @@ export const Button = React.forwardRef(
       'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer select-none active:scale-[0.98]'
 
     const variants = {
-      primary:
-        'bg-primary text-white hover:bg-primary-hover focus:ring-primary shadow-sm shadow-primary/20',
-      secondary:
-        'bg-secondary text-main hover:opacity-90 focus:ring-secondary',
-      outline:
-        'border border-border text-main hover:bg-primary-light focus:ring-primary',
-      ghost:
-        'text-muted hover:bg-primary-light hover:text-main focus:ring-primary',
-      danger:
-        'bg-danger text-white hover:opacity-90 focus:ring-danger shadow-sm',
-      success:
-        'bg-success text-white hover:opacity-90 focus:ring-success shadow-sm',
+      primary: 'crm-btn-primary',
+      secondary: 'crm-btn-secondary',
+      outline: 'crm-btn-outline',
+      ghost: 'crm-btn-ghost',
+      danger: 'crm-btn-danger',
+      success: 'crm-btn-success',
     }
 
     const sizes = {

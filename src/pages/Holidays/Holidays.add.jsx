@@ -1,32 +1,32 @@
 import React, { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Button from '../../components/Button/Button.component'
 import ROUTES from '../../config/routes'
 
-export const DocumentsEdit = () => {
+export const HolidaysAdd = () => {
   const navigate = useNavigate()
-  const { id } = useParams()
   const [formData, setFormData] = useState({
-    name: 'Passport_Copy_Bio.pdf',
-    category: 'Identification',
-    applicant: 'Emma Watson',
-    status: 'Verified',
+    name: '',
+    destination: '',
+    duration: '5 Nights / 6 Days',
+    price: '',
+    status: 'Active',
   })
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    navigate(ROUTES.DOCUMENTS)
+    navigate(ROUTES.HOLIDAYS)
   }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-main">Edit Document #{id || 'DOC-101'}</h1>
-          <p className="text-sm text-muted mt-1">Update file metadata and verification status</p>
+          <h1 className="text-2xl font-bold text-main">Add Holiday Package</h1>
+          <p className="text-sm text-muted mt-1">Create a new holiday package or custom tour itinerary</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => navigate(ROUTES.DOCUMENTS)}>
-          &larr; Back to Documents
+        <Button variant="outline" size="sm" onClick={() => navigate(ROUTES.HOLIDAYS)}>
+          &larr; Back to Holidays
         </Button>
       </div>
 
@@ -35,7 +35,7 @@ export const DocumentsEdit = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold uppercase text-main mb-1">
-                Document Name *
+                Package Title *
               </label>
               <input
                 type="text"
@@ -43,17 +43,20 @@ export const DocumentsEdit = () => {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="crm-input"
+                placeholder="e.g. Swiss Alps Getaway"
               />
             </div>
             <div>
               <label className="block text-xs font-semibold uppercase text-main mb-1">
-                Category
+                Destination *
               </label>
               <input
                 type="text"
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                required
+                value={formData.destination}
+                onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
                 className="crm-input"
+                placeholder="e.g. Switzerland"
               />
             </div>
           </div>
@@ -61,37 +64,36 @@ export const DocumentsEdit = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold uppercase text-main mb-1">
-                Applicant
+                Duration
               </label>
               <input
                 type="text"
-                value={formData.applicant}
-                onChange={(e) => setFormData({ ...formData, applicant: e.target.value })}
+                value={formData.duration}
+                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                 className="crm-input"
+                placeholder="e.g. 7 Nights / 8 Days"
               />
             </div>
             <div>
               <label className="block text-xs font-semibold uppercase text-main mb-1">
-                Verification Status
+                Starting Price ($)
               </label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              <input
+                type="text"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 className="crm-input"
-              >
-                <option value="Verified">Verified</option>
-                <option value="Pending Review">Pending Review</option>
-                <option value="Rejected">Rejected</option>
-              </select>
+                placeholder="e.g. 3,450"
+              />
             </div>
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
-            <Button variant="ghost" onClick={() => navigate(ROUTES.DOCUMENTS)}>
+            <Button variant="ghost" onClick={() => navigate(ROUTES.HOLIDAYS)}>
               Cancel
             </Button>
             <Button type="submit" variant="primary">
-              Save Document Details
+              Save Holiday Package
             </Button>
           </div>
         </form>
@@ -100,4 +102,4 @@ export const DocumentsEdit = () => {
   )
 }
 
-export default DocumentsEdit
+export default HolidaysAdd

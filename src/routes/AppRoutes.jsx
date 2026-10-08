@@ -13,7 +13,7 @@ import Leads from '../pages/Leads/Leads.view'
 import Customers from '../pages/Customers/Customers.view'
 import Travellers from '../pages/Travellers/Travellers.view'
 import Applications from '../pages/Applications/Applications.view'
-import Documents from '../pages/Documents/Documents.view'
+import Holidays from '../pages/Holidays/Holidays.view'
 import Tasks from '../pages/Tasks/Tasks.view'
 import Visa from '../pages/Visa/Visa.view'
 import Reports from '../pages/Reports/Reports.view'
@@ -30,7 +30,7 @@ import CustomersAdd from '../pages/Customers/Customers.add'
 import VisaAdd from '../pages/Visa/Visa.add'
 import EmployeesAdd from '../pages/Employees/Employees.add'
 import TasksAdd from '../pages/Tasks/Tasks.add'
-import DocumentsAdd from '../pages/Documents/Documents.add'
+import HolidaysAdd from '../pages/Holidays/Holidays.add'
 import TravellersAdd from '../pages/Travellers/Travellers.add'
 
 // Pages - Edit
@@ -40,8 +40,10 @@ import CustomersEdit from '../pages/Customers/Customers.edit'
 import VisaEdit from '../pages/Visa/Visa.edit'
 import EmployeesEdit from '../pages/Employees/Employees.edit'
 import TasksEdit from '../pages/Tasks/Tasks.edit'
-import DocumentsEdit from '../pages/Documents/Documents.edit'
+import HolidaysEdit from '../pages/Holidays/Holidays.edit'
 import TravellersEdit from '../pages/Travellers/Travellers.edit'
+
+import NotFound from '../pages/NotFound/NotFound.view'
 
 export const AppRoutes = () => {
   return (
@@ -74,10 +76,10 @@ export const AppRoutes = () => {
         <Route path={ROUTES.APPLICATIONS_ADD} element={<ApplicationsAdd />} />
         <Route path={ROUTES.APPLICATIONS_EDIT} element={<ApplicationsEdit />} />
 
-        {/* Documents */}
-        <Route path={ROUTES.DOCUMENTS} element={<Documents />} />
-        <Route path={ROUTES.DOCUMENTS_ADD} element={<DocumentsAdd />} />
-        <Route path={ROUTES.DOCUMENTS_EDIT} element={<DocumentsEdit />} />
+        {/* Holidays */}
+        <Route path={ROUTES.HOLIDAYS} element={<Holidays />} />
+        <Route path={ROUTES.HOLIDAYS_ADD} element={<HolidaysAdd />} />
+        <Route path={ROUTES.HOLIDAYS_EDIT} element={<HolidaysEdit />} />
 
         {/* Tasks */}
         <Route path={ROUTES.TASKS} element={<Tasks />} />
@@ -106,11 +108,11 @@ export const AppRoutes = () => {
       <Route path="/portal" element={<CustomerLayout />}>
         <Route index element={<Applications />} />
         <Route path="applications" element={<Applications />} />
-        <Route path="documents" element={<Documents />} />
+        <Route path="holidays" element={<Holidays />} />
       </Route>
 
-      {/* Fallback route */}
-      <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+      {/* Fallback 404 Route */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }
