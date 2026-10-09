@@ -1,13 +1,20 @@
 import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, Navigate } from 'react-router-dom'
 import ROUTES from '../../config/routes'
 import { StatCard } from '../../components/Card/StatCard.component'
-import { LeadAnalyticsChart, LeadSourceBreakdownChart } from '../../components/Charts'
+import LeadAnalyticsChart from '../../components/Charts/LeadAnalyticsChart.component'
+import LeadSourceBreakdownChart from '../../components/Charts/LeadSourceBreakdownChart.component'
 import Table from '../../components/Table/Table.component'
 import Button from '../../components/Button/Button.component'
+import usePermission from '../../hooks/usePermission'
 
 export const Dashboard = () => {
   const navigate = useNavigate()
+  const { isRole } = usePermission()
+
+  if (isRole('AGENT', 'STAFF')) {
+    return <Navigate to={ROUTES.STAFF_DASHBOARD} replace />
+  }
 
   // Sample data for summary cards
   const summaryMetrics = [
@@ -145,11 +152,10 @@ export const Dashboard = () => {
       header: 'Lead Type',
       render: (val) => (
         <span
-          className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-            val === 'Holiday'
+          className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${val === 'Holiday'
               ? 'bg-purple-100 text-purple-700 border border-purple-200'
               : 'bg-blue-100 text-blue-700 border border-blue-200'
-          }`}
+            }`}
         >
           {val}
         </span>
@@ -168,9 +174,8 @@ export const Dashboard = () => {
         }
         return (
           <span
-            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${
-              badgeColors[val] || 'bg-slate-100 text-slate-700 border-slate-200'
-            }`}
+            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${badgeColors[val] || 'bg-slate-100 text-slate-700 border-slate-200'
+              }`}
           >
             {val}
           </span>
@@ -289,7 +294,7 @@ export const Dashboard = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-xl font-extrabold text-main tracking-tight">Super Admin Dashboard</h1>
+          <h1 className="text-x font-extrabold text-main tracking-tight">Super Admin Dashboard</h1>
           <p className="text-xs text-muted mt-0.5">
             Overall CRM overview, lead intelligence, and application statuses
           </p>
@@ -309,7 +314,7 @@ export const Dashboard = () => {
       </div>
 
       {/* 1. Compact Summary Cards Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
         {summaryMetrics.map((metric, idx) => (
           <StatCard
             key={idx}
@@ -326,7 +331,7 @@ export const Dashboard = () => {
       </div>
 
       {/* 2. Interactive Lead Graphs Section (Compact 2-Column Grid Layout) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
         {/* Main Bar Analytics Chart (2 columns wide) */}
         <div className="lg:col-span-2">
           <LeadAnalyticsChart />
@@ -339,10 +344,10 @@ export const Dashboard = () => {
       </div>
 
       {/* 3. Recent Leads Table Section */}
-      <div className="bg-surface rounded-2xl border border-border p-4 sm:p-5 shadow-2xs space-y-3">
+      <div className="bg-surface rounded-xl border border-border p-3 sm:p-4 shadow-2xs space-y-2.5">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold text-main">Recent Leads</h2>
+            <h2 className="text-sm font-bold text-main">Recent Leads</h2>
             <p className="text-[11px] text-muted">The 5 most recent lead inquiries received</p>
           </div>
           <Link
@@ -357,10 +362,10 @@ export const Dashboard = () => {
       </div>
 
       {/* 4. Recent Rejected Applications Section */}
-      <div className="bg-surface rounded-2xl border border-border p-4 sm:p-5 shadow-2xs space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+      <div className="bg-surface rounded-xl border border-border p-3 sm:p-4 shadow-2xs space-y-2.5">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
           <div>
-            <h2 className="text-base font-bold text-rose-950 flex items-center gap-2">
+            <h2 className="text-sm font-bold text-rose-950 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-rose-600" />
               Recent Rejected Applications
             </h2>

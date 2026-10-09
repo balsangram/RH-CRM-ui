@@ -1,10 +1,16 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import Button from '../../components/Button/Button.component'
 import ROUTES from '../../config/routes'
+import usePermission from '../../hooks/usePermission'
 
 export const HolidaysAdd = () => {
   const navigate = useNavigate()
+  const { isRole } = usePermission()
+
+  if (isRole('AGENT', 'STAFF')) {
+    return <Navigate to={ROUTES.STAFF_DASHBOARD} replace />
+  }
   const [formData, setFormData] = useState({
     name: '',
     destination: '',

@@ -4,6 +4,7 @@ export const ROUTES = {
 
   // Admin / Staff
   DASHBOARD: '/dashboard',
+  STAFF_DASHBOARD: '/staff/dashboard',
 
   LEADS: '/leads',
   LEADS_ADD: '/leads/add',

@@ -46,18 +46,20 @@ export const LeadAnalyticsChart = ({ className = '' }) => {
       { label: '15:00', holiday: 9500, visa: 1400, fullDate: '03:00 PM' },
       { label: '17:00', holiday: 1300, visa: 19500, fullDate: '05:00 PM' },
       { label: '19:00', holiday: 800, visa: 1150, fullDate: '07:00 PM' },
-      { label: '09:00', holiday: 4500, visa: 2500, fullDate: '09:00 AM' },
-      { label: '11:00', holiday: 8500, visa: 4000, fullDate: '11:00 AM' },
-      { label: '13:00', holiday: 1100, visa: 1600, fullDate: '01:00 PM' },
-      { label: '15:00', holiday: 9500, visa: 1400, fullDate: '03:00 PM' },
-      { label: '17:00', holiday: 1300, visa: 19500, fullDate: '05:00 PM' },
-      { label: '19:00', holiday: 800, visa: 1150, fullDate: '07:00 PM' },
+      { label: '1:00', holiday: 4500, visa: 2500, fullDate: '09:00 AM' },
+      { label: '2:00', holiday: 8500, visa: 4000, fullDate: '11:00 AM' },
+      { label: '3:00', holiday: 1100, visa: 1600, fullDate: '01:00 PM' },
+      { label: '4:00', holiday: 9500, visa: 1400, fullDate: '03:00 PM' },
+      { label: '5:00', holiday: 1300, visa: 19500, fullDate: '05:00 PM' },
+      { label: '7:00', holiday: 800, visa: 1150, fullDate: '07:00 PM' },
     ],
     custom: [
-      { label: 'Day 1', holiday: 320, visa: 480, fullDate: 'Custom Day 1' },
+      { label: 'Day 1', holiday: 4200, visa: 2800, fullDate: 'Custom Day 1' },
       { label: 'Day 2', holiday: 410, visa: 590, fullDate: 'Custom Day 2' },
       { label: 'Day 3', holiday: 550, visa: 720, fullDate: 'Custom Day 3' },
       { label: 'Day 4', holiday: 480, visa: 640, fullDate: 'Custom Day 4' },
+      { label: 'Day 5', holiday: 620, visa: 890, fullDate: 'Custom Day 5' },
+      { label: 'Day 5', holiday: 620, visa: 890, fullDate: 'Custom Day 5' },
       { label: 'Day 5', holiday: 620, visa: 890, fullDate: 'Custom Day 5' },
     ],
   }
@@ -72,7 +74,7 @@ export const LeadAnalyticsChart = ({ className = '' }) => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
         <div>
           <h2 className="text-base font-bold text-main flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[var(--brand-primary)]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[var(--chart-primary)]" />
             Lead Analytics Overview
           </h2>
           <p className="text-[11px] text-muted mt-0.5">
@@ -133,11 +135,11 @@ export const LeadAnalyticsChart = ({ className = '' }) => {
       {/* Chart Legend */}
       <div className="flex items-center gap-5 mt-3 mb-1 text-[11px] font-semibold">
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-[var(--brand-primary)]" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[var(--chart-primary)]" />
           <span className="text-main">Holiday Leads</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-[var(--brand-red)]" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[var(--chart-secondary)]" />
           <span className="text-main">Visa Leads</span>
         </div>
       </div>
@@ -172,13 +174,13 @@ export const LeadAnalyticsChart = ({ className = '' }) => {
                       {item.fullDate}
                     </p>
                     <div className="space-y-0.5 text-[10px] font-semibold">
-                      <div className="flex items-center gap-1 text-[var(--brand-primary)]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-primary)]" />
+                      <div className="flex items-center gap-1 text-[var(--chart-primary)]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--chart-primary)]" />
                         <span>Holiday: {item.holiday ? item.holiday.toLocaleString() : '0'}</span>
                       </div>
                       {item.visa > 0 && (
-                        <div className="flex items-center gap-1 text-[var(--brand-red)]">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-red)]" />
+                        <div className="flex items-center gap-1 text-[var(--chart-secondary)]">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--chart-secondary)]" />
                           <span>Visa: {item.visa.toLocaleString()}</span>
                         </div>
                       )}
@@ -201,7 +203,7 @@ export const LeadAnalyticsChart = ({ className = '' }) => {
                   {hPct > 0 && (
                     <div
                       style={{ height: `${hPct}%` }}
-                      className={`w-full rounded-full bg-[var(--brand-primary)] transition-all duration-300 relative z-10 ${
+                      className={`w-full rounded-full bg-[var(--chart-primary)] transition-all duration-300 relative z-10 ${
                         isHovered ? 'brightness-110 shadow-md' : ''
                       }`}
                     />
@@ -211,7 +213,7 @@ export const LeadAnalyticsChart = ({ className = '' }) => {
                   {vPct > 0 && (
                     <div
                       style={{ height: `${vPct}%` }}
-                      className={`w-full rounded-full bg-[var(--brand-red)] transition-all duration-300 absolute bottom-0 left-0 right-0 z-20 ${
+                      className={`w-full rounded-full bg-[var(--chart-secondary)] transition-all duration-300 absolute bottom-0 left-0 right-0 z-20 ${
                         isHovered ? 'brightness-110 shadow-md' : ''
                       }`}
                     />

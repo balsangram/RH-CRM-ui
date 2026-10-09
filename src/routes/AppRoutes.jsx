@@ -9,6 +9,7 @@ import CustomerLayout from '../layouts/CustomerLayout'
 // Pages - View
 import Login from '../pages/Login/Login.view'
 import Dashboard from '../pages/Dashboard/Dashboard.view'
+import StaffDashboard from '../pages/Dashboard/StaffDashboard.view'
 import Leads from '../pages/Leads/Leads.view'
 import Customers from '../pages/Customers/Customers.view'
 import Travellers from '../pages/Travellers/Travellers.view'
@@ -55,6 +56,7 @@ export const AppRoutes = () => {
       <Route path="/" element={<AdminLayout />}>
         <Route index element={<Navigate to={ROUTES.DASHBOARD} replace />} />
         <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+        <Route path={ROUTES.STAFF_DASHBOARD} element={<StaffDashboard />} />
 
         {/* Leads */}
         <Route path={ROUTES.LEADS} element={<Leads />} />

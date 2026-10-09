@@ -1,10 +1,16 @@
 import React, { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import Button from '../../components/Button/Button.component'
 import ROUTES from '../../config/routes'
+import usePermission from '../../hooks/usePermission'
 
 export const ApplicationsEdit = () => {
   const navigate = useNavigate()
+  const { isRole, can } = usePermission()
+
+  if (isRole('ADMIN', 'SUPER_ADMIN') || !can('applications:view')) {
+    return <Navigate to={ROUTES.DASHBOARD} replace />
+  }
   const { id } = useParams()
   const [formData, setFormData] = useState({
     applicant: 'Emma Watson',

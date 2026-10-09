@@ -1,11 +1,17 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import Table from '../../components/Table/Table.component'
 import Button from '../../components/Button/Button.component'
 import ROUTES from '../../config/routes'
+import usePermission from '../../hooks/usePermission'
 
 export const Holidays = () => {
   const navigate = useNavigate()
+  const { isRole } = usePermission()
+
+  if (isRole('AGENT', 'STAFF')) {
+    return <Navigate to={ROUTES.STAFF_DASHBOARD} replace />
+  }
   const holidays = [
     { id: 'HOL-101', name: 'Swiss Alps Luxury Tour', destination: 'Switzerland', duration: '7 Nights / 8 Days', price: '$3,450', status: 'Active', date: '2026-10-15' },
     { id: 'HOL-102', name: 'Bali Beach & Cultural Escape', destination: 'Indonesia', duration: '5 Nights / 6 Days', price: '$1,890', status: 'Active', date: '2026-10-18' },

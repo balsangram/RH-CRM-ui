@@ -17,7 +17,7 @@ export const Table = ({
                 <th
                   key={col.key || index}
                   scope="col"
-                  className={`px-6 py-3.5 ${col.className || ''}`}
+                  className={`px-4 py-2.5 ${col.className || ''}`}
                 >
                   {col.header}
                 </th>
@@ -29,7 +29,7 @@ export const Table = ({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-6 py-12 text-center text-muted"
+                  className="px-4 py-8 text-center text-muted"
                 >
                   <div className="flex items-center justify-center gap-2">
                     <svg
@@ -59,11 +59,11 @@ export const Table = ({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-6 py-12 text-center text-muted"
+                  className="px-4 py-8 text-center text-muted"
                 >
                   <div className="flex flex-col items-center justify-center">
                     <svg
-                      className="w-10 h-10 mb-2 text-muted/60"
+                      className="w-8 h-8 mb-2 text-muted/60"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -91,7 +91,7 @@ export const Table = ({
                   {columns.map((col, colIndex) => (
                     <td
                       key={col.key || colIndex}
-                      className={`px-6 py-4 whitespace-nowrap ${col.cellClassName || ''}`}
+                      className={`px-4 py-2.5 whitespace-nowrap ${col.cellClassName || ''}`}
                     >
                       {col.render
                         ? col.render(row[col.key], row, rowIndex)

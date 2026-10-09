@@ -8,6 +8,12 @@ export const SIDEBAR_ITEMS = [
     icon: 'Dashboard',
     badge: 'DA',
   },
+  // {
+  //   title: 'Staff Dashboard',
+  //   path: ROUTES.STAFF_DASHBOARD,
+  //   icon: 'AssignmentInd',
+  //   badge: 'SD',
+  // },
   {
     title: 'Leads',
     path: ROUTES.LEADS,
@@ -47,6 +53,7 @@ export const SIDEBAR_ITEMS = [
     path: ROUTES.HOLIDAYS,
     icon: 'BeachAccess',
     badge: 'BE',
+    permission: PERMISSIONS.HOLIDAYS_VIEW,
   },
   {
     title: 'Reports & Analytics',

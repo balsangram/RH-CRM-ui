@@ -111,23 +111,23 @@ export const StatCard = ({
   const cardContent = (
     <div className="flex flex-col justify-between h-full">
       <div>
-        <div className="flex items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
             {icon && (
-              <div className={`p-2 rounded-lg flex items-center justify-center shrink-0 ${activeTheme.iconBg}`}>
+              <div className={`p-1 rounded-md flex items-center justify-center shrink-0 ${activeTheme.iconBg}`}>
                 {icon}
               </div>
             )}
-            <div>
-              <p className="text-[11px] font-bold text-muted uppercase tracking-wider leading-snug">{title}</p>
-              {subtitle && <p className="text-[10px] text-muted/80 leading-snug">{subtitle}</p>}
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold text-muted uppercase tracking-wider leading-tight truncate">{title}</p>
+              {subtitle && <p className="text-[9px] text-muted/70 leading-tight truncate">{subtitle}</p>}
             </div>
           </div>
 
           {/* Navigation arrow indicator on hover */}
           {(destination || handleClick) && (
-            <div className={`text-slate-400 ${activeTheme.arrowColor} transition-all duration-200 transform group-hover:translate-x-1 shrink-0`}>
-              <svg className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className={`text-slate-400 ${activeTheme.arrowColor} transition-all duration-200 transform group-hover:translate-x-0.5 shrink-0`}>
+              <svg className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
               </svg>
             </div>
@@ -135,8 +135,8 @@ export const StatCard = ({
         </div>
 
         {/* Clean Compact Aligned Metric Counter Number */}
-        <div className="mt-3 flex items-baseline justify-between">
-          <span className="text-2xl font-bold text-main tracking-tight leading-none">
+        <div className="mt-1 flex items-baseline justify-between">
+          <span className="text-base sm:text-lg font-bold text-main tracking-tight leading-none">
             <CountUp value={value} />
           </span>
         </div>
@@ -144,7 +144,7 @@ export const StatCard = ({
     </div>
   )
 
-  const baseCardStyles = `group relative bg-surface rounded-xl p-3.5 sm:p-4 border border-border shadow-2xs transition-all duration-200 ${
+  const baseCardStyles = `group relative bg-surface rounded-lg p-2 sm:p-2.5 border border-border shadow-2xs transition-all duration-200 ${
     destination || handleClick ? 'cursor-pointer select-none block' : ''
   } ${activeTheme.borderHover} ${className}`
 

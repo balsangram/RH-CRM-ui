@@ -20,11 +20,12 @@ export const PERMISSIONS = {
   CUSTOMERS_EDIT: 'customers:edit',
   CUSTOMERS_DELETE: 'customers:delete',
 
-  // Applications & Visa
+  // Applications, Visa & Holidays
   APPLICATIONS_VIEW: 'applications:view',
   APPLICATIONS_MANAGE: 'applications:manage',
   VISA_VIEW: 'visa:view',
   VISA_MANAGE: 'visa:manage',
+  HOLIDAYS_VIEW: 'holidays:view',
 
   // Admin / HR
   EMPLOYEES_MANAGE: 'employees:manage',

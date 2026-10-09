@@ -88,17 +88,31 @@ export const Login = () => {
 
     try {
       localStorage.setItem('auth_token', 'mock_jwt_token_sample')
-      localStorage.setItem(
-        'user',
-        JSON.stringify({
-          id: 'usr_01',
-          name: 'Sarah Connor',
-          email,
-          role: 'ADMIN',
-          permissions: ['*'],
-        })
-      )
-      navigate(ROUTES.DASHBOARD)
+      const isAgent = email.toLowerCase().includes('agent') || email.toLowerCase().includes('staff')
+      
+      const userData = isAgent
+        ? {
+            id: 'usr_staff_01',
+            name: 'sipu Sharma',
+            email,
+            role: 'AGENT',
+            permissions: ['applications:view', 'applications:manage', 'leads:view'],
+          }
+        : {
+            id: 'usr_admin_01',
+            name: 'Super Admin',
+            email,
+            role: 'ADMIN',
+            permissions: ['leads:view', 'customers:view', 'visa:view', 'holidays:view', 'reports:view', 'employees:manage', 'roles:manage', 'audit_logs:view', 'settings:manage'],
+          }
+
+      localStorage.setItem('user', JSON.stringify(userData))
+      
+      if (isAgent) {
+        navigate(ROUTES.STAFF_DASHBOARD)
+      } else {
+        navigate(ROUTES.DASHBOARD)
+      }
     } catch (err) {
       setError(err?.message || 'Verification failed. Invalid OTP code.')
     } finally {
@@ -113,7 +127,7 @@ export const Login = () => {
     setEmail(demoEmail)
     setOtp(['1', '2', '3', '4', '5', '6'])
     setStep('OTP')
-    setInfoMessage(`Demo OTP code auto-filled for ${demoEmail}`)
+    setInfoMessage(`Demo OTP code auto-filled for ${demoEmail} (${role === 'AGENT' ? 'Staff Agent' : 'Super Admin'})`)
     setError('')
   }
 
