@@ -19,7 +19,10 @@ export const AdminLayout = () => {
 
       {/* Main Content Area */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+        {/* Mobile Header (Hidden on Desktop view) */}
+        <div className="lg:hidden">
+          <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+        </div>
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="mx-auto max-w-7xl">

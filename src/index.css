@@ -342,3 +342,21 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* --------------------------------------------------------------------------
+   5. GLOBAL SKELETON SHIMMER ANIMATION
+   -------------------------------------------------------------------------- */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #E2E2F5 25%, #F7F7FB 37%, #E2E2F5 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.6s infinite ease-in-out;
+}

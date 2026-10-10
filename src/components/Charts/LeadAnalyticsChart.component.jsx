@@ -1,10 +1,15 @@
 import React, { useState } from 'react'
+import { ChartSkeleton } from '../Skeleton/Skeleton.component'
 
-export const LeadAnalyticsChart = ({ className = '' }) => {
+export const LeadAnalyticsChart = ({ className = '', isLoading = false }) => {
   const [filter, setFilter] = useState('year')
   const [activeHoverIdx, setActiveHoverIdx] = useState(11) // Default hover on 'Jan'
   const [customStartDate, setCustomStartDate] = useState('2026-01-01')
   const [customEndDate, setCustomEndDate] = useState('2026-10-08')
+
+  if (isLoading) {
+    return <ChartSkeleton className={className} />
+  }
 
   // Datasets matching the inspiration layout
   const dataPresets = {

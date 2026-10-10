@@ -263,19 +263,17 @@ export const Applications = () => {
             <button
               type="button"
               onClick={() => handleCategorySwitch('VISA')}
-              className={`px-3 py-1 rounded text-xs font-bold transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
-                categoryTab === 'VISA'
+              className={`px-3 py-1 rounded text-xs font-bold transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${categoryTab === 'VISA'
                   ? 'bg-primary text-white shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
-              }`}
+                }`}
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
               <span>Visa Applications</span>
-              <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
-                categoryTab === 'VISA' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-              }`}>
+              <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${categoryTab === 'VISA' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                }`}>
                 {visaApplications.length}
               </span>
             </button>
@@ -284,19 +282,17 @@ export const Applications = () => {
             <button
               type="button"
               onClick={() => handleCategorySwitch('HOLIDAY')}
-              className={`px-3 py-1 rounded text-xs font-bold transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
-                categoryTab === 'HOLIDAY'
+              className={`px-3 py-1 rounded text-xs font-bold transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${categoryTab === 'HOLIDAY'
                   ? 'bg-primary text-white shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
-              }`}
+                }`}
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 002 2h1.5a2.5 2.5 0 002.5-2.5V7a2 2 0 00-2-2h-1.5A2.5 2.5 0 0113 2.5V1" />
               </svg>
               <span>Holiday Applications</span>
-              <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
-                categoryTab === 'HOLIDAY' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-              }`}>
+              <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${categoryTab === 'HOLIDAY' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                }`}>
                 {holidayApplications.length}
               </span>
             </button>
@@ -331,11 +327,10 @@ export const Applications = () => {
               key={tab.value}
               type="button"
               onClick={() => handleSubTabSwitch(tab.value)}
-              className={`px-2 py-0.5 text-[11px] font-semibold rounded transition-colors cursor-pointer ${
-                activeSubTab === tab.value
+              className={`px-2 py-0.5 text-[11px] font-semibold rounded transition-colors cursor-pointer ${activeSubTab === tab.value
                   ? 'bg-primary/10 text-primary border border-primary/30 font-bold'
                   : 'text-muted hover:bg-slate-100 hover:text-main'
-              }`}
+                }`}
             >
               {tab.label}
             </button>

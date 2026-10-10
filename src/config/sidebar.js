@@ -80,20 +80,20 @@ export const SIDEBAR_ITEMS = [
     badge: 'AD',
     permission: PERMISSIONS.ROLES_MANAGE,
   },
-  {
-    title: 'Audit Logs',
-    path: ROUTES.AUDIT_LOGS,
-    icon: 'History',
-    badge: 'HI',
-    permission: PERMISSIONS.AUDIT_LOGS_VIEW,
-  },
-  {
-    title: 'Settings',
-    path: ROUTES.SETTINGS,
-    icon: 'Settings',
-    badge: 'SE',
-    permission: PERMISSIONS.SETTINGS_MANAGE,
-  },
+  // {
+  //   title: 'Audit Logs',
+  //   path: ROUTES.AUDIT_LOGS,
+  //   icon: 'History',
+  //   badge: 'HI',
+  //   permission: PERMISSIONS.AUDIT_LOGS_VIEW,
+  // },
+  // {
+  //   title: 'Settings',
+  //   path: ROUTES.SETTINGS,
+  //   icon: 'Settings',
+  //   badge: 'SE',
+  //   permission: PERMISSIONS.SETTINGS_MANAGE,
+  // },
 ]
 
 export default SIDEBAR_ITEMS

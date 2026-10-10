@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { Skeleton } from '../Skeleton/Skeleton.component'
 
 // Smooth Count-Up Animation Component
 const CountUp = ({ value, duration = 1200 }) => {
@@ -73,6 +74,7 @@ export const StatCard = ({
   onViewAll,
   onClick,
   color = 'primary',
+  isLoading = false,
   className = '',
 }) => {
   const destination = viewAllLink || to
@@ -107,6 +109,23 @@ export const StatCard = ({
   }
 
   const activeTheme = colorMap[color] || colorMap.primary
+
+  if (isLoading) {
+    return (
+      <div className={`bg-surface rounded-lg p-2 sm:p-2.5 border border-border shadow-2xs space-y-2 ${className}`}>
+        <div className="flex items-center gap-2">
+          <Skeleton width="1.5rem" height="1.5rem" rounded="rounded-md" />
+          <div className="space-y-1 flex-1">
+            <Skeleton width="75%" height="0.65rem" />
+            <Skeleton width="45%" height="0.55rem" />
+          </div>
+        </div>
+        <div className="pt-1">
+          <Skeleton width="40%" height="1.25rem" rounded="rounded" />
+        </div>
+      </div>
+    )
+  }
 
   const cardContent = (
     <div className="flex flex-col justify-between h-full">

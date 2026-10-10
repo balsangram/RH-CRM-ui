@@ -1,53 +1,55 @@
 import React from 'react'
-import { useLottie } from 'lottie-react'
-import loadingAnimation from '../../assets/svg/loading.json'
-import loadingSvg from '../../assets/svg/loading.svg'
+import {
+  Skeleton,
+  StatCardSkeleton,
+  TableSkeleton,
+  CardSkeleton,
+  ChartSkeleton,
+  PageSkeleton,
+} from '../Skeleton/Skeleton.component'
 
-const LottieLoader = () => {
-  const options = {
-    animationData: loadingAnimation,
-    loop: true,
-    autoplay: true,
-  }
-  const { View } = useLottie(options)
-  return <div className="w-full h-full flex items-center justify-center">{View}</div>
-}
-
-export const Loader = ({ fullPage = false, size = 'md', message = 'Loading...' }) => {
-  const sizeMap = {
-    sm: 'w-16 h-16',
-    md: 'w-32 h-32',
-    lg: 'w-48 h-48',
-  }
-
-  const content = (
-    <div className="flex flex-col items-center justify-center p-4">
-      <div className={`${sizeMap[size] || sizeMap.md} flex items-center justify-center overflow-hidden`}>
-        {loadingAnimation ? (
-          <LottieLoader />
-        ) : (
-          <img
-            src={loadingSvg}
-            alt="Loading"
-            className="max-h-full max-w-full object-contain"
-          />
-        )}
-      </div>
-      {message && <p className="text-xs font-semibold text-muted mt-2 tracking-wide animate-pulse">{message}</p>}
-    </div>
-  )
-
-  if (fullPage) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs">
-        <div className="bg-surface rounded-2xl p-6 shadow-xl border border-border">
-          {content}
-        </div>
-      </div>
-    )
+/**
+ * Unified Global Skeleton Loader Component Wrapper
+ *
+ * @param {boolean} isLoading - Whether loading state is active
+ * @param {string} type - 'page' | 'table' | 'statCard' | 'chart' | 'card'
+ * @param {number} count - Number of skeleton items (for statCard)
+ * @param {number} columnsCount - Number of table columns
+ * @param {number} rowsCount - Number of table rows
+ * @param {string} className - Additional CSS classes
+ * @param {React.ReactNode} children - Content rendered when isLoading is false
+ */
+export const Loader = ({
+  isLoading = true,
+  type = 'page',
+  count = 4,
+  columnsCount = 6,
+  rowsCount = 5,
+  className = '',
+  children = null,
+}) => {
+  if (!isLoading) {
+    return children || null
   }
 
-  return content
+  if (type === 'table') {
+    return <TableSkeleton columnsCount={columnsCount} rowsCount={rowsCount} className={className} />
+  }
+
+  if (type === 'statCard') {
+    return <StatCardSkeleton count={count} />
+  }
+
+  if (type === 'chart') {
+    return <ChartSkeleton className={className} />
+  }
+
+  if (type === 'card') {
+    return <CardSkeleton className={className} />
+  }
+
+  // Default Page Skeleton
+  return <PageSkeleton />
 }
 
 export default Loader
