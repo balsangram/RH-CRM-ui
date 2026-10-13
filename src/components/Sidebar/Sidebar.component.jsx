@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import SIDEBAR_ITEMS from '../../config/sidebar'
 import usePermission from '../../hooks/usePermission'
 import useAuth from '../../hooks/useAuth'
 import ROUTES from '../../config/routes'
+import ConfirmModal from '../Modal/ConfirmModal.component'
 
 export const Sidebar = ({
   isOpen = false,
@@ -14,8 +15,10 @@ export const Sidebar = ({
   const { can } = usePermission()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   const handleLogout = () => {
+    setShowLogoutConfirm(false)
     logout()
     navigate(ROUTES.LOGIN)
   }
@@ -121,6 +124,8 @@ export const Sidebar = ({
               return null
             }
 
+            const IconComponent = item.icon
+
             return (
               <NavLink
                 key={item.path || index}
@@ -137,11 +142,24 @@ export const Sidebar = ({
                   }`
                 }
               >
-                {/* Round Badge Initials Icon */}
+                {/* MUI Icon Container */}
                 <div
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold flex-shrink-0 transition-colors bg-white/10 text-white/80`}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors bg-white/10 text-white/90"
                 >
-                  {item.badge || item.title.slice(0, 2).toUpperCase()}
+                  {(() => {
+                    if (!IconComponent) {
+                      return (
+                        <span className="text-[10px] font-bold">
+                          {item.title.slice(0, 2).toUpperCase()}
+                        </span>
+                      )
+                    }
+                    if (React.isValidElement(IconComponent)) {
+                      return IconComponent
+                    }
+                    const Comp = IconComponent.default || IconComponent
+                    return <Comp sx={{ fontSize: 18 }} />
+                  })()}
                 </div>
 
                 {!isCollapsed && <span className="truncate font-medium">{item.title}</span>}
@@ -171,7 +189,7 @@ export const Sidebar = ({
               {/* Sign Out Button */}
               <button
                 type="button"
-                onClick={handleLogout}
+                onClick={() => setShowLogoutConfirm(true)}
                 className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-secondary/20 hover:text-secondary transition-colors cursor-pointer flex-shrink-0"
                 title="Sign out"
               >
@@ -190,7 +208,7 @@ export const Sidebar = ({
               </div>
               <button
                 type="button"
-                onClick={handleLogout}
+                onClick={() => setShowLogoutConfirm(true)}
                 className="p-1.5 rounded-lg text-white/60 hover:text-secondary hover:bg-secondary/20 transition-colors cursor-pointer"
                 title="Sign out"
               >
@@ -202,6 +220,17 @@ export const Sidebar = ({
           )}
         </div>
       </aside>
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
+        title="Confirm Logout"
+        message="Are you sure you want to log out of your session?"
+        confirmText="Yes, Log Out"
+        cancelText="Cancel"
+      />
     </>
   )
 }

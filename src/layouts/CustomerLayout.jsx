@@ -1,15 +1,18 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import useAuth from '../hooks/useAuth'
 import ROUTES from '../config/routes'
+import ConfirmModal from '../components/Modal/ConfirmModal.component'
 
 const currentYear = new Date().getFullYear()
 
 export const CustomerLayout = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   const handleLogout = () => {
+    setShowLogoutConfirm(false)
     logout()
     navigate(ROUTES.LOGIN)
   }
@@ -31,8 +34,8 @@ export const CustomerLayout = () => {
               Welcome, <strong className="text-main">{user?.name || 'Customer'}</strong>
             </span>
             <button
-              onClick={handleLogout}
-              className="text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-primary-light font-medium transition-colors"
+              onClick={() => setShowLogoutConfirm(true)}
+              className="text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-primary-light font-medium transition-colors cursor-pointer"
             >
               Sign out
             </button>
@@ -49,8 +52,20 @@ export const CustomerLayout = () => {
       <footer className="border-t border-border py-6 text-center text-xs text-muted bg-surface">
         <p>&copy; {currentYear} RH Global Services. All rights reserved.</p>
       </footer>
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
+        title="Confirm Logout"
+        message="Are you sure you want to log out of the Customer Portal?"
+        confirmText="Yes, Log Out"
+        cancelText="Cancel"
+      />
     </div>
   )
 }
 
 export default CustomerLayout
+

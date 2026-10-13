@@ -1,25 +1,52 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Button from '../../components/Button/Button.component'
 import ROUTES from '../../config/routes'
+import leadsService from '../../services/leads'
 
 export const LeadsEdit = () => {
   const navigate = useNavigate()
   const { id } = useParams()
 
   const [formData, setFormData] = useState({
-    name: 'Alice Walker',
-    email: 'alice.w@example.com',
-    phone: '+1 415-555-0199',
-    country: 'Canada',
-    source: 'Website',
-    status: 'In_Progress',
-    notes: 'Interested in Express Entry Permanent Residency program.',
+    name: '',
+    email: '',
+    phone: '',
+    country: '',
+    source: 'Website Form',
+    status: 'LEAD',
+    notes: '',
   })
+
+  useEffect(() => {
+    if (id) {
+      const existing = leadsService.getLeadById(id)
+      if (existing) {
+        setFormData({
+          name: existing.name,
+          email: existing.email,
+          phone: existing.phone,
+          country: existing.targetCountry,
+          source: existing.source,
+          status: existing.stage,
+          notes: '',
+        })
+      }
+    }
+  }, [id])
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Process lead update logic
+    if (id) {
+      leadsService.updateLead(id, {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        targetCountry: formData.country,
+        source: formData.source,
+        stage: formData.status,
+      })
+    }
     navigate(ROUTES.LEADS)
   }
 

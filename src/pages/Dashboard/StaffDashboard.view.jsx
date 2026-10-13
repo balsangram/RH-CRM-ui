@@ -6,6 +6,7 @@ import Table from '../../components/Table/Table.component'
 import Button from '../../components/Button/Button.component'
 import { getStatusBadgeStyle } from '../../utils/helpers'
 import useAuth from '../../hooks/useAuth'
+import leadsService from '../../services/leads'
 
 export const StaffDashboard = () => {
   const navigate = useNavigate()
@@ -238,10 +239,32 @@ export const StaffDashboard = () => {
     })
   }, [assignedApplications, activeFilter, searchQuery])
 
-  // Top 10 Recent Applications to display on dashboard
-  const recentTenApps = useMemo(() => {
-    return filteredApps.slice(0, 10)
+  // Top 5 Recent Applications to display on dashboard
+  const recentFiveApps = useMemo(() => {
+    return filteredApps.slice(0, 5)
   }, [filteredApps])
+
+  // Assigned Leads computation (Top 5 Recent)
+  const [allLeads] = useState(() => leadsService.getLeads())
+  const recentFiveLeads = useMemo(() => {
+    const query = searchQuery.toLowerCase().trim()
+    const filtered = allLeads.filter((l) => {
+      if (!query) return true
+      return (
+        l.name.toLowerCase().includes(query) ||
+        l.id.toLowerCase().includes(query) ||
+        l.targetCountry.toLowerCase().includes(query) ||
+        l.serviceRequired.toLowerCase().includes(query) ||
+        l.assignedStaff?.toLowerCase().includes(query)
+      )
+    })
+
+    const staffMatched = filtered.filter(
+      (l) => l.assignedStaff?.toLowerCase().trim() === staffName.toLowerCase().trim()
+    )
+
+    return (staffMatched.length > 0 ? staffMatched : filtered).slice(0, 5)
+  }, [allLeads, staffName, searchQuery])
 
   // Open Edit Modal
   const handleOpenEdit = (app) => {
@@ -372,6 +395,114 @@ export const StaffDashboard = () => {
     },
   ]
 
+  // Table Column Definitions for Recent Assigned Leads
+  const leadColumns = [
+    {
+      key: 'id',
+      header: 'Lead ID',
+      render: (val, row) => (
+        <div>
+          <button
+            type="button"
+            onClick={() => navigate(ROUTES.LEADS)}
+            className="font-mono font-bold text-primary hover:text-primary-hover hover:underline cursor-pointer block text-xs"
+          >
+            {val}
+          </button>
+          <span className="text-[10px] text-muted">{row.createdDate}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'name',
+      header: 'Applicant Name',
+      render: (val, row) => (
+        <div>
+          <span className="font-bold text-main block text-xs">{val}</span>
+          <span className="text-[11px] text-muted truncate max-w-[140px] block">{row.company || row.email}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'serviceRequired',
+      header: 'Service / Country',
+      render: (val, row) => (
+        <div>
+          <span className="font-semibold text-main block text-xs truncate max-w-[160px]">{val}</span>
+          <span className="text-[10px] text-muted font-medium flex items-center gap-1">
+            <span>📍</span>
+            <span>{row.targetCountry}</span>
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: 'type',
+      header: 'Type',
+      render: (val) => (
+        <span
+          className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+            val === 'VISA'
+              ? 'bg-blue-50 text-blue-700 border border-blue-200'
+              : 'bg-purple-50 text-purple-700 border border-purple-200'
+          }`}
+        >
+          {val}
+        </span>
+      ),
+    },
+    {
+      key: 'stage',
+      header: 'Pipeline Stage',
+      render: (val) => {
+        let badgeStyle = 'bg-slate-100 text-slate-700 border-slate-200'
+        if (val === 'QUALIFIED') badgeStyle = 'bg-amber-50 text-amber-800 border-amber-200'
+        if (val === 'PROPOSAL') badgeStyle = 'bg-purple-50 text-purple-800 border-purple-200'
+        if (val === 'NEGOTIATION') badgeStyle = 'bg-blue-50 text-blue-800 border-blue-200'
+        if (val === 'CONVERTED') badgeStyle = 'bg-emerald-50 text-emerald-800 border-emerald-200'
+
+        return (
+          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${badgeStyle}`}>
+            {val}
+          </span>
+        )
+      },
+    },
+    {
+      key: 'value',
+      header: 'Est. Value',
+      render: (val) => (
+        <span className="font-black text-slate-900 text-xs">
+          ₹{Number(val).toLocaleString('en-IN')}
+        </span>
+      ),
+    },
+    {
+      key: 'assignedStaff',
+      header: 'Assigned Staff',
+      render: (val) => (
+        <span className="text-xs text-slate-700 font-medium flex items-center gap-1">
+          <span>👤</span>
+          <span className="truncate max-w-[100px]">{val}</span>
+        </span>
+      ),
+    },
+    {
+      key: 'action',
+      header: 'Action',
+      render: () => (
+        <button
+          type="button"
+          onClick={() => navigate(ROUTES.LEADS)}
+          className="px-2.5 py-1 text-xs font-semibold rounded-md bg-[#0F0E2B] hover:bg-[#181445] text-white shadow-2xs transition-colors cursor-pointer flex items-center gap-1"
+        >
+          <span>Open Lead</span>
+          <span>&rarr;</span>
+        </button>
+      ),
+    },
+  ]
+
   return (
     <div className="space-y-4 pb-6">
       {/* -------------------------------------------------------------------- */}
@@ -405,16 +536,16 @@ export const StaffDashboard = () => {
       </div>
 
       {/* -------------------------------------------------------------------- */}
-      {/* 4 SUMMARY CARDS (Clicking any card navigates to Applications tab)    */}
+      {/* SUMMARY CARDS (Clicking any card navigates to relevant section)      */}
       {/* -------------------------------------------------------------------- */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
-        {/* Card 1: Total Assigned Applications */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5">
+        {/* Card 1: Total Assigned Cases */}
         <StatCard
-          title="Total Assigned Applications"
+          title="Total Cases"
           value={metrics.total}
           subtitle="All cases assigned to you"
           color="indigo"
-          to={ROUTES.APPLICATIONS}
+          to={ROUTES.VISA}
           icon={
             <svg className="w-3.5 h-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -422,13 +553,13 @@ export const StaffDashboard = () => {
           }
         />
 
-        {/* Card 2: Active Applications */}
+        {/* Card 2: Active Cases */}
         <StatCard
-          title="Active Applications"
+          title="Active Cases"
           value={metrics.active}
-          subtitle="Currently processing / Under review"
+          subtitle="Processing / Under review"
           color="primary"
-          to={ROUTES.APPLICATIONS}
+          to={ROUTES.VISA}
           icon={
             <svg className="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -436,13 +567,13 @@ export const StaffDashboard = () => {
           }
         />
 
-        {/* Card 3: Pending Applications */}
+        {/* Card 3: Pending Cases */}
         <StatCard
-          title="Pending Applications"
+          title="Pending Cases"
           value={metrics.pending}
-          subtitle="Waiting for action / client documents"
+          subtitle="Waiting for client action"
           color="amber"
-          to={ROUTES.APPLICATIONS}
+          to={ROUTES.VISA}
           icon={
             <svg className="w-3.5 h-3.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -450,16 +581,30 @@ export const StaffDashboard = () => {
           }
         />
 
-        {/* Card 4: Completed Applications */}
+        {/* Card 4: Completed Cases */}
         <StatCard
-          title="Completed Applications"
+          title="Completed Cases"
           value={metrics.completed}
           subtitle="Approved & dispatched cases"
           color="emerald"
-          to={ROUTES.APPLICATIONS}
+          to={ROUTES.VISA}
           icon={
             <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          }
+        />
+
+        {/* Card 5: Assigned Leads in Pipeline */}
+        <StatCard
+          title="Assigned Leads"
+          value={recentFiveLeads.length}
+          subtitle="Stage pipeline prospects"
+          color="purple"
+          to={ROUTES.LEADS}
+          icon={
+            <svg className="w-3.5 h-3.5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
           }
         />
@@ -468,53 +613,50 @@ export const StaffDashboard = () => {
       {/* -------------------------------------------------------------------- */}
       {/* FILTER BAR & SEARCH INPUT                                            */}
       {/* -------------------------------------------------------------------- */}
-      <div className="bg-surface rounded-lg border border-border p-2.5 sm:p-3 shadow-2xs space-y-2.5">
+      <div className="bg-surface rounded-lg border border-border p-2.5 sm:p-3 shadow-2xs space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-
-          {/* Search Box */}
-          <div className="relative min-w-[220px]">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by ID, applicant name..."
-              className="w-full pl-8 pr-3 py-1 text-xs rounded-lg bg-slate-50 border border-border text-main placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            />
-            <svg
-              className="w-3.5 h-3.5 text-muted absolute left-2.5 top-1/2 -translate-y-1/2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
         </div>
 
         {/* -------------------------------------------------------------------- */}
-        {/* RECENT APPLICATIONS TABLE (Top 10 Recent Assigned Applications)       */}
+        {/* 1. RECENT CASES TABLE (Top 5 Recent Assigned Cases)                   */}
         {/* -------------------------------------------------------------------- */}
-        <div>
-          <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-border/60">
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between pb-1.5 border-b border-border/60">
             <div className="flex items-center gap-1.5">
-              <h2 className="text-xs font-bold text-main">Recent Assigned Applications</h2>
+              <h2 className="text-xs font-bold text-main">Recent Assigned Cases</h2>
               <span className="px-1.5 py-0.2 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-[9px] font-bold">
-                Top 10 Recent
+                Top 5 Recent
+              </span>
+            </div>
+          </div>
+
+          <Table columns={columns} data={recentFiveApps} />
+        </div>
+
+        {/* -------------------------------------------------------------------- */}
+        {/* 2. RECENT ASSIGNED LEADS TABLE (Top 5 Recent Assigned Leads)          */}
+        {/* -------------------------------------------------------------------- */}
+        <div className="space-y-1.5 pt-2 border-t border-border/60">
+          <div className="flex items-center justify-between pb-1.5 border-b border-border/60">
+            <div className="flex items-center gap-1.5">
+              <h2 className="text-xs font-bold text-main">Recent Assigned Leads</h2>
+              <span className="px-1.5 py-0.2 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-[9px] font-bold">
+                Top 5 Recent
               </span>
             </div>
             <button
               type="button"
-              onClick={() => navigate(ROUTES.APPLICATIONS)}
+              onClick={() => navigate(ROUTES.LEADS)}
               className="text-[11px] font-semibold text-primary hover:text-primary-hover flex items-center gap-1 cursor-pointer transition-colors group"
             >
-              <span>View All Applications</span>
+              <span>View All in Leads Pipeline</span>
               <svg className="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </div>
 
-          <Table columns={columns} data={recentTenApps} />
+          <Table columns={leadColumns} data={recentFiveLeads} />
         </div>
       </div>
 

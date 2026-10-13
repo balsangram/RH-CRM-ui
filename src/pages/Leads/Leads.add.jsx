@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../../components/Button/Button.component'
 import ROUTES from '../../config/routes'
+import leadsService from '../../services/leads'
 
 export const LeadsAdd = () => {
   const navigate = useNavigate()
@@ -10,13 +11,23 @@ export const LeadsAdd = () => {
     email: '',
     phone: '',
     country: '',
-    source: 'Website',
+    source: 'Website Form',
     notes: '',
   })
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Process lead creation logic
+    leadsService.createLead({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      targetCountry: formData.country || 'United States',
+      source: formData.source,
+      serviceRequired: 'Visitor Visa Consultation',
+      value: 28000,
+      assignedStaff: 'Amit Verma',
+      stage: 'LEAD',
+    })
     navigate(ROUTES.LEADS)
   }
 

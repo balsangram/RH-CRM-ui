@@ -1,66 +1,63 @@
 import ROUTES from './routes'
 import { PERMISSIONS } from '../utils/permissions'
 
+// MUI Icons
+import DashboardIcon from '@mui/icons-material/Dashboard'
+import GroupAddIcon from '@mui/icons-material/GroupAdd'
+import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff'
+import BeachAccessIcon from '@mui/icons-material/BeachAccess'
+import PeopleIcon from '@mui/icons-material/People'
+import LuggageIcon from '@mui/icons-material/Luggage'
+import AssignmentIcon from '@mui/icons-material/Assignment'
+import BarChartIcon from '@mui/icons-material/BarChart'
+import BadgeIcon from '@mui/icons-material/Badge'
+import CardTravelIcon from '@mui/icons-material/CardTravel'
+
 export const SIDEBAR_ITEMS = [
   {
     title: 'Dashboard',
     path: ROUTES.DASHBOARD,
-    icon: 'Dashboard',
-    badge: 'DA',
+    icon: DashboardIcon,
   },
-  // {
-  //   title: 'Staff Dashboard',
-  //   path: ROUTES.STAFF_DASHBOARD,
-  //   icon: 'AssignmentInd',
-  //   badge: 'SD',
-  // },
   {
     title: 'Leads',
     path: ROUTES.LEADS,
-    icon: 'GroupAdd',
-    badge: 'GR',
+    icon: GroupAddIcon,
     permission: PERMISSIONS.LEADS_VIEW,
   },
   {
+    title: 'Visa Cases',
+    path: ROUTES.VISA,
+    icon: FlightTakeoffIcon,
+    permission: PERMISSIONS.VISA_VIEW,
+  },
+  {
+    title: 'Holiday Cases',
+    path: ROUTES.HOLIDAYS,
+    icon: BeachAccessIcon,
+    permission: PERMISSIONS.HOLIDAYS_VIEW,
+  },  
+  {
     title: 'Customers',
     path: ROUTES.CUSTOMERS,
-    icon: 'People',
-    badge: 'PE',
+    icon: PeopleIcon,
     permission: PERMISSIONS.CUSTOMERS_VIEW,
   },
   {
     title: 'Travellers',
     path: ROUTES.TRAVELLERS,
-    icon: 'Luggage',
-    badge: 'LU',
+    icon: LuggageIcon,
   },
   {
-    title: 'Applications',
+    title: 'Cases',
     path: ROUTES.APPLICATIONS,
-    icon: 'Assignment',
-    badge: 'AS',
+    icon: AssignmentIcon,
     permission: PERMISSIONS.APPLICATIONS_VIEW,
   },
   {
-    title: 'Visa Services',
-    path: ROUTES.VISA,
-    icon: 'FlightTakeoff',
-    badge: 'FL',
-    permission: PERMISSIONS.VISA_VIEW,
-  },
-  {
-    title: 'Holidays',
-    path: ROUTES.HOLIDAYS,
-    icon: 'BeachAccess',
-    badge: 'BE',
-    permission: PERMISSIONS.HOLIDAYS_VIEW,
-  },
-
-  {
     title: 'Reports & Analytics',
     path: ROUTES.REPORTS,
-    icon: 'BarChart',
-    badge: 'BA',
+    icon: BarChartIcon,
     permission: PERMISSIONS.REPORTS_VIEW,
   },
   {
@@ -70,38 +67,15 @@ export const SIDEBAR_ITEMS = [
   {
     title: 'Employees',
     path: ROUTES.EMPLOYEES,
-    icon: 'Badge',
-    badge: 'BA',
+    icon: BadgeIcon,
     permission: PERMISSIONS.EMPLOYEES_MANAGE,
   },
   {
     title: 'Packages',
     path: ROUTES.PACKAGES,
-    icon: 'Luggage',
-    badge: 'PK',
+    icon: CardTravelIcon,
     permission: PERMISSIONS.PACKAGES_VIEW,
   },
-  // {
-  //   title: 'Roles & Permissions',
-  //   path: ROUTES.ROLES,
-  //   icon: 'AdminPanelSettings',
-  //   badge: 'AD',
-  //   permission: PERMISSIONS.ROLES_MANAGE,
-  // },
-  // {
-  //   title: 'Audit Logs',
-  //   path: ROUTES.AUDIT_LOGS,
-  //   icon: 'History',
-  //   badge: 'HI',
-  //   permission: PERMISSIONS.AUDIT_LOGS_VIEW,
-  // },
-  // {
-  //   title: 'Settings',
-  //   path: ROUTES.SETTINGS,
-  //   icon: 'Settings',
-  //   badge: 'SE',
-  //   permission: PERMISSIONS.SETTINGS_MANAGE,
-  // },
 ]
 
 export default SIDEBAR_ITEMS
