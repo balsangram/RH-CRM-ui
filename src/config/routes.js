@@ -34,6 +34,10 @@ export const ROUTES = {
   VISA_ADD: '/visa/add',
   VISA_EDIT: '/visa/edit/:id',
 
+  PACKAGES: '/packages',
+  PACKAGES_VISA_DETAIL: '/packages/visa/:id',
+  PACKAGES_HOLIDAY_DETAIL: '/packages/holiday/:id',
+
   REPORTS: '/reports',
 
   EMPLOYEES: '/employees',

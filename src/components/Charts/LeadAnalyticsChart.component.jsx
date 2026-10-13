@@ -14,6 +14,7 @@ export const LeadAnalyticsChart = ({ className = '', isLoading = false }) => {
   // Datasets matching the inspiration layout
   const dataPresets = {
     year: [
+      { label: 'Jan', holiday: 6960, visa: 8400, fullDate: 'January 2026' },
       { label: 'Feb', holiday: 1800, visa: 1000, fullDate: 'February 2025' },
       { label: 'Mar', holiday: 4600, visa: 2000, fullDate: 'March 2025' },
       { label: 'Apr', holiday: 3800, visa: 0, fullDate: 'April 2025' },
@@ -25,9 +26,6 @@ export const LeadAnalyticsChart = ({ className = '', isLoading = false }) => {
       { label: 'Oct', holiday: 6700, visa: 0, fullDate: 'October 2025' },
       { label: 'Nov', holiday: 7100, visa: 0, fullDate: 'November 2025' },
       { label: 'Dec', holiday: 6200, visa: 0, fullDate: 'December 2025' },
-      { label: 'Jan', holiday: 6960, visa: 8400, fullDate: 'January 2026' },
-      { label: 'Feb', holiday: 5400, visa: 0, fullDate: 'February 2026' },
-      { label: 'Mar', holiday: 0, visa: 0, fullDate: 'March 2026' },
     ],
     month: [
       { label: 'W1', holiday: 1800, visa: 2400, fullDate: 'Week 1' },
@@ -64,8 +62,8 @@ export const LeadAnalyticsChart = ({ className = '', isLoading = false }) => {
       { label: 'Day 3', holiday: 550, visa: 720, fullDate: 'Custom Day 3' },
       { label: 'Day 4', holiday: 480, visa: 640, fullDate: 'Custom Day 4' },
       { label: 'Day 5', holiday: 620, visa: 890, fullDate: 'Custom Day 5' },
-      { label: 'Day 5', holiday: 620, visa: 890, fullDate: 'Custom Day 5' },
-      { label: 'Day 5', holiday: 620, visa: 890, fullDate: 'Custom Day 5' },
+      { label: 'Day 6', holiday: 620, visa: 890, fullDate: 'Custom Day 5' },
+      { label: 'Day 7', holiday: 620, visa: 890, fullDate: 'Custom Day 5' },
     ],
   }
 

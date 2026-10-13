@@ -23,6 +23,9 @@ import Roles from '../pages/Roles/Roles.view'
 import Notifications from '../pages/Notifications/Notifications.view'
 import AuditLogs from '../pages/AuditLogs/AuditLogs.view'
 import Settings from '../pages/Settings/Settings.view'
+import Packages from '../pages/Packages/Packages.view'
+import VisaPackageDetail from '../pages/Packages/VisaPackageDetail.view'
+import HolidayPackageDetail from '../pages/Packages/HolidayPackageDetail.view'
 
 // Pages - Add
 import LeadsAdd from '../pages/Leads/Leads.add'
@@ -92,6 +95,11 @@ export const AppRoutes = () => {
         <Route path={ROUTES.VISA} element={<Visa />} />
         <Route path={ROUTES.VISA_ADD} element={<VisaAdd />} />
         <Route path={ROUTES.VISA_EDIT} element={<VisaEdit />} />
+
+        {/* Packages & Catalog */}
+        <Route path={ROUTES.PACKAGES} element={<Packages />} />
+        <Route path={ROUTES.PACKAGES_VISA_DETAIL} element={<VisaPackageDetail />} />
+        <Route path={ROUTES.PACKAGES_HOLIDAY_DETAIL} element={<HolidayPackageDetail />} />
 
         {/* Reports & Administration */}
         <Route path={ROUTES.REPORTS} element={<Reports />} />

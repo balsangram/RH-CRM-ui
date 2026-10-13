@@ -26,6 +26,8 @@ export const PERMISSIONS = {
   VISA_VIEW: 'visa:view',
   VISA_MANAGE: 'visa:manage',
   HOLIDAYS_VIEW: 'holidays:view',
+  PACKAGES_VIEW: 'packages:view',
+  PACKAGES_MANAGE: 'packages:manage',
 
   // Admin / HR
   EMPLOYEES_MANAGE: 'employees:manage',

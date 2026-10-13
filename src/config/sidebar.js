@@ -55,6 +55,7 @@ export const SIDEBAR_ITEMS = [
     badge: 'BE',
     permission: PERMISSIONS.HOLIDAYS_VIEW,
   },
+
   {
     title: 'Reports & Analytics',
     path: ROUTES.REPORTS,
@@ -74,12 +75,19 @@ export const SIDEBAR_ITEMS = [
     permission: PERMISSIONS.EMPLOYEES_MANAGE,
   },
   {
-    title: 'Roles & Permissions',
-    path: ROUTES.ROLES,
-    icon: 'AdminPanelSettings',
-    badge: 'AD',
-    permission: PERMISSIONS.ROLES_MANAGE,
+    title: 'Packages',
+    path: ROUTES.PACKAGES,
+    icon: 'Luggage',
+    badge: 'PK',
+    permission: PERMISSIONS.PACKAGES_VIEW,
   },
+  // {
+  //   title: 'Roles & Permissions',
+  //   path: ROUTES.ROLES,
+  //   icon: 'AdminPanelSettings',
+  //   badge: 'AD',
+  //   permission: PERMISSIONS.ROLES_MANAGE,
+  // },
   // {
   //   title: 'Audit Logs',
   //   path: ROUTES.AUDIT_LOGS,
