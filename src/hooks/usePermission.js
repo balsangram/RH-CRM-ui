@@ -9,6 +9,11 @@ export const usePermission = () => {
   const role = useMemo(() => user?.role || '', [user])
 
   const can = (permission) => {
+    if (permission === 'companies:view' || permission === 'customers:view') {
+      if (['SUPER_ADMIN', 'ADMIN', 'AGENT', 'STAFF', 'MANAGER'].includes(role)) {
+        return true
+      }
+    }
     return hasPermission(permissions, permission)
   }
 

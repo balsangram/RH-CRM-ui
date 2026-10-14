@@ -96,14 +96,14 @@ export const Login = () => {
             name: 'sipu Sharma',
             email,
             role: 'AGENT',
-            permissions: ['applications:view', 'applications:manage', 'leads:view', 'packages:view'],
+            permissions: ['applications:view', 'applications:manage', 'leads:view', 'packages:view', 'companies:view', 'customers:view'],
           }
         : {
             id: 'usr_admin_01',
             name: 'Super Admin',
             email,
             role: 'ADMIN',
-            permissions: ['leads:view', 'customers:view', 'visa:view', 'holidays:view', 'packages:view', 'packages:manage', 'reports:view', 'employees:manage', 'roles:manage', 'audit_logs:view', 'settings:manage'],
+            permissions: ['leads:view', 'companies:view', 'customers:view', 'visa:view', 'holidays:view', 'packages:view', 'packages:manage', 'reports:view', 'employees:manage', 'roles:manage', 'audit_logs:view', 'settings:manage'],
           }
 
       localStorage.setItem('user', JSON.stringify(userData))

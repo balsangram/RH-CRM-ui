@@ -14,11 +14,17 @@ export const PERMISSIONS = {
   LEADS_EDIT: 'leads:edit',
   LEADS_DELETE: 'leads:delete',
 
-  // Customers
-  CUSTOMERS_VIEW: 'customers:view',
-  CUSTOMERS_CREATE: 'customers:create',
-  CUSTOMERS_EDIT: 'customers:edit',
-  CUSTOMERS_DELETE: 'customers:delete',
+  // Companies & Clients (Replacing Customers)
+  COMPANIES_VIEW: 'companies:view',
+  COMPANIES_CREATE: 'companies:create',
+  COMPANIES_EDIT: 'companies:edit',
+  COMPANIES_DELETE: 'companies:delete',
+
+  // Customers (Backward compatibility aliases)
+  CUSTOMERS_VIEW: 'companies:view',
+  CUSTOMERS_CREATE: 'companies:create',
+  CUSTOMERS_EDIT: 'companies:edit',
+  CUSTOMERS_DELETE: 'companies:delete',
 
   // Applications, Visa & Holidays
   APPLICATIONS_VIEW: 'applications:view',
@@ -46,6 +52,19 @@ export const PERMISSIONS = {
 export const hasPermission = (userPermissions = [], requiredPermission) => {
   if (!requiredPermission) return true
   if (userPermissions.includes('*') || userPermissions.includes('ALL')) return true
+  if (
+    requiredPermission === 'companies:view' ||
+    requiredPermission === 'customers:view'
+  ) {
+    if (
+      userPermissions.includes('companies:view') ||
+      userPermissions.includes('customers:view') ||
+      userPermissions.includes('applications:view') ||
+      userPermissions.includes('leads:view')
+    ) {
+      return true
+    }
+  }
   return userPermissions.includes(requiredPermission)
 }
 

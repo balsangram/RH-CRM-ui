@@ -6,12 +6,14 @@ import DashboardIcon from '@mui/icons-material/Dashboard'
 import GroupAddIcon from '@mui/icons-material/GroupAdd'
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff'
 import BeachAccessIcon from '@mui/icons-material/BeachAccess'
-import PeopleIcon from '@mui/icons-material/People'
+import BusinessIcon from '@mui/icons-material/Business'
 import LuggageIcon from '@mui/icons-material/Luggage'
 import AssignmentIcon from '@mui/icons-material/Assignment'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import BadgeIcon from '@mui/icons-material/Badge'
 import CardTravelIcon from '@mui/icons-material/CardTravel'
+
+import FileDownloadIcon from '@mui/icons-material/FileDownload'
 
 export const SIDEBAR_ITEMS = [
   {
@@ -38,10 +40,10 @@ export const SIDEBAR_ITEMS = [
     permission: PERMISSIONS.HOLIDAYS_VIEW,
   },  
   {
-    title: 'Customers',
-    path: ROUTES.CUSTOMERS,
-    icon: PeopleIcon,
-    permission: PERMISSIONS.CUSTOMERS_VIEW,
+    title: 'Companies',
+    path: ROUTES.COMPANIES,
+    icon: BusinessIcon,
+    permission: PERMISSIONS.COMPANIES_VIEW,
   },
   {
     title: 'Travellers',
@@ -76,6 +78,13 @@ export const SIDEBAR_ITEMS = [
     icon: CardTravelIcon,
     permission: PERMISSIONS.PACKAGES_VIEW,
   },
+  {
+    title: 'Logs',
+    path: ROUTES.AUDIT_LOGS,
+    icon: FileDownloadIcon,
+    permission: PERMISSIONS.AUDIT_LOGS_VIEW,
+  },
 ]
 
 export default SIDEBAR_ITEMS
+

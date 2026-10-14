@@ -10,9 +10,15 @@ export const ROUTES = {
   LEADS_ADD: '/leads/add',
   LEADS_EDIT: '/leads/edit/:id',
 
-  CUSTOMERS: '/customers',
-  CUSTOMERS_ADD: '/customers/add',
-  CUSTOMERS_EDIT: '/customers/edit/:id',
+  COMPANIES: '/companies',
+  COMPANIES_ADD: '/companies/add',
+  COMPANIES_EDIT: '/companies/edit/:id',
+  COMPANIES_DETAIL: '/companies/:id',
+
+  // Backward compatibility alias for CUSTOMERS
+  CUSTOMERS: '/companies',
+  CUSTOMERS_ADD: '/companies/add',
+  CUSTOMERS_EDIT: '/companies/edit/:id',
 
   TRAVELLERS: '/travellers',
   TRAVELLERS_ADD: '/travellers/add',

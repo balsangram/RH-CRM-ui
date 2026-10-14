@@ -23,7 +23,7 @@ export const Dashboard = () => {
       value: '148',
       change: '8.2%',
       isUp: true,
-      viewAllLink: ROUTES.CUSTOMERS,
+      viewAllLink: ROUTES.COMPANIES,
       color: 'indigo',
       icon: (
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

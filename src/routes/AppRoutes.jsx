@@ -11,7 +11,8 @@ import Login from '../pages/Login/Login.view'
 import Dashboard from '../pages/Dashboard/Dashboard.view'
 import StaffDashboard from '../pages/Dashboard/StaffDashboard.view'
 import Leads from '../pages/Leads/Leads.view'
-import Customers from '../pages/Customers/Customers.view'
+import Companies from '../pages/Companies/Companies.view'
+import Customers from '../pages/Companies/Companies.view'
 import Travellers from '../pages/Travellers/Travellers.view'
 import Applications from '../pages/Applications/Applications.view'
 import Holidays from '../pages/Holidays/Holidays.view'
@@ -30,7 +31,8 @@ import HolidayPackageDetail from '../pages/Packages/HolidayPackageDetail.view'
 // Pages - Add
 import LeadsAdd from '../pages/Leads/Leads.add'
 import ApplicationsAdd from '../pages/Applications/Applications.add'
-import CustomersAdd from '../pages/Customers/Customers.add'
+import CompaniesAdd from '../pages/Companies/Companies.add'
+import CustomersAdd from '../pages/Companies/Companies.add'
 import VisaAdd from '../pages/Visa/Visa.add'
 import EmployeesAdd from '../pages/Employees/Employees.add'
 import TasksAdd from '../pages/Tasks/Tasks.add'
@@ -40,7 +42,8 @@ import TravellersAdd from '../pages/Travellers/Travellers.add'
 // Pages - Edit
 import LeadsEdit from '../pages/Leads/Leads.edit'
 import ApplicationsEdit from '../pages/Applications/Applications.edit'
-import CustomersEdit from '../pages/Customers/Customers.edit'
+import CompaniesEdit from '../pages/Companies/Companies.edit'
+import CustomersEdit from '../pages/Companies/Companies.edit'
 import VisaEdit from '../pages/Visa/Visa.edit'
 import EmployeesEdit from '../pages/Employees/Employees.edit'
 import TasksEdit from '../pages/Tasks/Tasks.edit'
@@ -66,10 +69,14 @@ export const AppRoutes = () => {
         <Route path={ROUTES.LEADS_ADD} element={<LeadsAdd />} />
         <Route path={ROUTES.LEADS_EDIT} element={<LeadsEdit />} />
 
-        {/* Customers */}
-        <Route path={ROUTES.CUSTOMERS} element={<Customers />} />
-        <Route path={ROUTES.CUSTOMERS_ADD} element={<CustomersAdd />} />
-        <Route path={ROUTES.CUSTOMERS_EDIT} element={<CustomersEdit />} />
+        {/* Companies / Corporate Clients (Replacing Customers) */}
+        <Route path={ROUTES.COMPANIES} element={<Companies />} />
+        <Route path={ROUTES.COMPANIES_ADD} element={<CompaniesAdd />} />
+        <Route path={ROUTES.COMPANIES_EDIT} element={<CompaniesEdit />} />
+        <Route path={ROUTES.COMPANIES_DETAIL} element={<Companies />} />
+        <Route path="/customers" element={<Navigate to={ROUTES.COMPANIES} replace />} />
+        <Route path="/customers/add" element={<Navigate to={ROUTES.COMPANIES_ADD} replace />} />
+        <Route path="/customers/edit/:id" element={<Navigate to={ROUTES.COMPANIES} replace />} />
 
         {/* Travellers */}
         <Route path={ROUTES.TRAVELLERS} element={<Travellers />} />
