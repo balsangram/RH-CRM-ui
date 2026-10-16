@@ -2,18 +2,24 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import visaCasesService, { VISA_STAGES } from '../../services/visaCases'
 import ROUTES from '../../config/routes'
+import AddPaymentModal from '../../components/Modal/AddPaymentModal.component'
+import { downloadApplicationDossier, downloadInvoice, downloadVisaDocument } from '../../utils/documentGenerators'
+import useAuth from '../../hooks/useAuth'
+import Pagination from '../../components/Pagination/Pagination.component'
 
 export const Visa = () => {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const isStaff = user?.role === 'AGENT' || user?.role === 'STAFF'
 
-  // View state: 'table' | 'kanban'
+// View state: 'table' | 'kanban'
   const [viewMode, setViewMode] = useState('table')
 
-  // Cases state from service
+// Cases state from service
   const [cases, setCases] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // Filters state
+// Filters state
   const [filterCountry, setFilterCountry] = useState('ALL')
   const [filterVisaType, setFilterVisaType] = useState('ALL')
   const [filterOfficer, setFilterOfficer] = useState('ALL')
@@ -21,14 +27,20 @@ export const Visa = () => {
   const [searchBy, setSearchBy] = useState('ALL')
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Side sheet drawer state
+// Side sheet drawer state
   const [selectedCaseId, setSelectedCaseId] = useState(null)
   const [drawerAlert, setDrawerAlert] = useState('')
 
-  // Full Profile Modal state
+// Add Payment Modal state
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+
+// Full Profile Modal state
   const [profileModalCase, setProfileModalCase] = useState(null)
 
-  // New Case Modal state
+  // Visa Document state (upload simulation)
+  const [visaDocUploaded, setVisaDocUploaded] = useState(false)
+
+// New Case Modal state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [newCaseForm, setNewCaseForm] = useState({
     applicant: '',
@@ -44,65 +56,84 @@ export const Visa = () => {
     passportExp: '',
   })
 
-  // Load cases
+// Load cases
   const reloadCases = () => {
     const list = visaCasesService.getCases()
     setCases(list)
     setIsLoading(false)
   }
 
-  useEffect(() => {
+useEffect(() => {
     reloadCases()
   }, [])
 
-  // Selected case for Side Sheet
+// Selected case for Side Sheet
   const selectedCase = useMemo(() => {
     if (!selectedCaseId) return null
     return cases.find((c) => c.id === selectedCaseId) || null
   }, [cases, selectedCaseId])
 
-  // Extract unique filter dropdown values
+// Extract unique filter dropdown values
   const uniqueCountries = useMemo(() => {
     const set = new Set(cases.map((c) => c.country).filter(Boolean))
     return Array.from(set)
   }, [cases])
 
-  const uniqueVisaTypes = useMemo(() => {
+const uniqueVisaTypes = useMemo(() => {
     const set = new Set(cases.map((c) => c.visaType).filter(Boolean))
     return Array.from(set)
   }, [cases])
 
-  const uniqueOfficers = useMemo(() => {
+const uniqueOfficers = useMemo(() => {
     const set = new Set(cases.map((c) => c.officer).filter(Boolean))
     return Array.from(set)
   }, [cases])
 
-  // Filtered cases
+  // Filter cases assigned to this staff member when logged in as AGENT / STAFF
+  // TODO: Later replace with staff-assigned cases API endpoint
+  const staffCases = useMemo(() => {
+    if (!isStaff) return cases
+    const staffName = (user?.name || 'sipu Sharma').toLowerCase().trim()
+    const staffId = (user?.id || 'usr_staff_01').toLowerCase().trim()
+    return cases.filter((c) => {
+      const officer = (c.officer || '').toLowerCase()
+      const officerId = (c.officerId || '').toLowerCase()
+      const assigned = (c.assignedStaff || '').toLowerCase()
+      return (
+        officer.includes(staffName) ||
+        officerId.includes(staffId) ||
+        assigned.includes(staffName) ||
+        (staffName.includes('sipu') && (officer.includes('sipu') || officer.includes('amit')))
+      )
+    })
+  }, [cases, isStaff, user])
+
+// Filtered cases
   const filteredCases = useMemo(() => {
-    return cases.filter((item) => {
+    return staffCases.filter((item) => {
       // Stage filter
       if (filterStage !== 'ALL' && item.stage !== filterStage) return false
 
-      // Country filter
+// Country filter
       if (filterCountry !== 'ALL' && item.country !== filterCountry) return false
 
-      // Visa type filter
+// Visa type filter
       if (filterVisaType !== 'ALL' && item.visaType !== filterVisaType) return false
 
-      // Officer filter
+// Officer filter
       if (filterOfficer !== 'ALL' && item.officer !== filterOfficer) return false
 
-      // Search Query
+// Search Query
       const q = searchQuery.toLowerCase().trim()
       if (!q) return true
 
-      if (searchBy === 'APPLICANT') return item.applicant.toLowerCase().includes(q)
+if (searchBy === 'APPLICANT') return item.applicant.toLowerCase().includes(q)
       if (searchBy === 'CASE_ID') return item.id.toLowerCase().includes(q)
       if (searchBy === 'COUNTRY') return item.country.toLowerCase().includes(q)
       if (searchBy === 'OFFICER') return item.officer.toLowerCase().includes(q)
       if (searchBy === 'TXN') return (item.txnId || '').toLowerCase().includes(q)
 
-      // ALL Fields
+// ALL Fields
       return (
         item.id.toLowerCase().includes(q) ||
         item.applicant.toLowerCase().includes(q) ||
@@ -114,15 +145,29 @@ export const Visa = () => {
         (item.email || '').toLowerCase().includes(q)
       )
     })
-  }, [cases, filterStage, filterCountry, filterVisaType, filterOfficer, searchBy, searchQuery])
+  }, [staffCases, filterStage, filterCountry, filterVisaType, filterOfficer, searchBy, searchQuery])
 
-  // Pipeline aggregate statistics
+  // Table View Pagination State
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filterStage, filterCountry, filterVisaType, filterOfficer, searchBy, searchQuery])
+
+  const totalPages = Math.ceil(filteredCases.length / itemsPerPage) || 1
+  const paginatedCases = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage
+    return filteredCases.slice(start, start + itemsPerPage)
+  }, [filteredCases, currentPage, itemsPerPage])
+
+// Pipeline aggregate statistics
   const pipelineStats = useMemo(() => {
     const totalValue = cases.reduce((sum, c) => sum + (Number(c.amount) || 0), 0)
     const approvedCount = cases.filter((c) => c.stage === 'APPROVED').length
     const rejectedCount = cases.filter((c) => c.stage === 'REJECTED').length
 
-    // Stage by stage stats
+// Stage by stage stats
     const stageMap = {}
     VISA_STAGES.forEach((stage) => {
       const stageCases = cases.filter((c) => c.stage === stage.id)
@@ -131,10 +176,10 @@ export const Visa = () => {
       stageMap[stage.id] = { count, value }
     })
 
-    return { totalValue, approvedCount, rejectedCount, stageMap }
+return { totalValue, approvedCount, rejectedCount, stageMap }
   }, [cases])
 
-  // Quick Advance Stage handler
+// Quick Advance Stage handler
   const handleAdvanceStage = (caseItem, targetStageId) => {
     setDrawerAlert('')
     const result = visaCasesService.advanceStage(caseItem.id, targetStageId)
@@ -145,14 +190,35 @@ export const Visa = () => {
     reloadCases()
   }
 
-  // Toggle checklist item
+// Previous Stage handler
+  const handlePreviousStage = (caseItem, prevStageId) => {
+    setDrawerAlert('')
+    visaCasesService.updateCase(caseItem.id, {
+      stage: prevStageId,
+      docStatus: prevStageId,
+    })
+    reloadCases()
+  }
+
+// Toggle checklist item
   const handleToggleChecklist = (caseId, itemId, isChecked) => {
     visaCasesService.toggleChecklistItem(caseId, itemId, isChecked)
     reloadCases()
     setDrawerAlert('')
   }
 
-  // Handle Add New Case submit
+// Record Payment handler
+  const handleRecordPayment = (paymentData) => {
+    if (!selectedCase) return
+    visaCasesService.updateCase(selectedCase.id, {
+      paidAmount: paymentData.newPaidTotal,
+      paymentStatus: paymentData.newPaymentStatus,
+      txnId: paymentData.referenceNo,
+    })
+    reloadCases()
+  }
+
+// Handle Add New Case submit
   const handleCreateCaseSubmit = (e) => {
     e.preventDefault()
     visaCasesService.createCase(newCaseForm)
@@ -173,12 +239,12 @@ export const Visa = () => {
     reloadCases()
   }
 
-  // Currency Formatter
+// Currency Formatter
   const formatINR = (val) => {
     return '₹' + Number(val || 0).toLocaleString('en-IN')
   }
 
-  // Compact K formatter
+// Compact K formatter
   const formatK = (val) => {
     const n = Number(val || 0)
     if (n >= 100000) return `₹${(n / 100000).toFixed(1)}L`
@@ -186,8 +252,23 @@ export const Visa = () => {
     return `₹${n}`
   }
 
-  return (
+return (
     <div className="space-y-4 pb-12 font-sans">
+      {/* Staff Assignment View Banner */}
+      {isStaff && (
+        <div className="bg-indigo-50 border border-indigo-200 text-indigo-900 px-4 py-2.5 rounded-2xl text-xs flex items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <span className="text-base">👤</span>
+            <span>
+              <strong>Staff View ({user?.name || 'Staff Officer'}):</strong> Showing cases assigned to you.
+            </span>
+          </div>
+          <span className="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-mono font-bold">
+            Assigned: {staffCases.length} cases
+          </span>
+        </div>
+      )}
+
       {/* Top Header Card */}
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-4 sm:p-5">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -201,11 +282,11 @@ export const Visa = () => {
               </span>
             </div>
             <p className="text-xs font-medium text-slate-500 tracking-tight">
-              <span className="font-semibold text-slate-700">Flow:</span> Under Review &rarr; Docs Verified &rarr; Submitted &rarr; Processing &rarr; Approved | Rejected
+              <span className="font-semibold text-slate-700">Flow:</span> Under Review &rarr; Docs Verified &rarr; Submitted &rarr; Processing &rarr; Approved &rarr; Payment | Rejected
             </p>
           </div>
 
-          {/* Action Buttons: New Case + Kanban/Table Switcher */}
+{/* Action Buttons: New Case + Kanban/Table Switcher */}
           <div className="flex items-center gap-2.5 self-start md:self-auto">
             <button
               type="button"
@@ -215,7 +296,7 @@ export const Visa = () => {
               <span>+ New Case</span>
             </button>
 
-            {/* View Switcher Toggle */}
+{/* View Switcher Toggle */}
             <div className="inline-flex rounded-xl border border-slate-200 bg-slate-100/90 p-1 shadow-2xs">
               <button
                 type="button"
@@ -232,7 +313,7 @@ export const Visa = () => {
                 <span>Kanban Board</span>
               </button>
 
-              <button
+<button
                 type="button"
                 onClick={() => setViewMode('table')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
@@ -250,7 +331,7 @@ export const Visa = () => {
           </div>
         </div>
 
-        {/* Filter Controls Row */}
+{/* Filter Controls Row */}
         <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-3">
           {/* Country */}
           <div className="flex items-center gap-1.5 text-xs text-slate-600">
@@ -267,7 +348,7 @@ export const Visa = () => {
             </select>
           </div>
 
-          {/* Visa Type */}
+{/* Visa Type */}
           <div className="flex items-center gap-1.5 text-xs text-slate-600">
             <span className="font-semibold text-slate-700">Visa Type:</span>
             <select
@@ -282,7 +363,7 @@ export const Visa = () => {
             </select>
           </div>
 
-          {/* Case Officer */}
+{/* Case Officer */}
           <div className="flex items-center gap-1.5 text-xs text-slate-600">
             <span className="font-semibold text-slate-700">Case Officer:</span>
             <select
@@ -297,7 +378,7 @@ export const Visa = () => {
             </select>
           </div>
 
-          {/* Search By */}
+{/* Search By */}
           <div className="flex items-center gap-1.5 text-xs text-slate-600">
             <span className="font-semibold text-slate-700">Search By:</span>
             <select
@@ -314,7 +395,7 @@ export const Visa = () => {
             </select>
           </div>
 
-          {/* Search Input */}
+{/* Search Input */}
           <div className="flex-1 min-w-[200px] flex items-center gap-1.5 text-xs text-slate-600">
             <span className="font-semibold text-slate-700">Search:</span>
             <div className="relative flex-1">
@@ -338,7 +419,7 @@ export const Visa = () => {
           </div>
         </div>
 
-        {/* Status Summary Line */}
+{/* Status Summary Line */}
         <div className="mt-2 text-[10px] font-semibold text-slate-500 flex items-center gap-2">
           <span>
             Approved: <strong className="text-emerald-600 font-bold">{pipelineStats.approvedCount}</strong>
@@ -359,13 +440,13 @@ export const Visa = () => {
         </div>
       </div>
 
-      {/* Stage Stepper Progress Bar (Matching Reference Screenshot) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
+{/* Stage Stepper Progress Bar (Matching Reference Screenshot) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-2.5">
         {VISA_STAGES.map((stage, idx) => {
           const stats = pipelineStats.stageMap[stage.id] || { count: 0, value: 0 }
           const isSelected = filterStage === stage.id
 
-          return (
+return (
             <div
               key={stage.id}
               onClick={() => setFilterStage(filterStage === stage.id ? 'ALL' : stage.id)}
@@ -391,7 +472,7 @@ export const Visa = () => {
                 </div>
               </div>
 
-              {/* Indicator Arrow between cards on desktop */}
+{/* Indicator Arrow between cards on desktop */}
               {idx < VISA_STAGES.length - 1 && (
                 <div className="hidden lg:block absolute -right-2 top-1/2 -translate-y-1/2 text-slate-300 font-bold text-xs pointer-events-none z-10">
                   &rarr;
@@ -402,7 +483,7 @@ export const Visa = () => {
         })}
       </div>
 
-      {/* Main View Area */}
+{/* Main View Area */}
       {viewMode === 'table' ? (
         /* TABLE VIEW (Matching Screenshot 1) */
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
@@ -423,17 +504,17 @@ export const Visa = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredCases.length === 0 ? (
+                {paginatedCases.length === 0 ? (
                   <tr>
                     <td colSpan={10} className="py-12 text-center text-slate-400 font-medium">
                       No cases found matching your criteria.
                     </td>
                   </tr>
                 ) : (
-                  filteredCases.map((caseItem) => {
+                  paginatedCases.map((caseItem) => {
                     const stageDef = VISA_STAGES.find((s) => s.id === caseItem.stage) || VISA_STAGES[0]
 
-                    return (
+return (
                       <tr
                         key={caseItem.id}
                         className="hover:bg-slate-50/80 transition-colors group"
@@ -443,7 +524,7 @@ export const Visa = () => {
                           {caseItem.id}
                         </td>
 
-                        {/* APPLICANT */}
+{/* APPLICANT */}
                         <td className="py-3.5 px-4 min-w-[200px]">
                           <p className="font-bold text-slate-900 leading-tight">
                             {caseItem.applicant}
@@ -458,17 +539,17 @@ export const Visa = () => {
                           </div>
                         </td>
 
-                        {/* COUNTRY */}
+{/* COUNTRY */}
                         <td className="py-3.5 px-4 font-medium text-slate-800 whitespace-nowrap">
                           {caseItem.country}
                         </td>
 
-                        {/* VISA TYPE */}
+{/* VISA TYPE */}
                         <td className="py-3.5 px-4 font-medium text-slate-700 whitespace-nowrap">
                           {caseItem.visaType}
                         </td>
 
-                        {/* STAGE */}
+{/* STAGE */}
                         <td className="py-3.5 px-4 whitespace-nowrap">
                           <span
                             className={`inline-block px-2.5 py-1 text-[10px] font-bold uppercase rounded-md border tracking-wider ${stageDef.badgeBorder}`}
@@ -477,7 +558,7 @@ export const Visa = () => {
                           </span>
                         </td>
 
-                        {/* CASE OFFICER */}
+{/* CASE OFFICER */}
                         <td className="py-3.5 px-4 whitespace-nowrap">
                           <p className="font-semibold text-slate-900 leading-tight">
                             {caseItem.officer}
@@ -487,12 +568,12 @@ export const Visa = () => {
                           </p>
                         </td>
 
-                        {/* AMOUNT */}
+{/* AMOUNT */}
                         <td className="py-3.5 px-4 font-bold text-slate-900 whitespace-nowrap">
                           {formatINR(caseItem.amount)}
                         </td>
 
-                        {/* PAYMENT */}
+{/* PAYMENT */}
                         <td className="py-3.5 px-4 whitespace-nowrap">
                           <div
                             className={`px-2 py-1 rounded-md border text-[10px] font-mono leading-tight inline-block ${
@@ -508,12 +589,12 @@ export const Visa = () => {
                           </div>
                         </td>
 
-                        {/* APPLIED DATE */}
+{/* APPLIED DATE */}
                         <td className="py-3.5 px-4 font-mono text-slate-600 whitespace-nowrap">
                           {caseItem.appliedDate}
                         </td>
 
-                        {/* ACTIONS */}
+{/* ACTIONS */}
                         <td className="py-3.5 px-4 whitespace-nowrap text-center">
                           <div className="flex items-center justify-center gap-1.5">
                             <button
@@ -543,14 +624,30 @@ export const Visa = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Table View Pagination Controls */}
+          <div className="px-4 py-2.5 border-t border-slate-100 bg-white">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredCases.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
+              onItemsPerPageChange={(size) => {
+                setItemsPerPage(size)
+                setCurrentPage(1)
+              }}
+              pageSizeOptions={[5, 10, 20, 50]}
+            />
+          </div>
         </div>
       ) : (
         /* KANBAN BOARD VIEW (Matching Screenshot 2) */
         <div className="flex gap-3.5 items-start overflow-x-auto pb-4">
-          {VISA_STAGES.map((stage) => {
+          {VISA_STAGES.map((stage, stageIdx) => {
             const stageCases = filteredCases.filter((c) => c.stage === stage.id)
 
-            return (
+return (
               <div
                 key={stage.id}
                 className="bg-slate-50/80 rounded-2xl border border-slate-200/90 flex flex-col max-h-[calc(100vh-280px)] overflow-hidden shadow-2xs w-[285px] min-w-[285px] shrink-0"
@@ -570,7 +667,7 @@ export const Visa = () => {
                   </p>
                 </div>
 
-                {/* Cards Container */}
+{/* Cards Container */}
                 <div className="p-2 space-y-2 overflow-y-auto flex-1">
                   {stageCases.length === 0 ? (
                     <div className="py-8 text-center text-slate-400 text-[10px] italic">
@@ -583,7 +680,7 @@ export const Visa = () => {
                           ? Math.round(((caseItem.paidAmount || 0) / caseItem.amount) * 100)
                           : 0
 
-                      return (
+return (
                         <div
                           key={caseItem.id}
                           className="bg-white rounded-xl border border-slate-200/90 p-2.5 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all space-y-1.5"
@@ -598,7 +695,7 @@ export const Visa = () => {
                             </span>
                           </div>
 
-                          {/* Applicant Name & Destination */}
+{/* Applicant Name & Destination */}
                           <div>
                             <h4 className="text-[11px] font-bold text-slate-900 leading-snug truncate">
                               {caseItem.applicant}
@@ -608,7 +705,7 @@ export const Visa = () => {
                             </p>
                           </div>
 
-                          {/* Amount & Paid Progress */}
+{/* Amount & Paid Progress */}
                           <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
                             <span className="font-bold text-slate-900">
                               {formatINR(caseItem.amount)}
@@ -626,7 +723,7 @@ export const Visa = () => {
                             </span>
                           </div>
 
-                          {/* Case Officer & Document Status */}
+{/* Case Officer & Document Status */}
                           <div className="flex items-center justify-between text-[9px] text-slate-500">
                             <span className="flex items-center gap-1 truncate font-medium max-w-[130px]">
                               <span>👤</span> {caseItem.officer}
@@ -644,36 +741,44 @@ export const Visa = () => {
                             </span>
                           </div>
 
-                          {/* Card Action Buttons */}
-                          <div className="pt-1.5 border-t border-slate-100 flex items-center gap-1.5">
+{/* Bottom Actions: Previous / Side Sheet / Advance */}
+                          <div className="pt-1.5 border-t border-slate-100 flex items-center gap-1">
+                            <button
+                              type="button"
+                              disabled={stageIdx === 0}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handlePreviousStage(caseItem, VISA_STAGES[stageIdx - 1]?.id)
+                              }}
+                              className="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[9px] cursor-pointer"
+                              title="Move back to previous stage"
+                            >
+                              &larr;
+                            </button>
+
                             <button
                               type="button"
                               onClick={() => {
                                 setSelectedCaseId(caseItem.id)
                                 setDrawerAlert('')
                               }}
-                              className="px-2 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-[9px] font-bold transition-colors cursor-pointer flex-1 text-center"
+                              className="flex-1 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-[9px] transition-colors cursor-pointer text-center"
                             >
-                              Details
+                              Side Sheet & Details
                             </button>
+
                             <button
                               type="button"
-                              onClick={() => setProfileModalCase(caseItem)}
-                              className="px-2 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-[9px] font-bold transition-colors cursor-pointer text-center"
-                              title="Full Profile"
+                              disabled={!stage.nextStage}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleAdvanceStage(caseItem, stage.nextStage)
+                              }}
+                              className="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[9px] cursor-pointer"
+                              title="Advance to next stage"
                             >
-                              Profile &rarr;
+                              &rarr;
                             </button>
-                            {stage.nextStage && (
-                              <button
-                                type="button"
-                                onClick={() => handleAdvanceStage(caseItem, stage.nextStage)}
-                                className="px-2 py-1 rounded-lg bg-[#0F0E2B] text-white hover:bg-[#181445] text-[9px] font-bold transition-colors cursor-pointer shrink-0"
-                                title={`Advance to ${stage.nextStage}`}
-                              >
-                                &rarr; Next
-                              </button>
-                            )}
                           </div>
                         </div>
                       )
@@ -686,7 +791,7 @@ export const Visa = () => {
         </div>
       )}
 
-      {/* RIGHT SIDE SHEET DRAWER (Matching Screenshot 2) */}
+{/* RIGHT SIDE SHEET DRAWER (Matching Screenshot 2) */}
       {selectedCase && (
         <div className="fixed inset-0 z-50 overflow-hidden font-sans">
           {/* Backdrop */}
@@ -698,32 +803,43 @@ export const Visa = () => {
             }}
           />
 
-          <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+<div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
             <div className="w-screen max-w-lg bg-white shadow-2xl border-l border-slate-200 flex flex-col animate-in slide-in-from-right duration-200">
               {/* Drawer Top Header */}
-              <div className="p-4 sm:p-5 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
-                <div>
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-                    {selectedCase.applicant}
-                  </h3>
-                  <p className="text-xs font-mono font-bold text-slate-500 mt-0.5">
-                    {selectedCase.id}
-                  </p>
-                </div>
+              <div className="p-4 sm:p-5 border-b border-slate-200 bg-white shrink-0">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                      {selectedCase.applicant}
+                    </h3>
+                    <p className="text-xs font-mono font-bold text-slate-500 mt-0.5">
+                      {selectedCase.id}
+                    </p>
+                  </div>
 
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCaseId(null)
+                      setDrawerAlert('')
+                    }}
+                    className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <span>✕</span> Close
+                  </button>
+                </div>
+                {/* Download Application Button */}
                 <button
                   type="button"
-                  onClick={() => {
-                    setSelectedCaseId(null)
-                    setDrawerAlert('')
-                  }}
-                  className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
+                  onClick={() => downloadApplicationDossier(selectedCase, 'visa')}
+                  className="mt-2.5 w-full py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold text-[11px] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  <span>✕</span> Close
+                  <span>📄</span>
+                  <span>Download Application</span>
                 </button>
               </div>
 
-              {/* Drawer Scrollable Content */}
+{/* Drawer Scrollable Content */}
               <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-5 text-xs">
                 {/* Validation Alert Notice if checklist blocked */}
                 {drawerAlert && (
@@ -733,12 +849,12 @@ export const Visa = () => {
                   </div>
                 )}
 
-                {/* SECTION 1: STAGE CHECKLIST */}
+{/* SECTION 1: STAGE CHECKLIST */}
                 {(() => {
                   const currentStageDef =
                     VISA_STAGES.find((s) => s.id === selectedCase.stage) || VISA_STAGES[0]
 
-                  return (
+return (
                     <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5 font-black text-slate-800 uppercase tracking-wider text-[11px]">
@@ -750,18 +866,18 @@ export const Visa = () => {
                         </span>
                       </div>
 
-                      <p className="text-[11px] text-slate-500 italic">
+<p className="text-[11px] text-slate-500 italic">
                         &ldquo;Without completing mandatory items, cannot move stages.&rdquo;
                       </p>
 
-                      <div className="space-y-2 pt-1">
+<div className="space-y-2 pt-1">
                         {currentStageDef.checklist.map((chk) => {
                           const isChecked = Boolean(
                             selectedCase.completedChecklists &&
                               selectedCase.completedChecklists[chk.id]
                           )
 
-                          return (
+return (
                             <label
                               key={chk.id}
                               className="flex items-start gap-2.5 p-2 rounded-lg bg-white border border-slate-200/90 hover:border-slate-300 transition-colors cursor-pointer"
@@ -798,7 +914,7 @@ export const Visa = () => {
                   )
                 })()}
 
-                {/* SECTION 2: APPLICANT INFORMATION */}
+{/* SECTION 2: APPLICANT INFORMATION */}
                 <div className="space-y-2.5">
                   <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
                     Applicant Information
@@ -833,7 +949,7 @@ export const Visa = () => {
                   </div>
                 </div>
 
-                {/* SECTION 3: VISA DETAILS */}
+{/* SECTION 3: VISA DETAILS */}
                 <div className="space-y-2.5">
                   <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
                     Visa Details
@@ -864,11 +980,21 @@ export const Visa = () => {
                   </div>
                 </div>
 
-                {/* SECTION 4: PAYMENT SUMMARY */}
+{/* SECTION 4: PAYMENT SUMMARY */}
                 <div className="space-y-2.5">
-                  <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
-                    Payment Summary
-                  </h4>
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
+                      Payment Summary
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => setIsPaymentModalOpen(true)}
+                      className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center gap-1"
+                    >
+                      <span>+</span>
+                      <span>Add Payment</span>
+                    </button>
+                  </div>
                   <div className="p-3.5 rounded-xl border border-slate-200 bg-white space-y-3">
                     <div className="grid grid-cols-3 gap-2">
                       <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-center">
@@ -897,10 +1023,77 @@ export const Visa = () => {
                       <span>Status: <strong className="text-slate-800">{selectedCase.paymentStatus.replace('_', ' ')}</strong></span>
                       <span className="font-mono text-[10px]">Ref: {selectedCase.txnId || 'TXN-998144'}</span>
                     </div>
+                    {/* Download Invoice Button */}
+                    <button
+                      type="button"
+                      onClick={() => downloadInvoice(selectedCase, 'visa')}
+                      className="w-full mt-2 py-2 px-3 rounded-lg bg-gradient-to-r from-slate-700 to-slate-900 hover:from-slate-800 hover:to-black text-white font-bold text-[10px] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <span>🧾</span>
+                      <span>Download Invoice</span>
+                    </button>
                   </div>
                 </div>
 
-                {/* SECTION 5: ADVANCE STAGE ACTIONS */}
+                {/* SECTION 4b: VISA DOCUMENT ACTIONS (only after Payment stage) */}
+                {(() => {
+                  const stageOrder = ['UNDER_REVIEW', 'DOCS_VERIFIED', 'SUBMITTED', 'PROCESSING', 'APPROVED', 'PAYMENT']
+                  const currentIdx = stageOrder.indexOf(selectedCase.stage)
+                  const paymentIdx = stageOrder.indexOf('PAYMENT')
+                  const isAfterPayment = currentIdx >= paymentIdx
+
+                  if (!isAfterPayment) return null
+
+                  return (
+                    <div className="space-y-2.5">
+                      <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
+                        📋 Visa Document
+                      </h4>
+                      <div className="p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/40 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2.5 h-2.5 rounded-full ${visaDocUploaded ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                          <span className="text-xs font-semibold text-slate-700">
+                            {visaDocUploaded ? 'Visa Document Uploaded' : 'No visa document uploaded yet'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {/* Upload Visa */}
+                          <label className="flex-1 py-2 px-3 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-50 text-indigo-700 font-bold text-[10px] transition-all cursor-pointer flex items-center justify-center gap-1.5">
+                            <span>⬆️</span>
+                            <span>Upload Visa</span>
+                            <input
+                              type="file"
+                              accept=".pdf,.jpg,.jpeg,.png"
+                              className="hidden"
+                              onChange={() => setVisaDocUploaded(true)}
+                            />
+                          </label>
+                          {/* View Visa */}
+                          <button
+                            type="button"
+                            disabled={!visaDocUploaded}
+                            onClick={() => alert('Visa document preview would open here.')}
+                            className="flex-1 py-2 px-3 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-50 text-indigo-700 font-bold text-[10px] transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none"
+                          >
+                            <span>👁️</span>
+                            <span>View Visa</span>
+                          </button>
+                          {/* Download Visa */}
+                          <button
+                            type="button"
+                            onClick={() => downloadVisaDocument(selectedCase)}
+                            className="flex-1 py-2 px-3 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-50 text-indigo-700 font-bold text-[10px] transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                          >
+                            <span>⬇️</span>
+                            <span>Download Visa</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })()}
+
+{/* SECTION 5: ADVANCE STAGE ACTIONS */}
                 <div className="space-y-2.5 pt-2 border-t border-slate-200">
                   <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
                     Advance Stage
@@ -909,7 +1102,7 @@ export const Visa = () => {
                     const currentStageDef =
                       VISA_STAGES.find((s) => s.id === selectedCase.stage) || VISA_STAGES[0]
 
-                    return (
+return (
                       <div className="flex items-center gap-2">
                         {currentStageDef.nextStage ? (
                           <button
@@ -926,7 +1119,7 @@ export const Visa = () => {
                           </div>
                         )}
 
-                        {selectedCase.stage !== 'REJECTED' && (
+{selectedCase.stage !== 'REJECTED' && (
                           <button
                             type="button"
                             onClick={() => handleAdvanceStage(selectedCase, 'REJECTED')}
@@ -940,7 +1133,7 @@ export const Visa = () => {
                   })()}
                 </div>
 
-                {/* View Full Case Details Button */}
+{/* View Full Case Details Button */}
                 <div className="pt-2">
                   <button
                     type="button"
@@ -959,7 +1152,7 @@ export const Visa = () => {
         </div>
       )}
 
-      {/* FULL PROFILE / CASE DETAILS MODAL */}
+{/* FULL PROFILE / CASE DETAILS MODAL */}
       {profileModalCase && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -967,33 +1160,54 @@ export const Visa = () => {
             onClick={() => setProfileModalCase(null)}
           />
 
-          <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all z-10 font-sans p-6 space-y-5 animate-in zoom-in-95 duration-150">
+<div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all z-10 font-sans p-6 space-y-5 animate-in zoom-in-95 duration-150">
             {/* Header */}
-            <div className="flex items-start justify-between border-b border-slate-200 pb-4">
-              <div>
-                <div className="flex items-center gap-2.5">
-                  <h3 className="text-lg font-black text-slate-900">
-                    {profileModalCase.applicant}
-                  </h3>
-                  <span className="px-2 py-0.5 rounded font-mono text-xs font-bold bg-slate-100 border border-slate-200 text-slate-700">
-                    {profileModalCase.id}
-                  </span>
+            <div className="border-b border-slate-200 pb-4 space-y-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <h3 className="text-lg font-black text-slate-900">
+                      {profileModalCase.applicant}
+                    </h3>
+                    <span className="px-2 py-0.5 rounded font-mono text-xs font-bold bg-slate-100 border border-slate-200 text-slate-700">
+                      {profileModalCase.id}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Visa Case for <strong className="text-slate-800">{profileModalCase.country}</strong> &bull; {profileModalCase.visaType}
+                  </p>
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Visa Case for <strong className="text-slate-800">{profileModalCase.country}</strong> &bull; {profileModalCase.visaType}
-                </p>
-              </div>
 
-              <button
-                type="button"
-                onClick={() => setProfileModalCase(null)}
-                className="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center font-bold text-sm"
-              >
-                ✕
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setProfileModalCase(null)}
+                  className="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center font-bold text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+              {/* Top Action Buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => downloadApplicationDossier(profileModalCase, 'visa')}
+                  className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold text-[11px] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>📄</span>
+                  <span>Download Application</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => downloadInvoice(profileModalCase, 'visa')}
+                  className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-slate-700 to-slate-900 hover:from-slate-800 hover:to-black text-white font-bold text-[11px] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>🧾</span>
+                  <span>Download Invoice</span>
+                </button>
+              </div>
             </div>
 
-            {/* Profile Grid Details */}
+{/* Profile Grid Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                 <h4 className="font-bold text-slate-900 uppercase text-[10px] tracking-wider">
@@ -1007,7 +1221,7 @@ export const Visa = () => {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+<div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                 <h4 className="font-bold text-slate-900 uppercase text-[10px] tracking-wider">
                   Case Execution
                 </h4>
@@ -1020,11 +1234,21 @@ export const Visa = () => {
               </div>
             </div>
 
-            {/* Financial Ledger */}
+{/* Financial Ledger */}
             <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2 text-xs">
-              <h4 className="font-bold text-slate-900 uppercase text-[10px] tracking-wider">
-                Financial Status
-              </h4>
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-slate-900 uppercase text-[10px] tracking-wider">
+                  Financial Status
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setIsPaymentModalOpen(true)}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center gap-1"
+                >
+                  <span>+</span>
+                  <span>Add Payment</span>
+                </button>
+              </div>
               <div className="grid grid-cols-3 gap-3">
                 <div className="p-2.5 rounded-lg bg-slate-50 text-center">
                   <p className="text-[10px] font-bold text-slate-400">Total Fee</p>
@@ -1043,7 +1267,52 @@ export const Visa = () => {
               </div>
             </div>
 
-            {/* Footer */}
+            {/* Visa Document Actions (only if past Payment stage) */}
+            {(() => {
+              const stageOrder = ['UNDER_REVIEW', 'DOCS_VERIFIED', 'SUBMITTED', 'PROCESSING', 'APPROVED', 'PAYMENT']
+              const currentIdx = stageOrder.indexOf(profileModalCase.stage)
+              const paymentIdx = stageOrder.indexOf('PAYMENT')
+              const isAfterPayment = currentIdx >= paymentIdx
+
+              if (!isAfterPayment) return null
+
+              return (
+                <div className="p-4 rounded-xl border border-indigo-200 bg-indigo-50/40 space-y-2 text-xs">
+                  <h4 className="font-bold text-indigo-900 uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+                    <span>📋</span> Visa Document Actions
+                  </h4>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${visaDocUploaded ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                    <span className="text-xs font-semibold text-slate-700">
+                      {visaDocUploaded ? 'Visa Document Uploaded' : 'No visa document uploaded yet'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 pt-1">
+                    <label className="flex-1 py-2 px-3 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-50 text-indigo-700 font-bold text-[10px] transition-all cursor-pointer flex items-center justify-center gap-1.5">
+                      <span>⬆️</span> Upload Visa
+                      <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={() => setVisaDocUploaded(true)} />
+                    </label>
+                    <button
+                      type="button"
+                      disabled={!visaDocUploaded}
+                      onClick={() => alert('Visa document preview would open here.')}
+                      className="flex-1 py-2 px-3 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-50 text-indigo-700 font-bold text-[10px] transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none"
+                    >
+                      <span>👁️</span> View Visa
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => downloadVisaDocument(profileModalCase)}
+                      className="flex-1 py-2 px-3 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-50 text-indigo-700 font-bold text-[10px] transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <span>⬇️</span> Download Visa
+                    </button>
+                  </div>
+                </div>
+              )
+            })()}
+
+{/* Footer */}
             <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
               <button
                 type="button"
@@ -1056,7 +1325,7 @@ export const Visa = () => {
                 &larr; Open Stage Side Sheet
               </button>
 
-              <button
+<button
                 type="button"
                 onClick={() => setProfileModalCase(null)}
                 className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors cursor-pointer"
@@ -1068,7 +1337,7 @@ export const Visa = () => {
         </div>
       )}
 
-      {/* NEW CASE MODAL */}
+{/* NEW CASE MODAL */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-sans">
           <div
@@ -1076,7 +1345,7 @@ export const Visa = () => {
             onClick={() => setIsAddModalOpen(false)}
           />
 
-          <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all z-10 p-6 space-y-4 animate-in zoom-in-95 duration-150">
+<div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all z-10 p-6 space-y-4 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 className="text-base font-black text-slate-900">Create New Visa Case</h3>
@@ -1091,7 +1360,7 @@ export const Visa = () => {
               </button>
             </div>
 
-            <form onSubmit={handleCreateCaseSubmit} className="space-y-3.5 text-xs">
+<form onSubmit={handleCreateCaseSubmit} className="space-y-3.5 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
@@ -1107,7 +1376,7 @@ export const Visa = () => {
                   />
                 </div>
 
-                <div>
+<div>
                   <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
                     Phone Number *
                   </label>
@@ -1122,7 +1391,7 @@ export const Visa = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+<div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
                     Email Address *
@@ -1137,7 +1406,7 @@ export const Visa = () => {
                   />
                 </div>
 
-                <div>
+<div>
                   <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
                     Destination Country *
                   </label>
@@ -1157,7 +1426,7 @@ export const Visa = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+<div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
                     Visa Type *
@@ -1175,7 +1444,7 @@ export const Visa = () => {
                   </select>
                 </div>
 
-                <div>
+<div>
                   <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
                     Assigned Case Officer *
                   </label>
@@ -1191,7 +1460,7 @@ export const Visa = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+<div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
                     Total Amount (₹) *
@@ -1205,7 +1474,7 @@ export const Visa = () => {
                   />
                 </div>
 
-                <div>
+<div>
                   <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
                     Initial Paid (₹)
                   </label>
@@ -1217,7 +1486,7 @@ export const Visa = () => {
                   />
                 </div>
 
-                <div>
+<div>
                   <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
                     Payment Plan
                   </label>
@@ -1232,7 +1501,7 @@ export const Visa = () => {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+<div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
@@ -1251,6 +1520,14 @@ export const Visa = () => {
           </div>
         </div>
       )}
+
+      {/* Add Payment Modal Popup */}
+      <AddPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        caseItem={selectedCase || profileModalCase}
+        onRecordPayment={handleRecordPayment}
+      />
     </div>
   )
 }

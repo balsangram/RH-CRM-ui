@@ -14,6 +14,7 @@ import Leads from '../pages/Leads/Leads.view'
 import Companies from '../pages/Companies/Companies.view'
 import Customers from '../pages/Companies/Companies.view'
 import Travellers from '../pages/Travellers/Travellers.view'
+import Finance from '../pages/Finance/Finance.view'
 import Applications from '../pages/Applications/Applications.view'
 import Holidays from '../pages/Holidays/Holidays.view'
 import Tasks from '../pages/Tasks/Tasks.view'
@@ -23,6 +24,7 @@ import Employees from '../pages/Employees/Employees.view'
 import Roles from '../pages/Roles/Roles.view'
 import Notifications from '../pages/Notifications/Notifications.view'
 import AuditLogs from '../pages/AuditLogs/AuditLogs.view'
+import Reviews from '../pages/Reviews/Reviews.view'
 import Settings from '../pages/Settings/Settings.view'
 import Packages from '../pages/Packages/Packages.view'
 import VisaPackageDetail from '../pages/Packages/VisaPackageDetail.view'
@@ -83,6 +85,9 @@ export const AppRoutes = () => {
         <Route path={ROUTES.TRAVELLERS_ADD} element={<TravellersAdd />} />
         <Route path={ROUTES.TRAVELLERS_EDIT} element={<TravellersEdit />} />
 
+        {/* Finance & Payment Management */}
+        <Route path={ROUTES.FINANCE} element={<Finance />} />
+
         {/* Applications */}
         <Route path={ROUTES.APPLICATIONS} element={<Applications />} />
         <Route path={ROUTES.APPLICATIONS_ADD} element={<ApplicationsAdd />} />
@@ -118,6 +123,7 @@ export const AppRoutes = () => {
         <Route path={ROUTES.ROLES} element={<Roles />} />
         <Route path={ROUTES.NOTIFICATIONS} element={<Notifications />} />
         <Route path={ROUTES.AUDIT_LOGS} element={<AuditLogs />} />
+        <Route path={ROUTES.REVIEWS} element={<Reviews />} />
         <Route path={ROUTES.SETTINGS} element={<Settings />} />
       </Route>
 

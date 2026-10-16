@@ -12,6 +12,10 @@ import CompanyDetailsHeader from './components/CompanyDetailsHeader.component'
 import CompanyApplicationsTab from './components/CompanyApplicationsTab.component'
 import CompanyEmployeesTab from './components/CompanyEmployeesTab.component'
 import CompanyFinancialsTab from './components/CompanyFinancialsTab.component'
+import {
+  downloadApplicationDossier,
+  downloadInvoice,
+} from '../../utils/documentGenerators'
 
 export const Companies = () => {
   const navigate = useNavigate()
@@ -353,9 +357,11 @@ export const Companies = () => {
         {/* TAB 5.1: APPLICATIONS (Kanban / Table) */}
         {detailTab === 'applications' && (
           <CompanyApplicationsTab
+            companyId={activeCompany.id}
             applications={activeCompany.applications || []}
             onNewApplication={() => setShowAddAppModal(true)}
             onViewApplication={(app) => setSelectedAppDetail(app)}
+            onStageChange={refreshCompanies}
           />
         )}
 
@@ -398,6 +404,36 @@ export const Companies = () => {
                   className="p-1 rounded text-slate-400 hover:text-slate-600 cursor-pointer"
                 >
                   ✕
+                </button>
+              </div>
+
+              {/* Action Buttons: Download Dossier & Download Invoice */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    downloadApplicationDossier(
+                      selectedAppDetail,
+                      selectedAppDetail.applicationType === 'VISA' ? 'visa' : 'holiday'
+                    )
+                  }
+                  className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold text-xs transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>📄</span>
+                  <span>Download Application Dossier</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    downloadInvoice(
+                      selectedAppDetail,
+                      selectedAppDetail.applicationType === 'VISA' ? 'visa' : 'holiday'
+                    )
+                  }
+                  className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-slate-700 to-slate-900 hover:from-slate-800 hover:to-black text-white font-bold text-xs transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>🧾</span>
+                  <span>Download Invoice</span>
                 </button>
               </div>
 

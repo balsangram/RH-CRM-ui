@@ -17,8 +17,7 @@ export const Leads = () => {
   // Filter & Search states
   const [leadTypeFilter, setLeadTypeFilter] = useState('ALL') // 'ALL' | 'VISA' | 'HOLIDAY'
   const [sourceFilter, setSourceFilter] = useState('ALL')
-  const [staffFilter, setStaffFilter] = useState('ALL')
-  const [searchOption, setSearchOption] = useState('ALL') // 'ALL' | 'name' | 'phone' | 'staff' | 'package' | 'quote'
+  const [searchOption, setSearchOption] = useState('ALL') // 'ALL' | 'name' | 'phone' | 'package' | 'quote'
   const [searchQuery, setSearchQuery] = useState('')
 
   // Active Side Sheet Drawer
@@ -50,7 +49,6 @@ export const Leads = () => {
     targetCountry: 'United States',
     serviceRequired: 'B1/B2 Visitor Visa',
     value: 25000,
-    assignedStaff: 'Amit Verma',
     stage: 'LEAD',
     customFields: [],
   })
@@ -89,8 +87,6 @@ export const Leads = () => {
       if (leadTypeFilter !== 'ALL' && lead.type !== leadTypeFilter) return false
       // Source filter
       if (sourceFilter !== 'ALL' && lead.source !== sourceFilter) return false
-      // Staff filter
-      if (staffFilter !== 'ALL' && lead.assignedStaff !== staffFilter) return false
 
       // Search Query
       if (searchQuery.trim()) {
@@ -99,8 +95,6 @@ export const Leads = () => {
           return lead.name.toLowerCase().includes(q)
         } else if (searchOption === 'phone') {
           return lead.phone.toLowerCase().includes(q)
-        } else if (searchOption === 'staff') {
-          return lead.assignedStaff.toLowerCase().includes(q)
         } else if (searchOption === 'package') {
           return (
             lead.serviceRequired.toLowerCase().includes(q) ||
@@ -116,7 +110,6 @@ export const Leads = () => {
             lead.email.toLowerCase().includes(q) ||
             lead.id.toLowerCase().includes(q) ||
             lead.company.toLowerCase().includes(q) ||
-            lead.assignedStaff.toLowerCase().includes(q) ||
             lead.targetCountry.toLowerCase().includes(q) ||
             lead.serviceRequired.toLowerCase().includes(q) ||
             (lead.quotation?.code && lead.quotation.code.toLowerCase().includes(q)) ||
@@ -127,7 +120,7 @@ export const Leads = () => {
 
       return true
     })
-  }, [leads, leadTypeFilter, sourceFilter, staffFilter, searchOption, searchQuery])
+  }, [leads, leadTypeFilter, sourceFilter, searchOption, searchQuery])
 
   // Aggregate Metrics
   const totalPipelineValue = useMemo(() => {
@@ -253,14 +246,14 @@ export const Leads = () => {
     reloadData()
   }
 
-  // Open Case Conversion Modal
+  // Open Case Conversion Modal (Assigns Case Specialist)
   const handleOpenCaseModal = (lead, e) => {
     e?.stopPropagation()
     setCaseLead(lead)
     setCaseFormData({
       caseId: lead.caseId || `CASE-${3000 + Math.floor(Math.random() * 900)}`,
       caseType: lead.type === 'VISA' ? 'Visa Application Filing' : 'Holiday Tour Execution',
-      specialist: lead.assignedStaff || 'Amit Verma',
+      specialist: lead.caseDetails?.specialist || 'Amit Verma',
       priority: 'Normal',
       notes: `Converted from lead ${lead.id} (${lead.name})`,
     })
@@ -330,12 +323,6 @@ export const Leads = () => {
       })
     }
     setIsAddLeadModalOpen(false)
-    reloadData()
-  }
-
-  // Reassign staff directly on lead
-  const handleReassignStaff = (leadId, newStaff) => {
-    leadsService.updateLead(leadId, { assignedStaff: newStaff })
     reloadData()
   }
 
@@ -468,23 +455,6 @@ export const Leads = () => {
               </select>
             </div>
 
-            {/* Staff */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-semibold text-slate-500">Staff:</span>
-              <select
-                value={staffFilter}
-                onChange={(e) => setStaffFilter(e.target.value)}
-                className="px-2 py-1 rounded-md border border-slate-200 bg-slate-50 font-medium text-slate-800 text-xs focus:outline-none"
-              >
-                <option value="ALL">All Staff</option>
-                {STAFF_MEMBERS.map((st) => (
-                  <option key={st.id} value={st.name}>
-                    {st.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             {/* Search Option */}
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] font-semibold text-slate-500">Search Option:</span>
@@ -496,7 +466,6 @@ export const Leads = () => {
                 <option value="ALL">All Fields</option>
                 <option value="name">Name</option>
                 <option value="phone">Phone</option>
-                <option value="staff">Staff</option>
                 <option value="package">Package / Country</option>
                 <option value="quote">Quotation</option>
               </select>
@@ -508,7 +477,7 @@ export const Leads = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Name, phone, staff, package, QUO"
+                placeholder="Search by name, phone, package, quotation..."
                 className="w-full pl-6 pr-2 py-1 rounded-md border border-slate-200 bg-slate-50 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#2E2B6E]"
               />
               <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]">🔍</span>
@@ -658,15 +627,21 @@ export const Leads = () => {
                           <span className="truncate">{lead.targetCountry} &bull; {lead.serviceRequired}</span>
                         </div>
 
-                        {/* Value and Assigned Staff */}
+                        {/* Value and Converted Case Specialist / Date */}
                         <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
                           <span className="font-bold text-slate-900">
                             ₹{Number(lead.value).toLocaleString('en-IN')}
                           </span>
-                          <span className="text-[9px] text-slate-600 font-medium flex items-center gap-1">
-                            <span>👤</span>
-                            <span className="truncate max-w-[100px]">{lead.assignedStaff}</span>
-                          </span>
+                          {lead.stage === 'CONVERTED' && lead.caseDetails?.specialist ? (
+                            <span className="text-[9px] text-emerald-700 font-medium flex items-center gap-1 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                              <span>👤</span>
+                              <span className="truncate max-w-[100px]">{lead.caseDetails.specialist}</span>
+                            </span>
+                          ) : (
+                            <span className="text-[9px] font-mono text-slate-400">
+                              {lead.createdDate}
+                            </span>
+                          )}
                         </div>
 
                         {/* Proposal / Quotation Chip */}
@@ -1199,24 +1174,6 @@ export const Leads = () => {
                     <span className="font-mono text-slate-700">{activeLead.createdDate}</span>
                   </div>
 
-                  {/* Staff Assignment Selector */}
-                  <div className="col-span-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                    <label className="text-[10px] uppercase font-bold text-slate-500 block mb-1">
-                      Assigned Staff Member (Responsible Officer)
-                    </label>
-                    <select
-                      value={activeLead.assignedStaff}
-                      onChange={(e) => handleReassignStaff(activeLead.id, e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded-md border border-slate-300 bg-white font-bold text-slate-800 text-xs focus:outline-none"
-                    >
-                      {STAFF_MEMBERS.map((st) => (
-                        <option key={st.id} value={st.name}>
-                          {st.name} — {st.role}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
                   {/* Flexible Custom Fields */}
                   {activeLead.customFields && activeLead.customFields.length > 0 && (
                     <div className="col-span-2 space-y-1.5 pt-1">
@@ -1379,21 +1336,6 @@ export const Leads = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Assigned Staff Member *</label>
-                <select
-                  value={leadFormData.assignedStaff}
-                  onChange={(e) => setLeadFormData({ ...leadFormData, assignedStaff: e.target.value })}
-                  className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs"
-                >
-                  {STAFF_MEMBERS.map((st) => (
-                    <option key={st.id} value={st.name}>
-                      {st.name} ({st.role})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="sm:col-span-2">
                 <label className="block text-xs font-bold text-slate-700 mb-1">Pipeline Stage *</label>
                 <select
                   value={leadFormData.stage}
@@ -1623,19 +1565,6 @@ export const Leads = () => {
                     {st.name} ({st.role})
                   </option>
                 ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Priority Level</label>
-              <select
-                value={caseFormData.priority}
-                onChange={(e) => setCaseFormData({ ...caseFormData, priority: e.target.value })}
-                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50"
-              >
-                <option value="Normal">Normal Processing</option>
-                <option value="High">High (Express Departure)</option>
-                <option value="Urgent">Urgent / VIP Executive</option>
               </select>
             </div>
 

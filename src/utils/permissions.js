@@ -41,6 +41,7 @@ export const PERMISSIONS = {
   AUDIT_LOGS_VIEW: 'audit_logs:view',
   SETTINGS_MANAGE: 'settings:manage',
   REPORTS_VIEW: 'reports:view',
+  REVIEWS_MANAGE: 'reviews:manage',
 }
 
 /**

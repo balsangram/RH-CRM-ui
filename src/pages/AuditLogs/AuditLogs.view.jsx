@@ -192,9 +192,9 @@ export const AuditLogs = () => {
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 Download & Access Audit Logs
               </h1>
-              <span className="px-2.5 py-0.5 text-xs font-mono font-bold rounded-md border border-slate-300 bg-slate-50 text-slate-700 shadow-2xs">
+              {/* <span className="px-2.5 py-0.5 text-xs font-mono font-bold rounded-md border border-slate-300 bg-slate-50 text-slate-700 shadow-2xs">
                 {filteredLogs.length} of {logs.length} Download Events
-              </span>
+              </span> */}
             </div>
             <p className="text-xs font-medium text-slate-500 tracking-tight">
               Security & compliance trail tracking travellers and corporate companies downloading case stages, invoices, and visa documents.
@@ -362,7 +362,7 @@ export const AuditLogs = () => {
                 <th className="py-3 px-4">User / Entity</th>
                 <th className="py-3 px-4">Downloaded Asset</th>
                 <th className="py-3 px-4">Case Reference</th>
-                <th className="py-3 px-4">IP & Device</th>
+                {/* <th className="py-3 px-4">IP & Device</th> */}
                 <th className="py-3 px-4">Status</th>
                 <th className="py-3 px-4 text-center">Action</th>
               </tr>
@@ -446,14 +446,14 @@ export const AuditLogs = () => {
                       </td>
 
                       {/* IP & Device */}
-                      <td className="py-3.5 px-4 min-w-[170px]">
+                      {/* <td className="py-3.5 px-4 min-w-[170px]">
                         <p className="font-mono font-semibold text-slate-800 text-[11px] leading-tight">
                           {log.ipAddress}
                         </p>
                         <p className="text-[10px] text-slate-500 font-medium mt-0.5">
                           {log.location} &bull; {log.device}
                         </p>
-                      </td>
+                      </td> */}
 
                       {/* Status */}
                       <td className="py-3.5 px-4 whitespace-nowrap">

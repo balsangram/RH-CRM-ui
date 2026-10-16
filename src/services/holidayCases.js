@@ -3,7 +3,7 @@
  * Manages Holiday Cases, stage workflows, mandatory stage checklists, and real-time state persistence.
  */
 
-const STORAGE_KEY_HOLIDAY_CASES = 'rh_crm_holiday_cases_v2'
+const STORAGE_KEY_HOLIDAY_CASES = 'rh_crm_holiday_cases_v3'
 
 export const HOLIDAY_STAGES = [
   {
@@ -32,8 +32,8 @@ export const HOLIDAY_STAGES = [
     colorBadge: 'bg-blue-600 text-white',
     badgeBorder: 'border-blue-400 text-blue-700 bg-blue-50/90',
     headerBg: 'bg-blue-500/10 text-blue-900 border-blue-300',
-    nextStage: 'VOUCHERS_CONFIRM',
-    nextButtonText: '→ Vouchers & Confirm',
+    nextStage: 'PAYMENT',
+    nextButtonText: '→ Payment',
     checklist: [
       { id: 'd1', label: 'Passports & travel insurance copies received', mandatory: true },
       { id: 'd2', label: 'Day-wise custom itinerary approved by client', mandatory: true },
@@ -42,9 +42,27 @@ export const HOLIDAY_STAGES = [
     ],
   },
   {
-    id: 'VOUCHERS_CONFIRM',
+    id: 'PAYMENT',
     stepNumber: 3,
-    title: 'Stage 3: Vouchers & Confirm',
+    title: 'Stage 3: Payment',
+    shortTitle: 'Payment',
+    subtitle: 'Advance / full package fee collection',
+    colorBadge: 'bg-emerald-600 text-white',
+    badgeBorder: 'border-emerald-400 text-emerald-700 bg-emerald-50/90',
+    headerBg: 'bg-emerald-500/10 text-emerald-900 border-emerald-300',
+    nextStage: 'VOUCHERS_CONFIRM',
+    nextButtonText: '→ Vouchers & Confirm',
+    checklist: [
+      { id: 'hpay1', label: 'Tour package advance deposit / full payment confirmed', mandatory: true },
+      { id: 'hpay2', label: 'Official billing receipt & tax invoice issued to client', mandatory: true },
+      { id: 'hpay3', label: 'Airline & hotel vendor payment release approved', mandatory: true },
+      { id: 'hpay4', label: 'Payment mode & transaction reference recorded', mandatory: false },
+    ],
+  },
+  {
+    id: 'VOUCHERS_CONFIRM',
+    stepNumber: 4,
+    title: 'Stage 4: Vouchers & Confirm',
     shortTitle: 'Vouchers & Confirm',
     subtitle: 'Flights, hotels booked & travel vouchers issued',
     colorBadge: 'bg-purple-600 text-white',
@@ -61,8 +79,8 @@ export const HOLIDAY_STAGES = [
   },
   {
     id: 'TOUR_IN_PROGRESS',
-    stepNumber: 4,
-    title: 'Stage 4: Tour In-Progress',
+    stepNumber: 5,
+    title: 'Stage 5: Tour In-Progress',
     shortTitle: 'Tour In-Progress',
     subtitle: 'Travelers on trip / 24/7 on-ground assistance',
     colorBadge: 'bg-orange-500 text-white',
@@ -78,7 +96,7 @@ export const HOLIDAY_STAGES = [
   },
   {
     id: 'COMPLETED',
-    stepNumber: 5,
+    stepNumber: 6,
     title: 'Completed',
     shortTitle: 'Completed',
     subtitle: 'Tour finished / Customer review collected',
@@ -96,7 +114,7 @@ export const HOLIDAY_STAGES = [
   },
   {
     id: 'CANCELLED',
-    stepNumber: 6,
+    stepNumber: 7,
     title: 'Cancelled',
     shortTitle: 'Cancelled',
     subtitle: 'Tour cancelled / Refund or credit processed',
@@ -292,6 +310,34 @@ export const DEFAULT_HOLIDAY_CASES = [
       b1: true,
       x1: true,
       x2: true,
+    },
+  },
+  {
+    id: 'PKG-711',
+    customer: 'Vikramaditya Singhania',
+    phone: '+91 98199 44321',
+    email: 'vikram.singhania@corp.in',
+    packageName: 'Swiss & Italian Lakes Grand Odyssey',
+    destination: 'Switzerland & Italy',
+    duration: '10 Days / 9 Nights',
+    stage: 'PAYMENT',
+    price: 320000,
+    paidAmount: 180000,
+    paymentType: 'Prepaid',
+    paymentStatus: 'PARTIAL',
+    departureDate: '2026-12-18',
+    bookingDate: '2026-09-25',
+    officer: 'Priya Singh',
+    officerId: 'CO-102',
+    invoiceRef: 'INV-2026-0870',
+    completedChecklists: {
+      b1: true,
+      b2: true,
+      d1: true,
+      d2: true,
+      d3: true,
+      hpay1: true,
+      hpay2: true,
     },
   },
 ]

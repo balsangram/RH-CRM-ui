@@ -3,7 +3,7 @@
  * Manages Visa Cases, stage workflows, mandatory stage checklists, and real-time state persistence.
  */
 
-const STORAGE_KEY_VISA_CASES = 'rh_crm_visa_cases_v2'
+const STORAGE_KEY_VISA_CASES = 'rh_crm_visa_cases_v4'
 
 export const VISA_STAGES = [
   {
@@ -83,22 +83,41 @@ export const VISA_STAGES = [
     stepNumber: 5,
     title: 'Stage 5: Approved',
     shortTitle: 'Approved',
-    subtitle: 'Visa granted & passport stamped',
+    subtitle: 'Visa granted by embassy & passport stamped',
+    colorBadge: 'bg-teal-600 text-white',
+    badgeBorder: 'border-teal-500 text-teal-700 bg-teal-50/90',
+    headerBg: 'bg-teal-500/10 text-teal-900 border-teal-300',
+    nextStage: 'PAYMENT',
+    nextButtonText: '→ Payment',
+    checklist: [
+      { id: 'a1', label: 'Visa grant letter received and validity confirmed', mandatory: true },
+      { id: 'a2', label: 'Passport collected / returned to client with visa stamped', mandatory: true },
+      { id: 'a3', label: 'Client notified of successful approval', mandatory: true },
+    ],
+  },
+  {
+    id: 'PAYMENT',
+    stepNumber: 6,
+    title: 'Stage 6: Payment',
+    shortTitle: 'Payment',
+    subtitle: 'Final visa consultation & success fee settlement',
+    bannerText: '✔ Visa Approved & Final Payment Settled',
     colorBadge: 'bg-emerald-600 text-white',
-    badgeBorder: 'border-emerald-500 text-emerald-700 bg-emerald-50/90',
+    badgeBorder: 'border-emerald-400 text-emerald-700 bg-emerald-50/90',
     headerBg: 'bg-emerald-500/10 text-emerald-900 border-emerald-300',
     nextStage: null,
     nextButtonText: null,
     checklist: [
-      { id: 'a1', label: 'Visa grant letter received and validity confirmed', mandatory: true },
-      { id: 'a2', label: 'Passport collected / returned to client', mandatory: true },
-      { id: 'a3', label: 'Final invoice settled and receipt issued', mandatory: true },
+      { id: 'pay1', label: 'Final service fee & success commission invoice generated', mandatory: true },
+      { id: 'pay2', label: 'Client final invoice balance settled & verified', mandatory: true },
+      { id: 'pay3', label: 'Official tax invoice and payment receipt issued', mandatory: true },
+      { id: 'pay4', label: 'Stamped passport & document dossier delivered to client', mandatory: false },
     ],
   },
   {
     id: 'REJECTED',
-    stepNumber: 6,
-    title: 'Stage 6: Rejected',
+    stepNumber: 7,
+    title: 'Stage 7: Rejected',
     shortTitle: 'Rejected',
     subtitle: 'Visa declined or withdrawn',
     colorBadge: 'bg-rose-600 text-white',
@@ -325,6 +344,44 @@ export const DEFAULT_VISA_CASES = [
       r2: true,
     },
   },
+  {
+    id: 'VISA-308',
+    applicant: 'Aditya Sharma',
+    phone: '+91 98330 44556',
+    email: 'aditya.sharma@gmail.com',
+    passport: 'T4492019',
+    passportExp: '2030-07-25',
+    country: 'United States',
+    visaType: 'B1/B2 Business',
+    stage: 'PAYMENT',
+    officer: 'Priya Singh',
+    officerId: 'CO-102',
+    amount: 22500,
+    paidAmount: 11000,
+    paymentType: 'Postpaid',
+    paymentStatus: 'PARTIAL',
+    txnId: 'TXN-998310',
+    docStatus: 'VISA APPROVED - PAYMENT PENDING',
+    appliedDate: '2026-10-09',
+    completedChecklists: {
+      c1: true,
+      c2: true,
+      c3: true,
+      d1: true,
+      d2: true,
+      d3: true,
+      s1: true,
+      s2: true,
+      s3: true,
+      p1: true,
+      p2: true,
+      p3: true,
+      a1: true,
+      a2: true,
+      a3: true,
+      pay1: true,
+    },
+  },
 ]
 
 class VisaCasesService {
@@ -418,10 +475,12 @@ class VisaCasesService {
       }
     }
 
-    const updated = this.updateCase(caseId, {
+    const updates = {
       stage: targetStageId,
       docStatus:
-        targetStageId === 'APPROVED'
+        targetStageId === 'PAYMENT'
+          ? 'PAYMENT SETTLED'
+          : targetStageId === 'APPROVED'
           ? 'APPROVED'
           : targetStageId === 'REJECTED'
           ? 'REJECTED'
@@ -430,7 +489,14 @@ class VisaCasesService {
           : targetStageId === 'SUBMITTED'
           ? 'SUBMITTED'
           : 'PROCESSING',
-    })
+    }
+
+    if (targetStageId === 'PAYMENT') {
+      updates.paymentStatus = 'COMPLETED'
+      updates.paidAmount = currentCase.amount || updates.paidAmount
+    }
+
+    const updated = this.updateCase(caseId, updates)
 
     return { success: true, case: updated }
   }

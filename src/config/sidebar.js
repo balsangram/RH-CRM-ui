@@ -12,8 +12,9 @@ import AssignmentIcon from '@mui/icons-material/Assignment'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import BadgeIcon from '@mui/icons-material/Badge'
 import CardTravelIcon from '@mui/icons-material/CardTravel'
-
 import FileDownloadIcon from '@mui/icons-material/FileDownload'
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
+import RateReviewIcon from '@mui/icons-material/RateReview'
 
 export const SIDEBAR_ITEMS = [
   {
@@ -51,23 +52,22 @@ export const SIDEBAR_ITEMS = [
     icon: LuggageIcon,
   },
   {
-    title: 'Cases',
-    path: ROUTES.APPLICATIONS,
-    icon: AssignmentIcon,
-    permission: PERMISSIONS.APPLICATIONS_VIEW,
+    title: 'Finance',
+    path: ROUTES.FINANCE,
+    icon: AccountBalanceWalletIcon,
   },
-  {
-    title: 'Reports & Analytics',
-    path: ROUTES.REPORTS,
-    icon: BarChartIcon,
-    permission: PERMISSIONS.REPORTS_VIEW,
-  },
+  // {
+  //   title: 'Cases',
+  //   path: ROUTES.APPLICATIONS,
+  //   icon: AssignmentIcon,
+  //   permission: PERMISSIONS.APPLICATIONS_VIEW,
+  // },
   {
     title: 'Administration',
     divider: true,
   },
   {
-    title: 'Employees',
+    title: 'Staff & Roles',
     path: ROUTES.EMPLOYEES,
     icon: BadgeIcon,
     permission: PERMISSIONS.EMPLOYEES_MANAGE,
@@ -79,10 +79,22 @@ export const SIDEBAR_ITEMS = [
     permission: PERMISSIONS.PACKAGES_VIEW,
   },
   {
+    title: 'Reports & Analytics',
+    path: ROUTES.REPORTS,
+    icon: BarChartIcon,
+    permission: PERMISSIONS.REPORTS_VIEW,
+  },
+  {
     title: 'Logs',
     path: ROUTES.AUDIT_LOGS,
     icon: FileDownloadIcon,
     permission: PERMISSIONS.AUDIT_LOGS_VIEW,
+  },
+  {
+    title: 'Reviews & Ratings',
+    path: ROUTES.REVIEWS,
+    icon: RateReviewIcon,
+    permission: PERMISSIONS.REVIEWS_MANAGE,
   },
 ]
 

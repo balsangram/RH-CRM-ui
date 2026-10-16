@@ -112,7 +112,7 @@ export const INITIAL_LEADS = [
     serviceRequired: 'B1/B2 Business Visa',
     stage: 'LEAD',
     value: 28000,
-    assignedStaff: 'Amit Verma',
+    assignedStaff: null,
     createdDate: '2026-10-08',
     checklist: [
       { id: 'c1', text: 'Initial contact made with applicant', required: true, completed: true },
@@ -138,7 +138,7 @@ export const INITIAL_LEADS = [
     serviceRequired: '6D/5N Luxury Villa Package',
     stage: 'LEAD',
     value: 75000,
-    assignedStaff: 'Priya Singh',
+    assignedStaff: null,
     createdDate: '2026-10-08',
     checklist: [
       { id: 'c1', text: 'Initial contact made with applicant', required: true, completed: true },
@@ -164,7 +164,7 @@ export const INITIAL_LEADS = [
     serviceRequired: '7 Days Alps Grand Tour',
     stage: 'QUALIFIED',
     value: 145000,
-    assignedStaff: 'Priya Singh',
+    assignedStaff: null,
     createdDate: '2026-10-07',
     checklist: [
       { id: 'c1', text: 'Verify passport validity & financial proof', required: true, completed: true },
@@ -190,7 +190,7 @@ export const INITIAL_LEADS = [
     serviceRequired: 'Short-stay Tourist C Visa',
     stage: 'QUALIFIED',
     value: 18500,
-    assignedStaff: 'Amit Verma',
+    assignedStaff: null,
     createdDate: '2026-10-02',
     checklist: [
       { id: 'c1', text: 'Verify passport validity & financial proof', required: true, completed: true },
@@ -215,7 +215,7 @@ export const INITIAL_LEADS = [
     serviceRequired: 'Express B1 Business Visa Processing',
     stage: 'PROPOSAL',
     value: 35000,
-    assignedStaff: 'Amit Verma',
+    assignedStaff: null,
     createdDate: '2026-10-03',
     checklist: [
       { id: 'c1', text: 'Generate itemized quotation with fees', required: true, completed: true },
@@ -251,7 +251,7 @@ export const INITIAL_LEADS = [
     serviceRequired: '10 Days Cherry Blossom Cultural Tour',
     stage: 'PROPOSAL',
     value: 240000,
-    assignedStaff: 'Priya Singh',
+    assignedStaff: null,
     createdDate: '2026-10-04',
     checklist: [
       { id: 'c1', text: 'Generate itemized quotation with fees', required: true, completed: true },
@@ -287,7 +287,7 @@ export const INITIAL_LEADS = [
     serviceRequired: '5 Days Dubai Desert & Marina Experience',
     stage: 'NEGOTIATION',
     value: 92000,
-    assignedStaff: 'Priya Singh',
+    assignedStaff: null,
     createdDate: '2026-10-05',
     checklist: [
       { id: 'c1', text: 'Review customer objections & requested discounts', required: true, completed: true },
@@ -323,7 +323,7 @@ export const INITIAL_LEADS = [
     serviceRequired: '2-Year Long Term Business Visa',
     stage: 'NEGOTIATION',
     value: 55000,
-    assignedStaff: 'Amit Verma',
+    assignedStaff: null,
     createdDate: '2026-10-06',
     checklist: [
       { id: 'c1', text: 'Review customer objections & requested discounts', required: true, completed: true },
@@ -459,13 +459,26 @@ const saveStagesData = (data) => {
 const loadLeads = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_LEADS)
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY_LEADS, JSON.stringify(INITIAL_LEADS))
-      return INITIAL_LEADS
+    let list = raw ? JSON.parse(raw) : INITIAL_LEADS
+    // Ensure unconverted leads do NOT have assigned staff
+    let modified = false
+    list = list.map((l) => {
+      if (l.stage !== 'CONVERTED' && !l.caseId && l.assignedStaff) {
+        modified = true
+        return { ...l, assignedStaff: null }
+      }
+      return l
+    })
+    if (modified) {
+      try {
+        localStorage.setItem(STORAGE_KEY_LEADS, JSON.stringify(list))
+      } catch (e) {
+        // ignore
+      }
     }
-    return JSON.parse(raw)
+    return list
   } catch {
-    return INITIAL_LEADS
+    return INITIAL_LEADS.map((l) => (l.stage !== 'CONVERTED' ? { ...l, assignedStaff: null } : l))
   }
 }
 
@@ -581,7 +594,7 @@ export const leadsService = {
       serviceRequired: payload.serviceRequired || 'Visitor Visa',
       stage: initialStageId,
       value: Number(payload.value) || 25000,
-      assignedStaff: payload.assignedStaff || 'Amit Verma',
+      assignedStaff: null,
       createdDate: new Date().toISOString().slice(0, 10),
       checklist: initialChecklist,
       quotation: null,

@@ -4,9 +4,9 @@
  * @param {string} currency
  * @returns {string}
  */
-export const formatCurrency = (amount, currency = 'USD') => {
-  if (amount === undefined || amount === null || isNaN(amount)) return '$0.00'
-  return new Intl.NumberFormat('en-US', {
+export const formatCurrency = (amount, currency = 'INR') => {
+  if (amount === undefined || amount === null || isNaN(amount)) return '₹0.00'
+  return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency,
   }).format(amount)

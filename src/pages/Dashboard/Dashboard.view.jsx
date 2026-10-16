@@ -299,18 +299,6 @@ export const Dashboard = () => {
             Overall CRM overview, lead intelligence, and application statuses
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
-          <Link to={ROUTES.LEADS}>
-            <Button variant="outline" size="sm">
-              Manage Leads
-            </Button>
-          </Link>
-          <Link to={ROUTES.APPLICATIONS}>
-            <Button variant="primary" size="sm">
-              + New Application
-            </Button>
-          </Link>
-        </div>
       </div>
 
       {/* 1. Compact Summary Cards Section */}

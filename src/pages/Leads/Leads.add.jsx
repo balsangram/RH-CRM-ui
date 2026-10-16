@@ -25,7 +25,6 @@ export const LeadsAdd = () => {
       source: formData.source,
       serviceRequired: 'Visitor Visa Consultation',
       value: 28000,
-      assignedStaff: 'Amit Verma',
       stage: 'LEAD',
     })
     navigate(ROUTES.LEADS)

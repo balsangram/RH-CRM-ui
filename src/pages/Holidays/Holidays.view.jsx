@@ -2,9 +2,15 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import holidayCasesService, { HOLIDAY_STAGES } from '../../services/holidayCases'
 import ROUTES from '../../config/routes'
+import AddPaymentModal from '../../components/Modal/AddPaymentModal.component'
+import { downloadApplicationDossier, downloadInvoice } from '../../utils/documentGenerators'
+import useAuth from '../../hooks/useAuth'
+import Pagination from '../../components/Pagination/Pagination.component'
 
 export const Holidays = () => {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const isStaff = user?.role === 'AGENT' || user?.role === 'STAFF'
 
   // View state: 'kanban' | 'table' (Kanban is active by default as shown in screenshot 1)
   const [viewMode, setViewMode] = useState('kanban')
@@ -24,6 +30,9 @@ export const Holidays = () => {
   // Side sheet drawer state
   const [selectedCaseId, setSelectedCaseId] = useState(null)
   const [drawerAlert, setDrawerAlert] = useState('')
+
+  // Add Payment Modal state
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
 
   // Full Details Modal state
   const [detailsModalCase, setDetailsModalCase] = useState(null)
@@ -72,9 +81,28 @@ export const Holidays = () => {
     return Array.from(set)
   }, [cases])
 
+  // Filter cases assigned to this staff member when logged in as AGENT / STAFF
+  // TODO: Later replace with staff-assigned cases API endpoint
+  const staffCases = useMemo(() => {
+    if (!isStaff) return cases
+    const staffName = (user?.name || 'sipu Sharma').toLowerCase().trim()
+    const staffId = (user?.id || 'usr_staff_01').toLowerCase().trim()
+    return cases.filter((c) => {
+      const officer = (c.officer || '').toLowerCase()
+      const officerId = (c.officerId || '').toLowerCase()
+      const assigned = (c.assignedStaff || '').toLowerCase()
+      return (
+        officer.includes(staffName) ||
+        officerId.includes(staffId) ||
+        assigned.includes(staffName) ||
+        (staffName.includes('sipu') && (officer.includes('sipu') || officer.includes('priya')))
+      )
+    })
+  }, [cases, isStaff, user])
+
   // Filtered cases
   const filteredCases = useMemo(() => {
-    return cases.filter((item) => {
+    return staffCases.filter((item) => {
       if (filterStage !== 'ALL' && item.stage !== filterStage) return false
       if (filterDestination !== 'ALL' && item.destination !== filterDestination) return false
       if (filterOfficer !== 'ALL' && item.officer !== filterOfficer) return false
@@ -99,24 +127,38 @@ export const Holidays = () => {
         (item.email || '').toLowerCase().includes(q)
       )
     })
-  }, [cases, filterStage, filterDestination, filterOfficer, filterPayment, searchBy, searchQuery])
+  }, [staffCases, filterStage, filterDestination, filterOfficer, filterPayment, searchBy, searchQuery])
+
+  // Table View Pagination State
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filterStage, filterDestination, filterOfficer, filterPayment, searchBy, searchQuery])
+
+  const totalPages = Math.ceil(filteredCases.length / itemsPerPage) || 1
+  const paginatedCases = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage
+    return filteredCases.slice(start, start + itemsPerPage)
+  }, [filteredCases, currentPage, itemsPerPage])
 
   // Pipeline aggregate statistics
   const pipelineStats = useMemo(() => {
-    const totalValue = cases.reduce((sum, c) => sum + (Number(c.price) || 0), 0)
-    const completedCount = cases.filter((c) => c.stage === 'COMPLETED').length
-    const inProgressCount = cases.filter((c) => c.stage === 'TOUR_IN_PROGRESS').length
+    const totalValue = staffCases.reduce((sum, c) => sum + (Number(c.price) || 0), 0)
+    const completedCount = staffCases.filter((c) => c.stage === 'COMPLETED').length
+    const inProgressCount = staffCases.filter((c) => c.stage === 'TOUR_IN_PROGRESS').length
 
     const stageMap = {}
     HOLIDAY_STAGES.forEach((stage) => {
-      const stageCases = cases.filter((c) => c.stage === stage.id)
+      const stageCases = staffCases.filter((c) => c.stage === stage.id)
       const count = stageCases.length
       const value = stageCases.reduce((sum, c) => sum + (Number(c.price) || 0), 0)
       stageMap[stage.id] = { count, value }
     })
 
     return { totalValue, completedCount, inProgressCount, stageMap }
-  }, [cases])
+  }, [staffCases])
 
   // Advance Stage handler
   const handleAdvanceStage = (caseItem, targetStageId) => {
@@ -129,11 +171,35 @@ export const Holidays = () => {
     reloadCases()
   }
 
+  // Previous Stage handler
+  const handlePreviousStage = (caseItem, prevStageId) => {
+    setDrawerAlert('')
+    holidayCasesService.updateCase(caseItem.id, {
+      stage: prevStageId,
+    })
+    reloadCases()
+  }
+
   // Toggle checklist item
   const handleToggleChecklist = (caseId, itemId, isChecked) => {
     holidayCasesService.toggleChecklistItem(caseId, itemId, isChecked)
     reloadCases()
     setDrawerAlert('')
+  }
+
+  // Record Payment handler
+  const handleRecordPayment = (paymentData) => {
+    const activeCase = selectedCase || detailsModalCase
+    if (!activeCase) return
+    const updated = holidayCasesService.updateCase(activeCase.id, {
+      paidAmount: paymentData.newPaidTotal,
+      paymentStatus: paymentData.newPaymentStatus,
+      invoiceRef: paymentData.referenceNo,
+    })
+    if (updated && detailsModalCase) {
+      setDetailsModalCase(updated)
+    }
+    reloadCases()
   }
 
   // Create Booking handler
@@ -172,6 +238,21 @@ export const Holidays = () => {
 
   return (
     <div className="space-y-4 pb-12 font-sans">
+      {/* Staff Assignment View Banner */}
+      {isStaff && (
+        <div className="bg-indigo-50 border border-indigo-200 text-indigo-900 px-4 py-2.5 rounded-2xl text-xs flex items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <span className="text-base">👤</span>
+            <span>
+              <strong>Staff View ({user?.name || 'Staff Officer'}):</strong> Showing holiday cases assigned to you.
+            </span>
+          </div>
+          <span className="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-mono font-bold">
+            Assigned: {staffCases.length} cases
+          </span>
+        </div>
+      )}
+
       {/* Top Header Card */}
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-4 sm:p-5">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -185,7 +266,7 @@ export const Holidays = () => {
               </span>
             </div>
             <p className="text-xs font-medium text-slate-500 tracking-tight">
-              <span className="font-semibold text-slate-700">Pipeline Flow:</span> Stage 1 (Created) &rarr; Stage 2 (Docs & Itinerary) &rarr; Stage 3 (Vouchers) &rarr; Stage 4 (In-Progress) &rarr; Completed
+              <span className="font-semibold text-slate-700">Pipeline Flow:</span> Stage 1 (Created) &rarr; Stage 2 (Docs & Itinerary) &rarr; Stage 3 (Payment) &rarr; Stage 4 (Vouchers) &rarr; Stage 5 (In-Progress) &rarr; Completed
             </p>
           </div>
 
@@ -342,7 +423,7 @@ export const Holidays = () => {
       </div>
 
       {/* Stage Stepper Progress Bar (Connected with arrows) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-2.5">
         {HOLIDAY_STAGES.map((stage, idx) => {
           const stats = pipelineStats.stageMap[stage.id] || { count: 0, value: 0 }
           const isSelected = filterStage === stage.id
@@ -387,7 +468,7 @@ export const Holidays = () => {
       {viewMode === 'kanban' ? (
         /* KANBAN BOARD VIEW (Matching Screenshot 1) */
         <div className="flex gap-3.5 items-start overflow-x-auto pb-4">
-          {HOLIDAY_STAGES.map((stage) => {
+          {HOLIDAY_STAGES.map((stage, stageIdx) => {
             const stageCases = filteredCases.filter((c) => c.stage === stage.id)
 
             return (
@@ -505,36 +586,44 @@ export const Holidays = () => {
                             </span>
                           </div>
 
-                          {/* Action Buttons on Card */}
-                          <div className="pt-1.5 border-t border-slate-100 flex items-center gap-1.5">
+                          {/* Bottom Actions: Previous / Side Sheet / Advance */}
+                          <div className="pt-1.5 border-t border-slate-100 flex items-center gap-1">
+                            <button
+                              type="button"
+                              disabled={stageIdx === 0}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handlePreviousStage(caseItem, HOLIDAY_STAGES[stageIdx - 1]?.id)
+                              }}
+                              className="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[9px] cursor-pointer"
+                              title="Move back to previous stage"
+                            >
+                              &larr;
+                            </button>
+
                             <button
                               type="button"
                               onClick={() => {
                                 setSelectedCaseId(caseItem.id)
                                 setDrawerAlert('')
                               }}
-                              className="px-2 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-[9px] font-bold transition-colors cursor-pointer flex-1 text-center"
+                              className="flex-1 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-[9px] transition-colors cursor-pointer text-center"
                             >
-                              Details
+                              Side Sheet & Details
                             </button>
+
                             <button
                               type="button"
-                              onClick={() => setDetailsModalCase(caseItem)}
-                              className="px-2 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-[9px] font-bold transition-colors cursor-pointer text-center"
-                              title="Full Details"
+                              disabled={!stage.nextStage}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleAdvanceStage(caseItem, stage.nextStage)
+                              }}
+                              className="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[9px] cursor-pointer"
+                              title="Advance to next stage"
                             >
-                              Full &rarr;
+                              &rarr;
                             </button>
-                            {stage.nextStage && (
-                              <button
-                                type="button"
-                                onClick={() => handleAdvanceStage(caseItem, stage.nextStage)}
-                                className="px-2.5 py-1 rounded-lg bg-[#0F0E2B] text-white hover:bg-[#181445] text-[9px] font-bold transition-colors cursor-pointer shrink-0"
-                                title={`Advance to ${stage.nextStage}`}
-                              >
-                                &rarr; Next
-                              </button>
-                            )}
                           </div>
                         </div>
                       )
@@ -566,14 +655,14 @@ export const Holidays = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredCases.length === 0 ? (
+                {paginatedCases.length === 0 ? (
                   <tr>
                     <td colSpan={11} className="py-12 text-center text-slate-400 font-medium">
                       No booking cases found matching your criteria.
                     </td>
                   </tr>
                 ) : (
-                  filteredCases.map((caseItem) => {
+                  paginatedCases.map((caseItem) => {
                     const stageDef =
                       HOLIDAY_STAGES.find((s) => s.id === caseItem.stage) || HOLIDAY_STAGES[0]
 
@@ -691,6 +780,22 @@ export const Holidays = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Table View Pagination Controls */}
+          <div className="px-4 py-2.5 border-t border-slate-100 bg-white">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredCases.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
+              onItemsPerPageChange={(size) => {
+                setItemsPerPage(size)
+                setCurrentPage(1)
+              }}
+              pageSizeOptions={[5, 10, 20, 50]}
+            />
+          </div>
         </div>
       )}
 
@@ -708,25 +813,36 @@ export const Holidays = () => {
           <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
             <div className="w-screen max-w-lg bg-white shadow-2xl border-l border-slate-200 flex flex-col animate-in slide-in-from-right duration-200">
               {/* Drawer Top Header */}
-              <div className="p-4 sm:p-5 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
-                <div>
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-                    {selectedCase.packageName}
-                  </h3>
-                  <p className="text-xs font-mono font-bold text-slate-500 mt-0.5">
-                    {selectedCase.id} &bull; Customer: {selectedCase.customer}
-                  </p>
-                </div>
+              <div className="p-4 sm:p-5 border-b border-slate-200 bg-white shrink-0">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                      {selectedCase.packageName}
+                    </h3>
+                    <p className="text-xs font-mono font-bold text-slate-500 mt-0.5">
+                      {selectedCase.id} &bull; Customer: {selectedCase.customer}
+                    </p>
+                  </div>
 
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCaseId(null)
+                      setDrawerAlert('')
+                    }}
+                    className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <span>✕</span> Close
+                  </button>
+                </div>
+                {/* Download Application Button */}
                 <button
                   type="button"
-                  onClick={() => {
-                    setSelectedCaseId(null)
-                    setDrawerAlert('')
-                  }}
-                  className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
+                  onClick={() => downloadApplicationDossier(selectedCase, 'holiday')}
+                  className="mt-2.5 w-full py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold text-[11px] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  <span>✕</span> Close
+                  <span>📄</span>
+                  <span>Download Application Dossier</span>
                 </button>
               </div>
 
@@ -884,9 +1000,19 @@ export const Holidays = () => {
 
                 {/* SECTION 4: PAYMENT OVERVIEW */}
                 <div className="space-y-2.5">
-                  <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
-                    Payment Overview
-                  </h4>
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
+                      Payment Overview
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => setIsPaymentModalOpen(true)}
+                      className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center gap-1"
+                    >
+                      <span>+</span>
+                      <span>Add Payment</span>
+                    </button>
+                  </div>
                   <div className="p-3.5 rounded-xl border border-slate-200 bg-white space-y-3">
                     <div className="grid grid-cols-3 gap-2">
                       <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-center">
@@ -914,6 +1040,15 @@ export const Holidays = () => {
                       <span>Order Type: <strong className="text-slate-800">{selectedCase.paymentType}</strong></span>
                       <span>Payment Status: <strong className="text-slate-800">{selectedCase.paymentStatus}</strong></span>
                     </div>
+                    {/* Download Invoice Button */}
+                    <button
+                      type="button"
+                      onClick={() => downloadInvoice(selectedCase, 'holiday')}
+                      className="w-full mt-2 py-2 px-3 rounded-lg bg-gradient-to-r from-slate-700 to-slate-900 hover:from-slate-800 hover:to-black text-white font-bold text-[10px] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <span>🧾</span>
+                      <span>Download Invoice</span>
+                    </button>
                   </div>
                 </div>
 
@@ -994,28 +1129,49 @@ export const Holidays = () => {
           />
 
           <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all z-10 font-sans p-6 space-y-5 animate-in zoom-in-95 duration-150">
-            <div className="flex items-start justify-between border-b border-slate-200 pb-4">
-              <div>
-                <div className="flex items-center gap-2.5">
-                  <h3 className="text-lg font-black text-slate-900">
-                    {detailsModalCase.packageName}
-                  </h3>
-                  <span className="px-2 py-0.5 rounded font-mono text-xs font-bold bg-slate-100 border border-slate-200 text-slate-700">
-                    {detailsModalCase.id}
-                  </span>
+            <div className="border-b border-slate-200 pb-4 space-y-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <h3 className="text-lg font-black text-slate-900">
+                      {detailsModalCase.packageName}
+                    </h3>
+                    <span className="px-2 py-0.5 rounded font-mono text-xs font-bold bg-slate-100 border border-slate-200 text-slate-700">
+                      {detailsModalCase.id}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Destination: <strong className="text-slate-800">{detailsModalCase.destination}</strong> &bull; {detailsModalCase.duration}
+                  </p>
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Destination: <strong className="text-slate-800">{detailsModalCase.destination}</strong> &bull; {detailsModalCase.duration}
-                </p>
-              </div>
 
-              <button
-                type="button"
-                onClick={() => setDetailsModalCase(null)}
-                className="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center font-bold text-sm"
-              >
-                ✕
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setDetailsModalCase(null)}
+                  className="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center font-bold text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+              {/* Top Action Buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => downloadApplicationDossier(detailsModalCase, 'holiday')}
+                  className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold text-[11px] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>📄</span>
+                  <span>Download Application</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => downloadInvoice(detailsModalCase, 'holiday')}
+                  className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-slate-700 to-slate-900 hover:from-slate-800 hover:to-black text-white font-bold text-[11px] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>🧾</span>
+                  <span>Download Invoice</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -1045,9 +1201,19 @@ export const Holidays = () => {
             </div>
 
             <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2 text-xs">
-              <h4 className="font-bold text-slate-900 uppercase text-[10px] tracking-wider">
-                Financial Summary
-              </h4>
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-slate-900 uppercase text-[10px] tracking-wider">
+                  Financial Summary
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setIsPaymentModalOpen(true)}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center gap-1"
+                >
+                  <span>+</span>
+                  <span>Add Payment</span>
+                </button>
+              </div>
               <div className="grid grid-cols-3 gap-3">
                 <div className="p-2.5 rounded-lg bg-slate-50 text-center">
                   <p className="text-[10px] font-bold text-slate-400">Total Price</p>
@@ -1263,6 +1429,14 @@ export const Holidays = () => {
           </div>
         </div>
       )}
+
+      {/* Add Payment Modal Popup */}
+      <AddPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        caseItem={selectedCase || detailsModalCase}
+        onRecordPayment={handleRecordPayment}
+      />
     </div>
   )
 }

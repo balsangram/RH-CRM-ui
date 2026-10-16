@@ -48,7 +48,7 @@ export const Sidebar = ({
         className={`fixed inset-y-0 left-0 z-50 flex flex-col crm-sidebar transition-transform duration-300 ease-in-out shrink-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         } ${
-          isCollapsed ? 'lg:w-20 w-64' : 'lg:w-64 w-64'
+          isCollapsed ? 'lg:w-16 w-56' : 'lg:w-56 w-56'
         } rounded-r-2xl lg:rounded-2xl lg:relative lg:my-3 lg:ml-3 lg:h-[calc(100vh-1.5rem)] shadow-2xl lg:shadow-xl border-r lg:border border-white/10`}
       >
         {/* Floating Border Expand/Collapse Toggle Button (Desktop Only - matching user reference image) */}
@@ -104,17 +104,17 @@ export const Sidebar = ({
         </div>
 
         {/* Navigation Items List */}
-        <nav className="flex-1 overflow-y-auto py-3 space-y-1 scrollbar-none px-2">
+        <nav className="flex-1 overflow-y-auto py-2 space-y-0.5 scrollbar-none px-2">
           {SIDEBAR_ITEMS.map((item, index) => {
             if (item.divider) {
               return (
-                <div key={index} className="pt-4 pb-1">
+                <div key={index} className="pt-2.5 pb-0.5">
                   {!isCollapsed ? (
                     <p className="px-3 text-[10px] font-bold tracking-widest text-white/40 uppercase">
                       {item.title}
                     </p>
                   ) : (
-                    <div className="border-t border-white/10 my-2 mx-2" />
+                    <div className="border-t border-white/10 my-1.5 mx-2" />
                   )}
                 </div>
               )
@@ -133,10 +133,10 @@ export const Sidebar = ({
                 onClick={() => onClose?.()}
                 title={isCollapsed ? item.title : undefined}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 transition-all duration-150 ${
+                  `flex items-center gap-2.5 transition-all duration-150 ${
                     isCollapsed
-                      ? 'w-10 h-10 mx-auto justify-center rounded-xl'
-                      : 'px-3 py-2.5 rounded-xl text-sm'
+                      ? 'w-9 h-9 mx-auto justify-center rounded-lg'
+                      : 'px-3 py-1.5 rounded-lg text-xs'
                   } ${
                     isActive ? 'crm-sidebar-nav-active' : 'crm-sidebar-nav-item'
                   }`
@@ -144,7 +144,7 @@ export const Sidebar = ({
               >
                 {/* MUI Icon Container */}
                 <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors bg-white/10 text-white/90"
+                  className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 transition-colors bg-white/10 text-white/90"
                 >
                   {(() => {
                     if (!IconComponent) {
@@ -169,11 +169,11 @@ export const Sidebar = ({
         </nav>
 
         {/* User Profile Section in Sidebar (Desktop & Mobile Drawer) */}
-        <div className="p-3 border-t border-white/10 mt-auto">
+        <div className="p-2 border-t border-white/10 mt-auto">
           {!isCollapsed ? (
-            <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between gap-2.5">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-[#E11D2E] text-white font-bold flex items-center justify-center text-xs shadow-sm flex-shrink-0">
+            <div className="p-2 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 rounded-full bg-[#E11D2E] text-white font-bold flex items-center justify-center text-[10px] shadow-sm flex-shrink-0">
                   {userInitials}
                 </div>
                 <div className="min-w-0 flex-1">

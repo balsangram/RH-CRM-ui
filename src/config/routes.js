@@ -24,6 +24,8 @@ export const ROUTES = {
   TRAVELLERS_ADD: '/travellers/add',
   TRAVELLERS_EDIT: '/travellers/edit/:id',
 
+  FINANCE: '/finance',
+
   APPLICATIONS: '/applications',
   APPLICATIONS_ADD: '/applications/add',
   APPLICATIONS_EDIT: '/applications/edit/:id',
@@ -53,6 +55,7 @@ export const ROUTES = {
   ROLES: '/roles',
   NOTIFICATIONS: '/notifications',
   AUDIT_LOGS: '/audit-logs',
+  REVIEWS: '/reviews',
   SETTINGS: '/settings',
 
   // Customer Portal
