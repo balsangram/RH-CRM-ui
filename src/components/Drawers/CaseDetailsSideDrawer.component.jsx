@@ -356,7 +356,7 @@ export const CaseDetailsSideDrawer = ({
 
           {/* SECTION 4b: VISA DOCUMENT ACTIONS (only after Payment stage) */}
           {isVisa && (() => {
-            const stageOrder = ['UNDER_REVIEW', 'DOCS_VERIFIED', 'SUBMITTED', 'PROCESSING', 'APPROVED', 'PAYMENT']
+            const stageOrder = ['UNDER_REVIEW', 'DOCS_VERIFIED', 'SUBMITTED', 'PROCESSING', 'INTERVIEW', 'APPROVED', 'PAYMENT']
             const currentIdx = stageOrder.indexOf(currentStageDef.id)
             const paymentIdx = stageOrder.indexOf('PAYMENT')
             const isAfterPayment = currentIdx >= paymentIdx || rawStage === 'PAYMENT'

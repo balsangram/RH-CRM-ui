@@ -20,6 +20,7 @@ const normalizeStageId = (item, isVisa) => {
     if (raw === 'PAYMENT' || raw === 'PAYMENT_PENDING' || raw === 'PAYMENT_VERIFIED') return 'PAYMENT'
     if (raw === 'SUBMITTED') return 'SUBMITTED'
     if (raw === 'PROCESSING' || raw === 'IN_PROGRESS') return 'PROCESSING'
+    if (raw === 'INTERVIEW' || raw === 'INTERVIEW_SCHEDULED' || raw === 'INTERVIEW_PENDING') return 'INTERVIEW'
     if (raw === 'APPROVED') return 'APPROVED'
     if (raw === 'REJECTED' || raw === 'CANCELLED') return 'REJECTED'
     return 'UNDER_REVIEW'

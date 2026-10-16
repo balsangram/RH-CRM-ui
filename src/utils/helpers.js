@@ -61,6 +61,13 @@ export const getStatusBadgeStyle = (status = '') => {
         bg: 'bg-rose-50 text-rose-700 border border-rose-200',
         badge: 'bg-rose-500',
       }
+    case 'interview':
+    case 'interview_scheduled':
+    case 'interview_pending':
+      return {
+        bg: 'bg-indigo-50 text-indigo-700 border border-indigo-200',
+        badge: 'bg-indigo-500',
+      }
     case 'new':
     case 'draft':
       return {

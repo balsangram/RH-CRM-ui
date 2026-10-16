@@ -32,7 +32,7 @@ export const Applications = () => {
     { id: 'APP-902', applicant: 'Carlos Mendoza', country: 'Canada', visaType: 'Work Permit (LMIA)', officer: 'Officer Tremblay', status: 'Approved', date: '2026-10-03' },
     { id: 'APP-903', applicant: 'Amina Al-Mansoor', country: 'France (Schengen)', visaType: 'Business Visit', officer: 'Officer Dubois', status: 'Pending', date: '2026-10-02' },
     { id: 'APP-904', applicant: 'Liam O’Connor', country: 'United States', visaType: 'B1/B2 Visitor', officer: 'Officer Miller', status: 'Approved', date: '2026-10-01' },
-    { id: 'APP-905', applicant: 'Rahul Verma', country: 'United States', visaType: 'B1/B2 Visitor', officer: 'Officer Sharma', status: 'Pending', date: '2026-09-29' },
+    { id: 'APP-905', applicant: 'Rahul Verma', country: 'United States', visaType: 'B1/B2 Visitor', officer: 'Officer Sharma', status: 'Interview', date: '2026-09-29' },
     { id: 'APP-906', applicant: 'Sofia Chen', country: 'Japan', visaType: 'Business Visit', officer: 'Officer Sato', status: 'Under_Review', date: '2026-09-28' },
     { id: 'APP-907', applicant: 'Tariq Al-Mansouri', country: 'UAE', visaType: 'Golden Visa Investor', officer: 'Officer Al-Hassan', status: 'Approved', date: '2026-09-25' },
     { id: 'APP-908', applicant: 'Ananya Roy', country: 'Canada', visaType: 'Student Visa (PAL)', officer: 'Officer Miller', status: 'Under_Review', date: '2026-09-20' },
@@ -58,6 +58,7 @@ export const Applications = () => {
   const visaSubTabs = [
     { label: 'All Cases', value: 'ALL' },
     { label: 'Under Review', value: 'Under_Review' },
+    { label: 'Interview Scheduled', value: 'Interview' },
     { label: 'Approved', value: 'Approved' },
     { label: 'Pending Action', value: 'Pending' },
   ]

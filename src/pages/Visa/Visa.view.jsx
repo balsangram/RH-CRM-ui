@@ -13,7 +13,7 @@ export const Visa = () => {
   const isStaff = user?.role === 'AGENT' || user?.role === 'STAFF'
 
 // View state: 'table' | 'kanban'
-  const [viewMode, setViewMode] = useState('table')
+  const [viewMode, setViewMode] = useState('kanban')
 
 // Cases state from service
   const [cases, setCases] = useState([])
@@ -441,7 +441,7 @@ return (
       </div>
 
 {/* Stage Stepper Progress Bar (Matching Reference Screenshot) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-2.5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-2 sm:gap-2.5">
         {VISA_STAGES.map((stage, idx) => {
           const stats = pipelineStats.stageMap[stage.id] || { count: 0, value: 0 }
           const isSelected = filterStage === stage.id
@@ -1037,7 +1037,7 @@ return (
 
                 {/* SECTION 4b: VISA DOCUMENT ACTIONS (only after Payment stage) */}
                 {(() => {
-                  const stageOrder = ['UNDER_REVIEW', 'DOCS_VERIFIED', 'SUBMITTED', 'PROCESSING', 'APPROVED', 'PAYMENT']
+                  const stageOrder = ['UNDER_REVIEW', 'DOCS_VERIFIED', 'SUBMITTED', 'PROCESSING', 'INTERVIEW', 'APPROVED', 'PAYMENT']
                   const currentIdx = stageOrder.indexOf(selectedCase.stage)
                   const paymentIdx = stageOrder.indexOf('PAYMENT')
                   const isAfterPayment = currentIdx >= paymentIdx
@@ -1269,7 +1269,7 @@ return (
 
             {/* Visa Document Actions (only if past Payment stage) */}
             {(() => {
-              const stageOrder = ['UNDER_REVIEW', 'DOCS_VERIFIED', 'SUBMITTED', 'PROCESSING', 'APPROVED', 'PAYMENT']
+              const stageOrder = ['UNDER_REVIEW', 'DOCS_VERIFIED', 'SUBMITTED', 'PROCESSING', 'INTERVIEW', 'APPROVED', 'PAYMENT']
               const currentIdx = stageOrder.indexOf(profileModalCase.stage)
               const paymentIdx = stageOrder.indexOf('PAYMENT')
               const isAfterPayment = currentIdx >= paymentIdx

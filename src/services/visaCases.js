@@ -3,7 +3,7 @@
  * Manages Visa Cases, stage workflows, mandatory stage checklists, and real-time state persistence.
  */
 
-const STORAGE_KEY_VISA_CASES = 'rh_crm_visa_cases_v4'
+const STORAGE_KEY_VISA_CASES = 'rh_crm_visa_cases_v5'
 
 export const VISA_STAGES = [
   {
@@ -65,23 +65,43 @@ export const VISA_STAGES = [
     stepNumber: 4,
     title: 'Stage 4: Processing',
     shortTitle: 'Processing',
-    subtitle: 'Embassy processing / interview / biometrics',
+    subtitle: 'Embassy processing & biometric verification',
     colorBadge: 'bg-orange-500 text-white',
     badgeBorder: 'border-orange-400 text-orange-700 bg-orange-50/90',
     headerBg: 'bg-orange-500/10 text-orange-900 border-orange-300',
-    nextStage: 'APPROVED',
-    nextButtonText: '→ Approved',
+    nextStage: 'INTERVIEW',
+    nextButtonText: '→ Interview',
     checklist: [
       { id: 'p1', label: 'Biometrics registration completed at center', mandatory: true },
-      { id: 'p2', label: 'Embassy interview (if required) conducted', mandatory: true },
+      { id: 'p2', label: 'Initial embassy background processing verification completed', mandatory: true },
       { id: 'p3', label: 'Consulate application tracking status verified', mandatory: true },
       { id: 'p4', label: 'Additional embassy documentation cleared', mandatory: false },
     ],
   },
   {
-    id: 'APPROVED',
+    id: 'INTERVIEW',
     stepNumber: 5,
-    title: 'Stage 5: Approved',
+    title: 'Stage 5: Interview',
+    shortTitle: 'Interview',
+    subtitle: 'Consular interview prep, appointment & attendance',
+    colorBadge: 'bg-indigo-600 text-white',
+    badgeBorder: 'border-indigo-400 text-indigo-700 bg-indigo-50/90',
+    headerBg: 'bg-indigo-500/10 text-indigo-900 border-indigo-300',
+    nextStage: 'APPROVED',
+    nextButtonText: '→ Approved',
+    checklist: [
+      { id: 'i1', label: 'Embassy / Consulate interview appointment date & slot scheduled', mandatory: true },
+      { id: 'i2', label: 'Appointment confirmation letter & barcode slip issued', mandatory: true },
+      { id: 'i3', label: 'Consular interview Q&A coaching & mock session completed with applicant', mandatory: true },
+      { id: 'i4', label: 'Original document dossier (Financials, NOC, Passport, Cover Letter) handed over', mandatory: true },
+      { id: 'i5', label: 'Consular interview attended & preliminary outcome / visa slip recorded', mandatory: true },
+      { id: 'i6', label: '221(g) / additional embassy processing documents cleared (if applicable)', mandatory: false },
+    ],
+  },
+  {
+    id: 'APPROVED',
+    stepNumber: 6,
+    title: 'Stage 6: Approved',
     shortTitle: 'Approved',
     subtitle: 'Visa granted by embassy & passport stamped',
     colorBadge: 'bg-teal-600 text-white',
@@ -97,8 +117,8 @@ export const VISA_STAGES = [
   },
   {
     id: 'PAYMENT',
-    stepNumber: 6,
-    title: 'Stage 6: Payment',
+    stepNumber: 7,
+    title: 'Stage 7: Payment',
     shortTitle: 'Payment',
     subtitle: 'Final visa consultation & success fee settlement',
     bannerText: '✔ Visa Approved & Final Payment Settled',
@@ -116,8 +136,8 @@ export const VISA_STAGES = [
   },
   {
     id: 'REJECTED',
-    stepNumber: 7,
-    title: 'Stage 7: Rejected',
+    stepNumber: 8,
+    title: 'Stage 8: Rejected',
     shortTitle: 'Rejected',
     subtitle: 'Visa declined or withdrawn',
     colorBadge: 'bg-rose-600 text-white',
@@ -235,7 +255,7 @@ export const DEFAULT_VISA_CASES = [
     passportExp: '2028-06-15',
     country: 'United States',
     visaType: 'B1/B2 Business',
-    stage: 'SUBMITTED',
+    stage: 'INTERVIEW',
     officer: 'Priya Singh',
     officerId: 'CO-102',
     amount: 21000,
@@ -243,8 +263,9 @@ export const DEFAULT_VISA_CASES = [
     paymentType: 'Prepaid',
     paymentStatus: 'COMPLETED',
     txnId: 'TXN-998200',
-    docStatus: 'SUBMITTED',
+    docStatus: 'INTERVIEW SCHEDULED',
     appliedDate: '2026-10-08',
+    interviewDate: '2026-10-24',
     completedChecklists: {
       c1: true,
       c2: true,
@@ -255,6 +276,14 @@ export const DEFAULT_VISA_CASES = [
       s1: true,
       s2: true,
       s3: true,
+      p1: true,
+      p2: true,
+      p3: true,
+      i1: true,
+      i2: true,
+      i3: true,
+      i4: false,
+      i5: false,
     },
   },
   {
@@ -484,6 +513,8 @@ class VisaCasesService {
           ? 'APPROVED'
           : targetStageId === 'REJECTED'
           ? 'REJECTED'
+          : targetStageId === 'INTERVIEW'
+          ? 'INTERVIEW SCHEDULED'
           : targetStageId === 'DOCS_VERIFIED'
           ? 'DOCS_VERIFIED'
           : targetStageId === 'SUBMITTED'

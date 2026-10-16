@@ -26,7 +26,7 @@ export const Companies = () => {
   const [companies, setCompanies] = useState(() => companiesService.getCompanies())
 
   // View state: 'table' or 'card'
-  const [viewFormat, setViewFormat] = useState('table')
+  const [viewFormat, setViewFormat] = useState('card')
 
   // Selected company for detailed view
   const [internalSelectedId, setInternalSelectedId] = useState(null)
