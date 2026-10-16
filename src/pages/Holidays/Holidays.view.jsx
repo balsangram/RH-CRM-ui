@@ -261,9 +261,9 @@ export const Holidays = () => {
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 Holiday & Tour Booking Cases — Processing Pipeline
               </h1>
-              <span className="px-2.5 py-0.5 text-xs font-mono font-bold rounded-md border border-slate-300 bg-slate-50 text-slate-700 shadow-2xs">
+              {/* <span className="px-2.5 py-0.5 text-xs font-mono font-bold rounded-md border border-slate-300 bg-slate-50 text-slate-700 shadow-2xs">
                 {filteredCases.length} of {cases.length} Bookings
-              </span>
+              </span> */}
             </div>
             <p className="text-xs font-medium text-slate-500 tracking-tight">
               <span className="font-semibold text-slate-700">Pipeline Flow:</span> Stage 1 (Created) &rarr; Stage 2 (Docs & Itinerary) &rarr; Stage 3 (Payment) &rarr; Stage 4 (Vouchers) &rarr; Stage 5 (In-Progress) &rarr; Completed

@@ -215,9 +215,9 @@ export const Travellers = () => {
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 Travelers / Customers Listing
               </h1>
-              <span className="px-2.5 py-0.5 text-xs font-mono font-bold rounded-md border border-slate-300 bg-slate-50 text-slate-700 shadow-2xs">
+              {/* <span className="px-2.5 py-0.5 text-xs font-mono font-bold rounded-md border border-slate-300 bg-slate-50 text-slate-700 shadow-2xs">
                 {filteredTravellers.length} of {travellers.length} Travelers
-              </span>
+              </span> */}
             </div>
             <p className="text-xs font-medium text-slate-500 tracking-tight">
               Manage corporate client accounts, individual travelers, passport validity, and corporate visa/tour processing

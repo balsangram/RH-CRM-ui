@@ -3,6 +3,7 @@ import downloadLogsService, {
   DOCUMENT_CATEGORIES,
   USER_TYPES,
 } from '../../services/downloadLogs'
+import Pagination from '../../components/Pagination/Pagination.component'
 
 export const AuditLogs = () => {
   const [logs, setLogs] = useState([])
@@ -13,6 +14,10 @@ export const AuditLogs = () => {
   const [categoryFilter, setCategoryFilter] = useState('ALL')
   const [searchQuery, setSearchQuery] = useState('')
   const [dateFilter, setDateFilter] = useState('ALL') // 'ALL' | 'TODAY' | '7_DAYS' | '30_DAYS'
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(5)
 
   // Selected Log for detail modal
   const [selectedLog, setSelectedLog] = useState(null)
@@ -67,6 +72,18 @@ export const AuditLogs = () => {
     })
   }, [logs, activeUserType, categoryFilter, dateFilter, searchQuery])
 
+  // Pagination calculation
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage) || 1
+  const paginatedLogs = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage
+    return filteredLogs.slice(start, start + itemsPerPage)
+  }, [filteredLogs, currentPage, itemsPerPage])
+
+  // Reset page when filter changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeUserType, categoryFilter, dateFilter, searchQuery, itemsPerPage])
+
   // Metric stats
   const metrics = useMemo(() => {
     const total = logs.length
@@ -99,18 +116,18 @@ export const AuditLogs = () => {
       'Location',
       'Device / Browser',
       'Status',
-      'Download Token',
+      'Verification Hash',
     ]
 
     const rows = filteredLogs.map((l) => [
       l.id,
-      l.timestamp,
+      `"${l.timestamp}"`,
       l.userType,
       `"${l.user}"`,
       `"${l.contactPerson || ''}"`,
       l.email,
       l.phone,
-      l.gstNumber || 'N/A',
+      l.gstNumber || '',
       l.docCategory,
       `"${l.docName}"`,
       l.caseId,
@@ -151,31 +168,31 @@ export const AuditLogs = () => {
     switch (category) {
       case 'INVOICE':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-amber-50 text-amber-800 border border-amber-200">
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-amber-50 text-amber-800 border border-amber-200">
             <span>📄</span> Invoice / Receipt
           </span>
         )
       case 'VISA_DOCUMENT':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-emerald-50 text-emerald-800 border border-emerald-200">
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-emerald-50 text-emerald-800 border border-emerald-200">
             <span>✈</span> Visa Document
           </span>
         )
       case 'CASE_STAGES':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-blue-50 text-blue-800 border border-blue-200">
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-blue-50 text-blue-800 border border-blue-200">
             <span>📑</span> Case Stages
           </span>
         )
       case 'TOUR_VOUCHER':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-purple-50 text-purple-800 border border-purple-200">
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-purple-50 text-purple-800 border border-purple-200">
             <span>🌴</span> Tour Voucher
           </span>
         )
       default:
         return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
             {category}
           </span>
         )
@@ -183,31 +200,26 @@ export const AuditLogs = () => {
   }
 
   return (
-    <div className="space-y-4 pb-12 font-sans">
-      {/* Top Header Card */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-4 sm:p-5">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                Download & Access Audit Logs
-              </h1>
-              {/* <span className="px-2.5 py-0.5 text-xs font-mono font-bold rounded-md border border-slate-300 bg-slate-50 text-slate-700 shadow-2xs">
-                {filteredLogs.length} of {logs.length} Download Events
-              </span> */}
-            </div>
-            <p className="text-xs font-medium text-slate-500 tracking-tight">
+    <div className="space-y-3 pb-8 font-sans">
+      {/* Top Header Card - Compact */}
+      <div className="bg-white rounded-lg border border-slate-200 shadow-2xs p-3 sm:p-3.5">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+          <div className="space-y-0.5">
+            <h1 className="text-base font-bold text-slate-900 tracking-tight">
+              Download & Access Audit Logs
+            </h1>
+            <p className="text-[11px] text-slate-500">
               Security & compliance trail tracking travellers and corporate companies downloading case stages, invoices, and visa documents.
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 self-start md:self-auto">
+          <div className="flex items-center gap-2 self-start md:self-auto">
             <button
               type="button"
               onClick={handleExportCSV}
-              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#0F0E2B] to-[#2E2B6E] hover:from-[#181445] hover:to-[#221F56] text-white text-xs font-bold shadow-xs hover:shadow-md transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-2.5 py-1.5 rounded-md bg-[#0F0E2B] hover:bg-[#181445] text-white text-[11px] font-bold shadow-2xs transition-all cursor-pointer flex items-center gap-1.5"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
               <span>Export CSV Report</span>
@@ -215,58 +227,62 @@ export const AuditLogs = () => {
           </div>
         </div>
 
-        {/* Aggregate Metric Cards */}
-        <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+        {/* Aggregate Metric Cards - Compact */}
+        <div className="mt-2.5 pt-2.5 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
           {/* Total */}
-          <div className="p-3 rounded-xl bg-slate-50/80 border border-slate-200">
-            <p className="text-[10px] font-bold uppercase text-slate-500">Total Downloads</p>
-            <p className="text-lg font-black text-slate-900 mt-0.5">{metrics.total}</p>
-            <p className="text-[10px] text-slate-400 mt-0.5">All downloaded assets</p>
+          <div className="p-2 sm:p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+            <p className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">Total Downloads</p>
+            <p className="text-base sm:text-lg font-black text-slate-900 leading-tight mt-0.5">{metrics.total}</p>
+            <p className="text-[9px] text-slate-400">All downloaded assets</p>
           </div>
 
           {/* Invoices */}
-          <div className="p-3 rounded-xl bg-amber-50/60 border border-amber-200">
-            <p className="text-[10px] font-bold uppercase text-amber-700">Invoices & Receipts</p>
-            <p className="text-lg font-black text-amber-900 mt-0.5">{metrics.invoices}</p>
-            <p className="text-[10px] text-amber-600 mt-0.5">Tax invoices & receipts</p>
+          <div className="p-2 sm:p-2.5 rounded-lg bg-amber-50/60 border border-amber-200">
+            <p className="text-[9px] font-bold uppercase text-amber-700 tracking-wider">Invoices & Receipts</p>
+            <p className="text-base sm:text-lg font-black text-amber-900 leading-tight mt-0.5">{metrics.invoices}</p>
+            <p className="text-[9px] text-amber-600">Tax invoices & receipts</p>
           </div>
 
           {/* Visa Docs */}
-          <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200">
-            <p className="text-[10px] font-bold uppercase text-emerald-700">Visa & Approvals</p>
-            <p className="text-lg font-black text-emerald-900 mt-0.5">{metrics.visaDocs}</p>
-            <p className="text-[10px] text-emerald-600 mt-0.5">E-Visas & grant letters</p>
+          <div className="p-2 sm:p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-200">
+            <p className="text-[9px] font-bold uppercase text-emerald-700 tracking-wider">Visa & Approvals</p>
+            <p className="text-base sm:text-lg font-black text-emerald-900 leading-tight mt-0.5">{metrics.visaDocs}</p>
+            <p className="text-[9px] text-emerald-600">E-Visas & grant letters</p>
           </div>
 
           {/* Case Stages */}
-          <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-200">
-            <p className="text-[10px] font-bold uppercase text-blue-700">Case Stages Dossiers</p>
-            <p className="text-lg font-black text-blue-900 mt-0.5">{metrics.caseStages}</p>
-            <p className="text-[10px] text-blue-600 mt-0.5">Stage progress sheets</p>
+          <div className="p-2 sm:p-2.5 rounded-lg bg-blue-50/60 border border-blue-200">
+            <p className="text-[9px] font-bold uppercase text-blue-700 tracking-wider">Case Stages Dossiers</p>
+            <p className="text-base sm:text-lg font-black text-blue-900 leading-tight mt-0.5">{metrics.caseStages}</p>
+            <p className="text-[9px] text-blue-600">Stage progress sheets</p>
           </div>
 
           {/* Entities */}
-          <div className="p-3 rounded-xl bg-purple-50/60 border border-purple-200 col-span-2 sm:col-span-1">
-            <p className="text-[10px] font-bold uppercase text-purple-700">Active Entities</p>
-            <p className="text-sm font-black text-purple-900 mt-1">
-              {metrics.travellers} <span className="text-[10px] font-semibold text-slate-600">Travellers</span>
-            </p>
-            <p className="text-[11px] font-bold text-purple-700 mt-0.5">
-              {metrics.companies} <span className="text-[10px] font-semibold text-slate-600">Companies (B2B)</span>
-            </p>
+          <div className="p-2 sm:p-2.5 rounded-lg bg-purple-50/60 border border-purple-200 col-span-2 sm:col-span-1">
+            <p className="text-[9px] font-bold uppercase text-purple-700 tracking-wider">Active Entities</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-xs font-black text-purple-900">
+                {metrics.travellers} <span className="text-[9px] font-normal text-slate-500">Travellers</span>
+              </span>
+              <span className="text-slate-300">&bull;</span>
+              <span className="text-xs font-black text-purple-900">
+                {metrics.companies} <span className="text-[9px] font-normal text-slate-500">Companies</span>
+              </span>
+            </div>
+            <p className="text-[9px] text-purple-600">B2C & B2B accounts</p>
           </div>
         </div>
 
-        {/* Filter Controls Row */}
-        <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+        {/* Filter Controls Row - Compact */}
+        <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
           {/* Entity Type Toggle Tabs (Travellers vs Companies) */}
-          <div className="inline-flex rounded-xl border border-slate-200 bg-slate-100/90 p-1 shadow-2xs">
+          <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5 shadow-2xs">
             <button
               type="button"
               onClick={() => setActiveUserType('ALL')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all cursor-pointer ${
                 activeUserType === 'ALL'
-                  ? 'bg-white text-slate-900 shadow-xs'
+                  ? 'bg-white text-slate-900 shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -276,9 +292,9 @@ export const AuditLogs = () => {
             <button
               type="button"
               onClick={() => setActiveUserType('TRAVELLER')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
                 activeUserType === 'TRAVELLER'
-                  ? 'bg-white text-sky-800 shadow-xs'
+                  ? 'bg-white text-sky-800 shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -289,9 +305,9 @@ export const AuditLogs = () => {
             <button
               type="button"
               onClick={() => setActiveUserType('COMPANY')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
                 activeUserType === 'COMPANY'
-                  ? 'bg-white text-purple-800 shadow-xs'
+                  ? 'bg-white text-purple-800 shadow-2xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -300,14 +316,14 @@ export const AuditLogs = () => {
             </button>
           </div>
 
-          {/* Category Dropdown Filter */}
+          {/* Category Dropdown Filter & Search */}
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 text-xs text-slate-600">
+            <div className="flex items-center gap-1 text-[11px] text-slate-600">
               <span className="font-semibold text-slate-700">Document:</span>
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                className="px-2 py-1 rounded-md border border-slate-200 bg-white text-[11px] font-medium text-slate-800 focus:outline-hidden focus:border-[#E11D2E] cursor-pointer"
               >
                 {DOCUMENT_CATEGORIES.map((c) => (
                   <option key={c.id} value={c.id}>{c.label}</option>
@@ -316,12 +332,12 @@ export const AuditLogs = () => {
             </div>
 
             {/* Date filter */}
-            <div className="flex items-center gap-1.5 text-xs text-slate-600">
+            <div className="flex items-center gap-1 text-[11px] text-slate-600">
               <span className="font-semibold text-slate-700">Time:</span>
               <select
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                className="px-2 py-1 rounded-md border border-slate-200 bg-white text-[11px] font-medium text-slate-800 focus:outline-hidden focus:border-[#E11D2E] cursor-pointer"
               >
                 <option value="ALL">All Time</option>
                 <option value="TODAY">Today</option>
@@ -329,19 +345,19 @@ export const AuditLogs = () => {
             </div>
 
             {/* Search Input */}
-            <div className="relative min-w-[220px]">
+            <div className="relative min-w-[200px]">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search user, company, case ID, IP..."
-                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full px-2.5 py-1 rounded-md border border-slate-200 bg-white text-[11px] text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:border-[#E11D2E]"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1.5 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                  className="absolute right-2 top-1 text-slate-400 hover:text-slate-600 text-xs font-bold"
                 >
                   ✕
                 </button>
@@ -351,54 +367,54 @@ export const AuditLogs = () => {
         </div>
       </div>
 
-      {/* Main Audit Logs Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+      {/* Main Audit Logs Table Card */}
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-[11px] border-collapse">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-black text-slate-700 uppercase tracking-wider">
-                <th className="py-3 px-4">Log ID</th>
-                <th className="py-3 px-4">Timestamp</th>
-                <th className="py-3 px-4">User / Entity</th>
-                <th className="py-3 px-4">Downloaded Asset</th>
-                <th className="py-3 px-4">Case Reference</th>
-                {/* <th className="py-3 px-4">IP & Device</th> */}
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-center">Action</th>
+              <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+                <th className="py-2 px-3">Log ID</th>
+                <th className="py-2 px-3">Timestamp</th>
+                <th className="py-2 px-3">User / Entity</th>
+                <th className="py-2 px-3">Downloaded Asset</th>
+                <th className="py-2 px-3">Case Reference</th>
+                <th className="py-2 px-3 text-center">Status</th>
+                <th className="py-2 px-3 text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredLogs.length === 0 ? (
+              {paginatedLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400 font-medium">
+                  <td colSpan={7} className="py-8 text-center text-slate-400 font-medium">
                     No download activity logs found matching your filters.
                   </td>
                 </tr>
               ) : (
-                filteredLogs.map((log) => {
+                paginatedLogs.map((log) => {
                   return (
                     <tr
                       key={log.id}
-                      className="hover:bg-slate-50/80 transition-colors group"
+                      className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                      onClick={() => setSelectedLog(log)}
                     >
                       {/* Log ID */}
-                      <td className="py-3.5 px-4 font-mono font-bold text-slate-900 whitespace-nowrap">
+                      <td className="py-2 px-3 font-mono font-bold text-slate-900 whitespace-nowrap">
                         {log.id}
                       </td>
 
                       {/* Timestamp */}
-                      <td className="py-3.5 px-4 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                      <td className="py-2 px-3 font-mono text-[10px] text-slate-500 whitespace-nowrap">
                         {log.timestamp}
                       </td>
 
                       {/* User / Entity */}
-                      <td className="py-3.5 px-4 min-w-[220px]">
+                      <td className="py-2 px-3 max-w-[200px]">
                         <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-slate-900 leading-tight">
+                          <span className="font-bold text-slate-900 leading-tight truncate">
                             {log.user}
                           </span>
                           <span
-                            className={`px-1.5 py-0.2 rounded text-[9px] font-bold uppercase border ${
+                            className={`px-1 py-0.2 rounded text-[9px] font-bold uppercase shrink-0 border ${
                               log.userType === 'COMPANY'
                                 ? 'bg-purple-50 text-purple-700 border-purple-200'
                                 : 'bg-sky-50 text-sky-700 border-sky-200'
@@ -407,15 +423,15 @@ export const AuditLogs = () => {
                             {log.userType === 'COMPANY' ? '🏢 Company' : '👤 Traveller'}
                           </span>
                         </div>
-                        <div className="flex flex-col gap-0.5 mt-1 text-[11px] text-slate-500 font-medium">
+                        <div className="flex flex-col text-[10px] text-slate-400 mt-0.5">
                           {log.contactPerson && log.userType === 'COMPANY' && (
-                            <span className="text-slate-600 font-normal">
+                            <span className="text-slate-500 truncate">
                               Attn: {log.contactPerson}
                             </span>
                           )}
                           <span className="truncate">✉ {log.email}</span>
                           {log.gstNumber && (
-                            <span className="font-mono text-[10px] text-purple-700">
+                            <span className="font-mono text-[9px] text-purple-700">
                               GST: {log.gstNumber}
                             </span>
                           )}
@@ -423,52 +439,42 @@ export const AuditLogs = () => {
                       </td>
 
                       {/* Downloaded Asset */}
-                      <td className="py-3.5 px-4 min-w-[220px]">
-                        <p className="font-bold text-slate-900 leading-tight">
+                      <td className="py-2 px-3 max-w-[210px]">
+                        <p className="font-bold text-slate-900 leading-tight truncate" title={log.docName}>
                           {log.docName}
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex items-center gap-1.5 mt-0.5">
                           {getCategoryBadge(log.docCategory)}
-                          <span className="font-mono text-[10px] text-slate-400">
+                          <span className="font-mono text-[9px] text-slate-400">
                             {log.fileSize}
                           </span>
                         </div>
                       </td>
 
                       {/* Case Reference */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className="font-mono font-bold text-slate-900 block">
+                      <td className="py-2 px-3 whitespace-nowrap">
+                        <span className="font-mono font-bold text-slate-900 block leading-tight">
                           {log.caseId}
                         </span>
-                        <span className="font-mono text-[10px] text-slate-500">
+                        <span className="font-mono text-[9px] text-slate-400">
                           Ref: {log.refNo}
                         </span>
                       </td>
 
-                      {/* IP & Device */}
-                      {/* <td className="py-3.5 px-4 min-w-[170px]">
-                        <p className="font-mono font-semibold text-slate-800 text-[11px] leading-tight">
-                          {log.ipAddress}
-                        </p>
-                        <p className="text-[10px] text-slate-500 font-medium mt-0.5">
-                          {log.location} &bull; {log.device}
-                        </p>
-                      </td> */}
-
                       {/* Status */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <td className="py-2 px-3 whitespace-nowrap text-center">
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                           <span>Downloaded</span>
                         </span>
                       </td>
 
                       {/* Action */}
-                      <td className="py-3.5 px-4 whitespace-nowrap text-center">
+                      <td className="py-2 px-3 whitespace-nowrap text-center" onClick={(e) => e.stopPropagation()}>
                         <button
                           type="button"
                           onClick={() => setSelectedLog(log)}
-                          className="px-2.5 py-1 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 font-bold text-[11px] transition-colors cursor-pointer shadow-2xs"
+                          className="px-2 py-0.5 rounded border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold text-[10px] transition-colors cursor-pointer shadow-2xs"
                         >
                           View Details
                         </button>
@@ -480,29 +486,42 @@ export const AuditLogs = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Reusable Pagination Component */}
+        <div className="px-3 py-2 border-t border-slate-200 bg-slate-50/40">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredLogs.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={setItemsPerPage}
+            pageSizeOptions={[5, 10, 20]}
+          />
+        </div>
       </div>
 
       {/* DETAIL AUDIT MODAL */}
       {selectedLog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-sans">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 font-sans">
           <div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-fade-in"
             onClick={() => setSelectedLog(null)}
           />
 
-          <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all z-10 p-6 space-y-4 animate-in zoom-in-95 duration-150">
+          <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all z-10 p-5 space-y-3.5 animate-fade-in text-xs">
             {/* Modal Header */}
-            <div className="flex items-start justify-between border-b border-slate-200 pb-3">
+            <div className="flex items-start justify-between border-b border-slate-200 pb-2.5">
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-base font-black text-slate-900">
+                  <h3 className="text-sm font-bold text-slate-900">
                     Audit Verification Payload
                   </h3>
-                  <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-slate-100 border border-slate-200 text-slate-700">
+                  <span className="px-1.5 py-0.2 rounded font-mono text-[9px] font-bold bg-slate-100 border border-slate-200 text-slate-700">
                     {selectedLog.id}
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-[10px] text-slate-500 mt-0.5">
                   Timestamp: {selectedLog.timestamp}
                 </p>
               </div>
@@ -510,20 +529,20 @@ export const AuditLogs = () => {
               <button
                 type="button"
                 onClick={() => setSelectedLog(null)}
-                className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center font-bold"
+                className="w-6 h-6 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center font-bold"
               >
                 ✕
               </button>
             </div>
 
             {/* Entity Details Card */}
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5 text-xs">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-900 uppercase text-[10px] tracking-wider">
+                <span className="font-bold text-slate-900 uppercase text-[9px] tracking-wider">
                   Entity Information
                 </span>
                 <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
+                  className={`px-1.5 py-0.2 rounded text-[9px] font-bold uppercase border ${
                     selectedLog.userType === 'COMPANY'
                       ? 'bg-purple-50 text-purple-700 border-purple-200'
                       : 'bg-sky-50 text-sky-700 border-sky-200'
@@ -532,57 +551,25 @@ export const AuditLogs = () => {
                   {selectedLog.userType === 'COMPANY' ? 'Corporate Company' : 'Individual Traveller'}
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-slate-700 pt-1">
+              <div className="grid grid-cols-2 gap-1.5 text-slate-700 pt-1 text-[11px]">
                 <p><strong>Name:</strong> {selectedLog.user}</p>
-                <p><strong>Contact:</strong> {selectedLog.contactPerson}</p>
+                <p><strong>Contact:</strong> {selectedLog.contactPerson || '—'}</p>
                 <p><strong>Email:</strong> {selectedLog.email}</p>
-                <p><strong>Phone:</strong> {selectedLog.phone}</p>
-                {selectedLog.gstNumber && (
-                  <p className="col-span-2">
-                    <strong>GST / Registration:</strong> <span className="font-mono text-purple-700">{selectedLog.gstNumber}</span>
-                  </p>
-                )}
+                <p><strong>Phone:</strong> {selectedLog.phone || '—'}</p>
               </div>
             </div>
 
             {/* Asset Details Card */}
-            <div className="p-3.5 rounded-xl border border-slate-200 bg-white space-y-2 text-xs">
-              <span className="font-bold text-slate-900 uppercase text-[10px] tracking-wider block">
+            <div className="p-3 rounded-lg border border-slate-200 bg-white space-y-1.5 text-xs">
+              <span className="font-bold text-slate-900 uppercase text-[9px] tracking-wider block">
                 Downloaded Document Asset
               </span>
-              <div className="space-y-1 text-slate-700">
+              <div className="space-y-1 text-slate-700 text-[11px]">
                 <p><strong>Document Name:</strong> {selectedLog.docName}</p>
                 <p><strong>Category:</strong> {selectedLog.docCategory}</p>
-                <p><strong>Linked Case / Booking:</strong> <span className="font-mono font-bold text-indigo-700">{selectedLog.caseId}</span></p>
+                <p><strong>Linked Case:</strong> <span className="font-mono font-bold text-indigo-700">{selectedLog.caseId}</span></p>
                 <p><strong>Document Ref No:</strong> <span className="font-mono">{selectedLog.refNo}</span></p>
                 <p><strong>File Specifications:</strong> {selectedLog.fileSize} ({selectedLog.fileFormat})</p>
-              </div>
-            </div>
-
-            {/* Security & Client Network Footprint */}
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
-              <span className="font-bold text-slate-900 uppercase text-[10px] tracking-wider block">
-                Security & Network Footprint
-              </span>
-              <div className="grid grid-cols-2 gap-2 text-slate-700">
-                <p><strong>IP Address:</strong> <span className="font-mono">{selectedLog.ipAddress}</span></p>
-                <p><strong>Geolocation:</strong> {selectedLog.location}</p>
-                <p className="col-span-2"><strong>Device / User-Agent:</strong> {selectedLog.device}</p>
-              </div>
-
-              {/* Verification Token */}
-              <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">Verification Token</p>
-                  <p className="font-mono text-[11px] text-slate-900 font-semibold">{selectedLog.downloadToken}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleCopyToken(selectedLog.downloadToken)}
-                  className="px-2.5 py-1 rounded-lg border border-slate-300 bg-white text-slate-700 font-bold text-[10px] hover:bg-slate-100 transition-colors cursor-pointer"
-                >
-                  {copiedToken ? '✔ Copied' : 'Copy Hash'}
-                </button>
               </div>
             </div>
 
@@ -591,7 +578,7 @@ export const AuditLogs = () => {
               <button
                 type="button"
                 onClick={() => setSelectedLog(null)}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 rounded-md bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 Close
               </button>

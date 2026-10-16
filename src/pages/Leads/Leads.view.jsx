@@ -357,9 +357,9 @@ export const Leads = () => {
               <h1 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
                 Leads Management — Stage Pipeline
               </h1>
-              <span className="px-2 py-0.5 rounded-full font-mono text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+              {/* <span className="px-2 py-0.5 rounded-full font-mono text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
                 {filteredLeads.length} of {leads.length} Leads
-              </span>
+              </span> */}
             </div>
             {/* <p className="text-slate-500 text-[11px] mt-0.5">
               Flow: Website / Social / Direct &rarr; Stage 1: Lead &rarr; Stage 2: Qualified &rarr; Stage 3: Proposal (with Quotation Creator) &rarr; Stage 4: Negotiation &rarr; Converted &rarr; Cases

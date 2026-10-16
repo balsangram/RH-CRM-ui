@@ -277,9 +277,9 @@ return (
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 Visa Cases — Processing Pipeline
               </h1>
-              <span className="px-2.5 py-0.5 text-xs font-mono font-bold rounded-md border border-slate-300 bg-slate-50 text-slate-700 shadow-2xs">
+              {/* <span className="px-2.5 py-0.5 text-xs font-mono font-bold rounded-md border border-slate-300 bg-slate-50 text-slate-700 shadow-2xs">
                 {filteredCases.length} of {cases.length} Cases
-              </span>
+              </span> */}
             </div>
             <p className="text-xs font-medium text-slate-500 tracking-tight">
               <span className="font-semibold text-slate-700">Flow:</span> Under Review &rarr; Docs Verified &rarr; Submitted &rarr; Processing &rarr; Approved &rarr; Payment | Rejected
