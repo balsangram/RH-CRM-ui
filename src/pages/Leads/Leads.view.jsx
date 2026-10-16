@@ -560,9 +560,6 @@ export const Leads = () => {
                     {item.count} {item.count === 1 ? 'Lead' : 'Leads'}
                   </span>
                 </div>
-                <div className="text-[10px] text-slate-500 mt-0.5 font-medium">
-                  ₹{Math.round(item.totalVal / 1000)}k value
-                </div>
               </div>
               {idx < stageStats.length - 1 && (
                 <span className="text-slate-300 font-bold text-xs select-none">&rarr;</span>
@@ -576,38 +573,38 @@ export const Leads = () => {
       {/* 4. KANBAN BOARD VIEW                                          */}
       {/* ------------------------------------------------------------- */}
       {viewMode === 'KANBAN' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 items-start overflow-x-auto pb-4">
+        <div className="flex gap-3.5 items-start overflow-x-auto pb-4">
           {stageStats.map((col, colIdx) => (
             <div
               key={col.stage.id}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, col.stage.id)}
-              className="bg-slate-100/80 rounded-xl border border-slate-200 p-2.5 flex flex-col gap-2 min-w-[240px]"
+              className="bg-slate-50/80 rounded-2xl border border-slate-200/90 flex flex-col max-h-[calc(100vh-280px)] overflow-hidden shadow-2xs w-[285px] min-w-[285px] shrink-0"
             >
-              {/* Column Header */}
-              <div className="space-y-1">
+              {/* Column Header (Pinned) */}
+              <div className="p-3 border-b border-slate-200 bg-white rounded-t-2xl space-y-1 shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <h2 className="font-black text-xs text-slate-900 tracking-tight">{col.stage.name}</h2>
                   </div>
-                  <span className="w-5 h-5 rounded-md text-[10px] font-bold bg-white text-slate-800 border border-slate-200 flex items-center justify-center shadow-2xs">
+                  <span className="w-5 h-5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 font-mono flex items-center justify-center shadow-2xs">
                     {col.count}
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-500 leading-tight font-medium">
+                <p className="text-[10px] text-slate-500 leading-tight font-medium line-clamp-1">
                   {col.stage.subtitle}
                 </p>
 
                 {/* Highlight banner if any */}
                 {col.stage.highlightBanner && (
-                  <div className="mt-1 px-2 py-1 rounded bg-white text-[10px] font-bold text-slate-800 border border-slate-200 shadow-2xs">
+                  <div className="mt-1 px-2 py-0.5 rounded bg-indigo-50/80 text-[10px] font-bold text-indigo-900 border border-indigo-200 shadow-2xs text-center">
                     {col.stage.highlightBanner}
                   </div>
                 )}
               </div>
 
-              {/* Cards Container */}
-              <div className="space-y-2.5 pt-1 min-h-[300px]">
+              {/* Cards Container with Independent Smooth Scrolling */}
+              <div className="p-2 space-y-2.5 overflow-y-auto flex-1">
                 {col.leads.length === 0 ? (
                   <div className="p-4 text-center text-[11px] text-slate-400 bg-white/60 rounded-lg border border-dashed border-slate-200">
                     No leads in {col.stage.shortName}
@@ -623,13 +620,13 @@ export const Leads = () => {
                         key={lead.id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, lead.id)}
-                        className="bg-white rounded-xl border border-slate-200 p-3 shadow-2xs hover:shadow-sm hover:border-slate-300 transition-all space-y-2 cursor-grab active:cursor-grabbing group"
+                        className="bg-white rounded-xl border border-slate-200/90 p-3 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all space-y-2 cursor-grab active:cursor-grabbing group"
                       >
                         {/* Top Badges & ID */}
                         <div className="flex items-center justify-between text-[10px]">
                           <div className="flex items-center gap-1">
                             <span
-                              className={`px-1.5 py-0.2 rounded font-bold uppercase ${
+                              className={`px-1.5 py-0.5 rounded font-bold uppercase ${
                                 lead.type === 'VISA'
                                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                                   : 'bg-purple-50 text-purple-700 border border-purple-200'
@@ -637,7 +634,7 @@ export const Leads = () => {
                             >
                               {lead.type}
                             </span>
-                            <span className="px-1.5 py-0.2 rounded font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                            <span className="px-1.5 py-0.5 rounded font-medium bg-slate-100 text-slate-600 border border-slate-200">
                               {lead.source?.includes('Website') ? 'Web' : lead.source?.includes('FB') ? 'Social' : 'Direct'}
                             </span>
                           </div>
@@ -648,80 +645,51 @@ export const Leads = () => {
                         <div>
                           <h3
                             onClick={() => setActiveLeadId(lead.id)}
-                            className="font-black text-xs text-slate-900 group-hover:text-[#2E2B6E] transition-colors cursor-pointer"
+                            className="font-bold text-[11px] text-slate-900 group-hover:text-[#2E2B6E] transition-colors cursor-pointer truncate leading-tight"
                           >
                             {lead.name}
                           </h3>
-                          <span className="text-[10px] text-slate-500 block truncate">{lead.company}</span>
+                          <span className="text-[10px] text-slate-500 block truncate mt-0.5">{lead.company}</span>
                         </div>
 
                         {/* Destination & Service */}
-                        <div className="text-[10px] text-slate-700 font-medium flex items-start gap-1">
-                          <span className="shrink-0">📍</span>
-                          <span className="line-clamp-1">{lead.targetCountry} - {lead.serviceRequired}</span>
+                        <div className="text-[10px] text-slate-600 font-medium flex items-center gap-1 truncate">
+                          <span>📍</span>
+                          <span className="truncate">{lead.targetCountry} &bull; {lead.serviceRequired}</span>
                         </div>
 
                         {/* Value and Assigned Staff */}
                         <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
-                          <span className="font-black text-slate-900">
+                          <span className="font-bold text-slate-900">
                             ₹{Number(lead.value).toLocaleString('en-IN')}
                           </span>
-                          <span className="text-[10px] text-slate-600 font-medium flex items-center gap-1">
+                          <span className="text-[9px] text-slate-600 font-medium flex items-center gap-1">
                             <span>👤</span>
-                            <span className="truncate max-w-[90px]">{lead.assignedStaff}</span>
+                            <span className="truncate max-w-[100px]">{lead.assignedStaff}</span>
                           </span>
                         </div>
 
-                        {/* Proposal / Quotation Section (For Proposal / Negotiation / Converted) */}
+                        {/* Proposal / Quotation Chip */}
                         {lead.quotation && (
-                          <div className="p-1.5 rounded bg-slate-50 border border-slate-200 text-[10px] space-y-1">
-                            <div className="flex items-center justify-between">
-                              <span className="font-mono font-bold text-slate-700">
-                                Quotation {lead.quotation.code}
-                              </span>
-                              <span className="font-black text-slate-900">
-                                ₹{Number(lead.quotation.total).toLocaleString('en-IN')}
-                              </span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={(e) => handleOpenProposalModal(lead, e)}
-                              className="w-full py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-white font-bold text-[9px] cursor-pointer"
-                            >
-                              Edit Quotation
-                            </button>
+                          <div className="px-2 py-1 rounded-md bg-purple-50/80 border border-purple-200 text-[9px] flex items-center justify-between">
+                            <span className="font-mono font-bold text-purple-700">📜 Quote {lead.quotation.code}</span>
+                            <span className="font-black text-purple-900">₹{Number(lead.quotation.total).toLocaleString('en-IN')}</span>
                           </div>
                         )}
 
-                        {/* Converted Case Section */}
+                        {/* Converted Case Chip */}
                         {lead.caseId && (
-                          <div className="p-1.5 rounded bg-emerald-50 border border-emerald-200 text-[10px] space-y-1">
-                            <div className="font-mono font-extrabold text-emerald-800">
-                              Case Active: {lead.caseId}
-                            </div>
-                            <button
-                              type="button"
-                              onClick={(e) => handleOpenCaseModal(lead, e)}
-                              className="w-full py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-white font-bold text-[9px] cursor-pointer"
-                            >
-                              View / Reassign Case
-                            </button>
+                          <div className="px-2 py-1 rounded-md bg-emerald-50/80 border border-emerald-200 text-[9px] flex items-center justify-between">
+                            <span className="font-mono font-bold text-emerald-800">📁 {lead.caseId}</span>
+                            <span className="text-[8px] uppercase font-bold px-1.5 py-0.2 bg-emerald-200 text-emerald-800 rounded">Converted</span>
                           </div>
                         )}
 
                         {/* Checklist indicator */}
-                        <div className="flex items-center justify-between text-[10px]">
-                          {isAllChecksDone ? (
-                            <span className="text-emerald-700 font-bold flex items-center gap-1">
-                              <span>✓</span>
-                              <span>Mandatory checks ready</span>
-                            </span>
-                          ) : (
-                            <span className="text-amber-700 font-semibold flex items-center gap-1">
-                              <span>⚠️</span>
-                              <span>Checklist pending</span>
-                            </span>
-                          )}
+                        <div className="flex items-center justify-between text-[9px]">
+                          <span className={`font-medium ${isAllChecksDone ? 'text-emerald-700 font-bold' : 'text-slate-500'}`}>
+                            {isAllChecksDone ? '✔ Mandatory checks ready' : 'Checklist'}
+                          </span>
                           <span className="text-slate-400 font-mono text-[9px]">
                             {checklistCompleted}/{checklistTotal}
                           </span>
@@ -733,7 +701,7 @@ export const Leads = () => {
                             type="button"
                             disabled={colIdx === 0}
                             onClick={(e) => handlePreviousStage(lead.id, e)}
-                            className="px-2 py-1 rounded border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[10px] cursor-pointer"
+                            className="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[9px] cursor-pointer"
                             title="Move back to previous stage"
                           >
                             &larr;
@@ -742,7 +710,7 @@ export const Leads = () => {
                           <button
                             type="button"
                             onClick={() => setActiveLeadId(lead.id)}
-                            className="flex-1 py-1 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-[10px] transition-colors cursor-pointer text-center"
+                            className="flex-1 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-[9px] transition-colors cursor-pointer text-center"
                           >
                             Side Sheet & Details
                           </button>
@@ -751,7 +719,7 @@ export const Leads = () => {
                             type="button"
                             disabled={colIdx === stageStats.length - 1}
                             onClick={(e) => handleAdvanceStage(lead.id, e)}
-                            className="px-2 py-1 rounded border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[10px] cursor-pointer"
+                            className="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[9px] cursor-pointer"
                             title="Advance to next stage"
                           >
                             &rarr;

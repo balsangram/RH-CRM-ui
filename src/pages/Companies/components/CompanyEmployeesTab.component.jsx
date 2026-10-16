@@ -82,8 +82,8 @@ export const CompanyEmployeesTab = ({
               <th className="px-4 py-3">NAME</th>
               <th className="px-4 py-3">EMAIL</th>
               <th className="px-4 py-3">PHONE NUMBER</th>
-              <th className="px-4 py-3">DEPARTMENT</th>
-              <th className="px-4 py-3">DESIGNATION</th>
+              {/* <th className="px-4 py-3">DEPARTMENT</th> */}
+              {/* <th className="px-4 py-3">DESIGNATION</th> */}
               <th className="px-4 py-3">STATUS</th>
               <th className="px-4 py-3">ACTIONS</th>
             </tr>
@@ -106,8 +106,8 @@ export const CompanyEmployeesTab = ({
                     </a>
                   </td>
                   <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{emp.phone}</td>
-                  <td className="px-4 py-3 text-slate-700">{emp.department}</td>
-                  <td className="px-4 py-3 text-slate-700">{emp.designation}</td>
+                  {/* <td className="px-4 py-3 text-slate-700">{emp.department}</td> */}
+                  {/* <td className="px-4 py-3 text-slate-700">{emp.designation}</td> */}
                   <td className="px-4 py-3">
                     <span
                       className={`inline-block px-2.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase border ${

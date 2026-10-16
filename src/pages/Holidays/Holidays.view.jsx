@@ -320,12 +320,8 @@ export const Holidays = () => {
           </div>
         </div>
 
-        {/* Aggregate Value Summary Line */}
-        <div className="mt-3 pt-2 text-[11px] font-semibold text-slate-500 flex items-center gap-2">
-          <span>
-            Total Pipeline: <strong className="text-slate-900 font-bold">{formatINR(pipelineStats.totalValue)}</strong>
-          </span>
-          <span>&bull;</span>
+        {/* Status Summary Line */}
+        <div className="mt-2 text-[10px] font-semibold text-slate-500 flex items-center gap-2">
           <span>
             Completed: <strong className="text-emerald-600 font-bold">{pipelineStats.completedCount}</strong>
           </span>
@@ -337,7 +333,7 @@ export const Holidays = () => {
             <button
               type="button"
               onClick={() => setFilterStage('ALL')}
-              className="ml-auto text-xs text-indigo-600 hover:underline font-bold cursor-pointer"
+              className="ml-auto text-[10px] text-indigo-600 hover:underline font-bold cursor-pointer"
             >
               Clear stage filter ({filterStage})
             </button>
@@ -355,7 +351,7 @@ export const Holidays = () => {
             <div
               key={stage.id}
               onClick={() => setFilterStage(filterStage === stage.id ? 'ALL' : stage.id)}
-              className={`p-3 rounded-xl border transition-all cursor-pointer select-none relative group ${
+              className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none relative group ${
                 isSelected
                   ? 'border-indigo-600 ring-2 ring-indigo-500/20 bg-indigo-50/40 shadow-xs'
                   : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-2xs'
@@ -363,16 +359,16 @@ export const Holidays = () => {
             >
               <div className="flex items-center gap-2">
                 <span
-                  className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold shrink-0 ${stage.colorBadge}`}
+                  className={`w-4 h-4 rounded text-[9px] flex items-center justify-center font-bold shrink-0 ${stage.colorBadge}`}
                 >
                   {stage.stepNumber}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold text-slate-900 truncate leading-tight">
+                  <p className="text-[11px] font-bold text-slate-900 truncate leading-tight">
                     {stage.shortTitle}
                   </p>
-                  <p className="text-[11px] text-slate-500 font-medium truncate mt-0.5">
-                    {stats.count} &bull; {formatK(stats.value)}
+                  <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">
+                    {stats.count} {stats.count === 1 ? 'Booking' : 'Bookings'}
                   </p>
                 </div>
               </div>
@@ -390,32 +386,32 @@ export const Holidays = () => {
       {/* MAIN VIEW AREA */}
       {viewMode === 'kanban' ? (
         /* KANBAN BOARD VIEW (Matching Screenshot 1) */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3.5 items-start">
+        <div className="flex gap-3.5 items-start overflow-x-auto pb-4">
           {HOLIDAY_STAGES.map((stage) => {
             const stageCases = filteredCases.filter((c) => c.stage === stage.id)
 
             return (
               <div
                 key={stage.id}
-                className="bg-slate-50/80 rounded-2xl border border-slate-200/90 flex flex-col max-h-[calc(100vh-280px)] overflow-hidden shadow-2xs"
+                className="bg-slate-50/80 rounded-2xl border border-slate-200/90 flex flex-col max-h-[calc(100vh-280px)] overflow-hidden shadow-2xs w-[285px] min-w-[285px] shrink-0"
               >
                 {/* Column Header */}
-                <div className="p-3 border-b border-slate-200 bg-white rounded-t-2xl space-y-1">
+                <div className="p-2.5 border-b border-slate-200 bg-white rounded-t-2xl space-y-0.5 shrink-0">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-black text-slate-900 tracking-tight">
+                    <h3 className="text-[11px] font-black text-slate-900 tracking-tight">
                       {stage.title}
                     </h3>
-                    <span className="w-5 h-5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 font-mono text-[10px] font-bold flex items-center justify-center">
+                    <span className="w-4 h-4 rounded-md bg-slate-100 text-slate-700 border border-slate-200 font-mono text-[9px] font-bold flex items-center justify-center">
                       {stageCases.length}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-500 font-medium leading-tight line-clamp-1">
+                  <p className="text-[9px] text-slate-500 font-medium leading-tight line-clamp-1">
                     {stage.subtitle}
                   </p>
                   {/* Completed / Cancelled Banner */}
                   {stage.bannerText && (
                     <div
-                      className={`text-[9px] font-bold text-center py-0.5 rounded border ${
+                      className={`text-[8px] font-bold text-center py-0.5 rounded border ${
                         stage.id === 'COMPLETED'
                           ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                           : 'border-rose-200 bg-rose-50 text-rose-700'
@@ -427,9 +423,9 @@ export const Holidays = () => {
                 </div>
 
                 {/* Cards Container */}
-                <div className="p-2 space-y-2.5 overflow-y-auto flex-1">
+                <div className="p-2 space-y-2 overflow-y-auto flex-1">
                   {stageCases.length === 0 ? (
-                    <div className="py-8 text-center text-slate-400 text-[11px] italic">
+                    <div className="py-8 text-center text-slate-400 text-[10px] italic">
                       No bookings in this stage
                     </div>
                   ) : (
@@ -450,65 +446,38 @@ export const Holidays = () => {
                       return (
                         <div
                           key={caseItem.id}
-                          className="bg-white rounded-xl border border-slate-200/90 p-3 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all space-y-2"
+                          className="bg-white rounded-xl border border-slate-200/90 p-2.5 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all space-y-1.5"
                         >
                           {/* Top Badges */}
-                          <div className="flex items-center justify-between text-[10px]">
-                            <div className="flex items-center gap-1">
-                              <span className="px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 flex items-center gap-1">
-                                <span>🌴</span> Holiday Case
-                              </span>
-                              <span className="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-medium border border-slate-200">
-                                {caseItem.paymentType}
-                              </span>
-                            </div>
-                            <span className="font-mono font-bold text-slate-400 text-[10px]">
+                          <div className="flex items-center justify-between text-[9px]">
+                            <span className="px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+                              🌴 Holiday
+                            </span>
+                            <span className="font-mono font-bold text-slate-400 text-[9px]">
                               {caseItem.id}
                             </span>
                           </div>
 
                           {/* Package Title & Customer */}
                           <div>
-                            <h4 className="text-xs font-bold text-slate-900 leading-snug">
+                            <h4 className="text-[11px] font-bold text-slate-900 leading-snug truncate">
                               {caseItem.packageName}
                             </h4>
-                            <p className="text-[11px] text-slate-700 font-medium mt-0.5 flex items-center gap-1">
+                            <p className="text-[10px] text-slate-700 font-medium mt-0.5 flex items-center gap-1 truncate">
                               <span>👤</span> {caseItem.customer}
                             </p>
-                            <p className="text-[10px] text-slate-500 font-medium mt-0.5 flex items-center gap-1">
+                            <p className="text-[9px] text-slate-500 font-medium mt-0.5 flex items-center gap-1 truncate">
                               <span>📍</span> {caseItem.destination} &bull; {caseItem.duration}
                             </p>
                           </div>
 
-                          {/* Checklist Pill & Departure Date */}
-                          <div className="flex items-center justify-between text-[10px] pt-1 border-t border-slate-100">
-                            {stage.id === 'COMPLETED' ? (
-                              <span className="px-1.5 py-0.5 rounded font-bold text-emerald-700 bg-emerald-50 border border-emerald-200">
-                                ✔ Checklist Done
-                              </span>
-                            ) : (
-                              <span
-                                className={`px-1.5 py-0.5 rounded font-bold border ${
-                                  completedCount === totalChecklist
-                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                    : 'bg-amber-50 text-amber-700 border-amber-200'
-                                }`}
-                              >
-                                Checklist: {completedCount}/{totalChecklist}
-                              </span>
-                            )}
-                            <span className="text-slate-500 font-mono text-[10px]">
-                              Dep: {caseItem.departureDate}
-                            </span>
-                          </div>
-
                           {/* Price & Paid Percentage */}
-                          <div className="flex items-center justify-between text-xs pt-0.5">
+                          <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
                             <span className="font-bold text-slate-900">
                               {formatINR(caseItem.price)}
                             </span>
                             <span
-                              className={`text-[10px] font-bold ${
+                              className={`text-[9px] font-bold ${
                                 paidPercent === 100
                                   ? 'text-emerald-600'
                                   : paidPercent > 0
@@ -516,51 +485,54 @@ export const Holidays = () => {
                                   : 'text-slate-400'
                               }`}
                             >
-                              {paidPercent}% paid
+                              {paidPercent}% paid ({caseItem.paymentType})
                             </span>
                           </div>
 
-                          {/* Case Officer */}
-                          <div className="text-[10px] text-slate-500 flex items-center gap-1 font-medium">
-                            <span>👤</span> {caseItem.officer}
+                          {/* Case Officer & Checklist */}
+                          <div className="flex items-center justify-between text-[9px] text-slate-500">
+                            <span className="flex items-center gap-1 truncate font-medium max-w-[130px]">
+                              <span>👤</span> {caseItem.officer}
+                            </span>
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border shrink-0 ${
+                                completedCount === totalChecklist
+                                  ? 'border-emerald-300 text-emerald-700 bg-emerald-50'
+                                  : 'border-amber-300 text-amber-700 bg-amber-50'
+                              }`}
+                            >
+                              {completedCount}/{totalChecklist} done
+                            </span>
                           </div>
 
                           {/* Action Buttons on Card */}
-                          <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5">
+                          <div className="pt-1.5 border-t border-slate-100 flex items-center gap-1.5">
                             <button
                               type="button"
                               onClick={() => {
                                 setSelectedCaseId(caseItem.id)
                                 setDrawerAlert('')
                               }}
-                              className="px-2 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-[10px] font-bold transition-colors cursor-pointer flex-1 text-center"
+                              className="px-2 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-[9px] font-bold transition-colors cursor-pointer flex-1 text-center"
                             >
-                              Side Sheet
+                              Details
                             </button>
                             <button
                               type="button"
                               onClick={() => setDetailsModalCase(caseItem)}
-                              className="px-2 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-[10px] font-bold transition-colors cursor-pointer flex items-center justify-center gap-0.5"
+                              className="px-2 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-[9px] font-bold transition-colors cursor-pointer text-center"
+                              title="Full Details"
                             >
-                              <span>Details</span>
-                              <span>&rarr;</span>
+                              Full &rarr;
                             </button>
                             {stage.nextStage && (
                               <button
                                 type="button"
                                 onClick={() => handleAdvanceStage(caseItem, stage.nextStage)}
-                                className="px-2 py-1 rounded-lg bg-[#0F0E2B] text-white hover:bg-[#181445] text-[10px] font-bold transition-colors cursor-pointer"
+                                className="px-2.5 py-1 rounded-lg bg-[#0F0E2B] text-white hover:bg-[#181445] text-[9px] font-bold transition-colors cursor-pointer shrink-0"
+                                title={`Advance to ${stage.nextStage}`}
                               >
-                                {stage.nextButtonText}
-                              </button>
-                            )}
-                            {stage.id === 'VOUCHERS_CONFIRM' && (
-                              <button
-                                type="button"
-                                onClick={() => handleAdvanceStage(caseItem, 'CANCELLED')}
-                                className="px-1.5 py-1 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 text-[10px] font-bold transition-colors cursor-pointer"
-                              >
-                                Cancel
+                                &rarr; Next
                               </button>
                             )}
                           </div>

@@ -29,10 +29,10 @@ export const LeadSourceBreakdownChart = ({ className = '' }) => {
             <span className="text-sm font-black text-main leading-tight">45%</span>
             <span className="text-xs font-bold text-muted leading-tight">Website</span>
 
-            {/* Ring Circle 2 (32% WhatsApp) */}
+            {/* Ring Circle 2 (32% Meta) */}
             <div className="w-40 h-40 rounded-full bg-[var(--brand-red)]/20 border border-[var(--brand-red)]/40 flex flex-col items-center pt-2.5 mt-1 shadow-2xs transition-transform hover:scale-105 duration-200">
               <span className="text-xs font-black text-main leading-tight">32%</span>
-              <span className="text-[11px] font-bold text-muted leading-tight">WhatsApp</span>
+              <span className="text-[11px] font-bold text-muted leading-tight">Meta</span>
 
               {/* Ring Circle 3 (18% Referral) */}
               <div className="w-28 h-28 rounded-full bg-blue-100 border border-blue-300 flex flex-col items-center pt-2 mt-1 shadow-2xs transition-transform hover:scale-105 duration-200">

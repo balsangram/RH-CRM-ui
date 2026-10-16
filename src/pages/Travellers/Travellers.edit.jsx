@@ -3,19 +3,42 @@ import { useNavigate, useParams } from 'react-router-dom'
 import Button from '../../components/Button/Button.component'
 import ROUTES from '../../config/routes'
 
+import travellersService from '../../services/travellers'
+
 export const TravellersEdit = () => {
   const navigate = useNavigate()
   const { id } = useParams()
   const [formData, setFormData] = useState({
-    name: 'Robert Downey Jr.',
-    passport: 'Z9821345',
-    nationality: 'United States',
-    expiry: '2029-08-14',
-    customer: 'Robert Downey',
+    name: '',
+    passport: '',
+    nationality: '',
+    expiry: '',
+    customer: '',
   })
+
+  React.useEffect(() => {
+    if (id) {
+      const found = travellersService.getTravellerById(id)
+      if (found) {
+        setFormData({
+          name: found.name,
+          passport: found.passport,
+          nationality: found.country,
+          expiry: found.expiry,
+          customer: found.associatedCustomer || '',
+        })
+      }
+    }
+  }, [id])
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    if (id) {
+      travellersService.updateTraveller(id, {
+        ...formData,
+        country: formData.nationality,
+      })
+    }
     navigate(ROUTES.TRAVELLERS)
   }
 

@@ -3,18 +3,29 @@ import { useNavigate } from 'react-router-dom'
 import Button from '../../components/Button/Button.component'
 import ROUTES from '../../config/routes'
 
+import travellersService from '../../services/travellers'
+
 export const TravellersAdd = () => {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     name: '',
     passport: '',
-    nationality: '',
-    expiry: '',
+    nationality: 'India',
+    expiry: '2030-01-01',
     customer: '',
+    email: '',
+    phone: '',
+    company: '',
+    status: 'ACTIVE',
   })
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    if (!formData.name || !formData.passport) return
+    travellersService.createTraveller({
+      ...formData,
+      country: formData.nationality,
+    })
     navigate(ROUTES.TRAVELLERS)
   }
 

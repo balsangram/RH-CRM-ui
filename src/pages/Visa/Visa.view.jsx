@@ -338,12 +338,8 @@ export const Visa = () => {
           </div>
         </div>
 
-        {/* Aggregate Value Summary Line */}
-        <div className="mt-3 pt-2 text-[11px] font-semibold text-slate-500 flex items-center gap-2">
-          <span>
-            Total Pipeline Value: <strong className="text-slate-900 font-bold">{formatINR(pipelineStats.totalValue)}</strong>
-          </span>
-          <span>&bull;</span>
+        {/* Status Summary Line */}
+        <div className="mt-2 text-[10px] font-semibold text-slate-500 flex items-center gap-2">
           <span>
             Approved: <strong className="text-emerald-600 font-bold">{pipelineStats.approvedCount}</strong>
           </span>
@@ -355,7 +351,7 @@ export const Visa = () => {
             <button
               type="button"
               onClick={() => setFilterStage('ALL')}
-              className="ml-auto text-xs text-indigo-600 hover:underline font-bold cursor-pointer"
+              className="ml-auto text-[10px] text-indigo-600 hover:underline font-bold cursor-pointer"
             >
               Clear stage filter ({filterStage})
             </button>
@@ -373,7 +369,7 @@ export const Visa = () => {
             <div
               key={stage.id}
               onClick={() => setFilterStage(filterStage === stage.id ? 'ALL' : stage.id)}
-              className={`p-3 rounded-xl border transition-all cursor-pointer select-none relative group ${
+              className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none relative group ${
                 isSelected
                   ? 'border-indigo-600 ring-2 ring-indigo-500/20 bg-indigo-50/40 shadow-xs'
                   : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-2xs'
@@ -381,16 +377,16 @@ export const Visa = () => {
             >
               <div className="flex items-center gap-2">
                 <span
-                  className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold shrink-0 ${stage.colorBadge}`}
+                  className={`w-4 h-4 rounded text-[9px] flex items-center justify-center font-bold shrink-0 ${stage.colorBadge}`}
                 >
                   {stage.stepNumber}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold text-slate-900 truncate leading-tight">
+                  <p className="text-[11px] font-bold text-slate-900 truncate leading-tight">
                     {stage.shortTitle}
                   </p>
-                  <p className="text-[11px] text-slate-500 font-medium truncate mt-0.5">
-                    {stats.count} &bull; {formatK(stats.value)}
+                  <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">
+                    {stats.count} {stats.count === 1 ? 'Case' : 'Cases'}
                   </p>
                 </div>
               </div>
@@ -550,34 +546,34 @@ export const Visa = () => {
         </div>
       ) : (
         /* KANBAN BOARD VIEW (Matching Screenshot 2) */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3.5 items-start">
+        <div className="flex gap-3.5 items-start overflow-x-auto pb-4">
           {VISA_STAGES.map((stage) => {
             const stageCases = filteredCases.filter((c) => c.stage === stage.id)
 
             return (
               <div
                 key={stage.id}
-                className="bg-slate-50/80 rounded-2xl border border-slate-200/90 flex flex-col max-h-[calc(100vh-280px)] overflow-hidden shadow-2xs"
+                className="bg-slate-50/80 rounded-2xl border border-slate-200/90 flex flex-col max-h-[calc(100vh-280px)] overflow-hidden shadow-2xs w-[285px] min-w-[285px] shrink-0"
               >
                 {/* Column Header */}
-                <div className="p-3 border-b border-slate-200 bg-white rounded-t-2xl">
+                <div className="p-2.5 border-b border-slate-200 bg-white rounded-t-2xl shrink-0 space-y-0.5">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-black text-slate-900 tracking-tight">
+                    <h3 className="text-[11px] font-black text-slate-900 tracking-tight">
                       {stage.title}
                     </h3>
-                    <span className="w-5 h-5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 font-mono text-[10px] font-bold flex items-center justify-center">
+                    <span className="w-4 h-4 rounded-md bg-slate-100 text-slate-700 border border-slate-200 font-mono text-[9px] font-bold flex items-center justify-center">
                       {stageCases.length}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-500 font-medium leading-tight mt-1 line-clamp-1">
+                  <p className="text-[9px] text-slate-500 font-medium leading-tight line-clamp-1">
                     {stage.subtitle}
                   </p>
                 </div>
 
                 {/* Cards Container */}
-                <div className="p-2 space-y-2.5 overflow-y-auto flex-1">
+                <div className="p-2 space-y-2 overflow-y-auto flex-1">
                   {stageCases.length === 0 ? (
-                    <div className="py-8 text-center text-slate-400 text-[11px] italic">
+                    <div className="py-8 text-center text-slate-400 text-[10px] italic">
                       No cases in this stage
                     </div>
                   ) : (
@@ -590,40 +586,35 @@ export const Visa = () => {
                       return (
                         <div
                           key={caseItem.id}
-                          className="bg-white rounded-xl border border-slate-200/90 p-3 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all space-y-2"
+                          className="bg-white rounded-xl border border-slate-200/90 p-2.5 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all space-y-1.5"
                         >
                           {/* Card Top Pill Row */}
-                          <div className="flex items-center justify-between gap-1 text-[10px]">
-                            <div className="flex items-center gap-1 flex-wrap">
-                              <span className="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold border border-slate-200">
-                                {caseItem.visaType}
-                              </span>
-                              <span className="px-1.5 py-0.5 rounded-md bg-slate-50 text-slate-600 font-medium border border-slate-200">
-                                {caseItem.paymentType}
-                              </span>
-                            </div>
-                            <span className="font-mono font-bold text-slate-400 text-[10px]">
+                          <div className="flex items-center justify-between gap-1 text-[9px]">
+                            <span className="px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold border border-blue-200">
+                              {caseItem.visaType}
+                            </span>
+                            <span className="font-mono font-bold text-slate-400 text-[9px]">
                               {caseItem.id}
                             </span>
                           </div>
 
                           {/* Applicant Name & Destination */}
                           <div>
-                            <h4 className="text-xs font-bold text-slate-900 leading-snug">
+                            <h4 className="text-[11px] font-bold text-slate-900 leading-snug truncate">
                               {caseItem.applicant}
                             </h4>
-                            <p className="text-[11px] text-slate-600 font-medium mt-0.5 flex items-center gap-1">
+                            <p className="text-[10px] text-slate-600 font-medium mt-0.5 flex items-center gap-1 truncate">
                               <span>📍</span> {caseItem.country}
                             </p>
                           </div>
 
                           {/* Amount & Paid Progress */}
-                          <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100">
+                          <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
                             <span className="font-bold text-slate-900">
                               {formatINR(caseItem.amount)}
                             </span>
                             <span
-                              className={`text-[10px] font-bold ${
+                              className={`text-[9px] font-bold ${
                                 paidPercent === 100
                                   ? 'text-emerald-600'
                                   : paidPercent > 0
@@ -631,17 +622,17 @@ export const Visa = () => {
                                   : 'text-slate-400'
                               }`}
                             >
-                              {paidPercent}% paid
+                              {paidPercent}% paid ({caseItem.paymentType})
                             </span>
                           </div>
 
                           {/* Case Officer & Document Status */}
-                          <div className="flex items-center justify-between text-[10px] text-slate-500">
-                            <span className="flex items-center gap-1 truncate font-medium">
+                          <div className="flex items-center justify-between text-[9px] text-slate-500">
+                            <span className="flex items-center gap-1 truncate font-medium max-w-[130px]">
                               <span>👤</span> {caseItem.officer}
                             </span>
                             <span
-                              className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase border ${
+                              className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border shrink-0 ${
                                 caseItem.docStatus === 'DOCS_VERIFIED'
                                   ? 'border-blue-300 text-blue-700 bg-blue-50'
                                   : caseItem.docStatus === 'APPROVED'
@@ -653,39 +644,34 @@ export const Visa = () => {
                             </span>
                           </div>
 
-                          {/* Applied Date */}
-                          <p className="text-[10px] text-slate-400 font-mono">
-                            Applied: {caseItem.appliedDate}
-                          </p>
-
                           {/* Card Action Buttons */}
-                          <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5">
+                          <div className="pt-1.5 border-t border-slate-100 flex items-center gap-1.5">
                             <button
                               type="button"
                               onClick={() => {
                                 setSelectedCaseId(caseItem.id)
                                 setDrawerAlert('')
                               }}
-                              className="px-2 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-[10px] font-bold transition-colors cursor-pointer flex-1 text-center"
+                              className="px-2 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-[9px] font-bold transition-colors cursor-pointer flex-1 text-center"
                             >
                               Details
                             </button>
                             <button
                               type="button"
                               onClick={() => setProfileModalCase(caseItem)}
-                              className="px-2 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-[10px] font-bold transition-colors cursor-pointer flex items-center justify-center gap-1"
+                              className="px-2 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-[9px] font-bold transition-colors cursor-pointer text-center"
+                              title="Full Profile"
                             >
-                              <span>Profile</span>
-                              <span>&rarr;</span>
+                              Profile &rarr;
                             </button>
                             {stage.nextStage && (
                               <button
                                 type="button"
                                 onClick={() => handleAdvanceStage(caseItem, stage.nextStage)}
-                                className="px-2 py-1 rounded-lg bg-[#0F0E2B] text-white hover:bg-[#181445] text-[10px] font-bold transition-colors cursor-pointer"
+                                className="px-2 py-1 rounded-lg bg-[#0F0E2B] text-white hover:bg-[#181445] text-[9px] font-bold transition-colors cursor-pointer shrink-0"
                                 title={`Advance to ${stage.nextStage}`}
                               >
-                                {stage.nextButtonText}
+                                &rarr; Next
                               </button>
                             )}
                           </div>

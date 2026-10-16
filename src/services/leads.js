@@ -63,7 +63,7 @@ export const DEFAULT_STAGES = [
     badgeClass: 'bg-purple-50 text-purple-800 border-purple-300',
     defaultChecklist: [
       { id: 'chk-7', text: 'Generate itemized quotation with fees', required: true, completed: true },
-      { id: 'chk-8', text: 'Send proposal document via email/WhatsApp', required: true, completed: true },
+      { id: 'chk-8', text: 'Send proposal document via email/Meta', required: true, completed: true },
       { id: 'chk-9', text: 'Follow up on proposal acceptance', required: false, completed: false },
     ],
   },
@@ -219,7 +219,7 @@ export const INITIAL_LEADS = [
     createdDate: '2026-10-03',
     checklist: [
       { id: 'c1', text: 'Generate itemized quotation with fees', required: true, completed: true },
-      { id: 'c2', text: 'Send proposal document via email/WhatsApp', required: true, completed: true },
+      { id: 'c2', text: 'Send proposal document via email/Meta', required: true, completed: true },
       { id: 'c3', text: 'Follow up on proposal acceptance', required: false, completed: true },
     ],
     quotation: {
@@ -255,7 +255,7 @@ export const INITIAL_LEADS = [
     createdDate: '2026-10-04',
     checklist: [
       { id: 'c1', text: 'Generate itemized quotation with fees', required: true, completed: true },
-      { id: 'c2', text: 'Send proposal document via email/WhatsApp', required: true, completed: true },
+      { id: 'c2', text: 'Send proposal document via email/Meta', required: true, completed: true },
       { id: 'c3', text: 'Follow up on proposal acceptance', required: false, completed: false },
     ],
     quotation: {

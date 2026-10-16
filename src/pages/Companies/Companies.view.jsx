@@ -35,9 +35,9 @@ export const Companies = () => {
   const [statusFilter, setStatusFilter] = useState('all')
   const [sortBy, setSortBy] = useState('name-asc')
 
-  // Pagination for table
+  // Pagination for table & cards
   const [currentPage, setCurrentPage] = useState(1)
-  const [rowsPerPage, setRowsPerPage] = useState(5)
+  const [rowsPerPage, setRowsPerPage] = useState(8)
 
   // Detail view active tab: 'applications' | 'employees' | 'financial'
   const [detailTab, setDetailTab] = useState('applications')
@@ -662,84 +662,8 @@ export const Companies = () => {
 
         {/* TABLE VIEW */}
         {viewFormat === 'table' ? (
-          <div>
-            <div className="overflow-x-auto">
-              <Table columns={columns} data={paginatedCompanies} />
-            </div>
-
-            {/* Pagination Controls */}
-            <div className="px-4 py-3 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-slate-600">
-              <div className="flex items-center gap-2">
-                <span>Rows per page:</span>
-                <select
-                  value={rowsPerPage}
-                  onChange={(e) => {
-                    setRowsPerPage(Number(e.target.value))
-                    setCurrentPage(1)
-                  }}
-                  className="px-2 py-1 rounded border border-slate-300 text-xs bg-white text-slate-800"
-                >
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                </select>
-                <span className="text-slate-500 ml-2">
-                  Showing {totalItems > 0 ? (currentPage - 1) * rowsPerPage + 1 : 0} to{' '}
-                  {Math.min(currentPage * rowsPerPage, totalItems)} of {totalItems} items
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  disabled={currentPage <= 1}
-                  onClick={() => setCurrentPage(1)}
-                  className="px-2 py-1 rounded border border-slate-200 text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  &laquo; First
-                </button>
-                <button
-                  type="button"
-                  disabled={currentPage <= 1}
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  className="px-2 py-1 rounded border border-slate-200 text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  &lsaquo; Prev
-                </button>
-
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    type="button"
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-7 h-7 rounded text-xs font-bold transition-colors cursor-pointer ${
-                      currentPage === page
-                        ? 'bg-slate-900 text-white'
-                        : 'border border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-                <button
-                  type="button"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  className="px-2 py-1 rounded border border-slate-200 text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  Next &rsaquo;
-                </button>
-                <button
-                  type="button"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage(totalPages)}
-                  className="px-2 py-1 rounded border border-slate-200 text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  Last &raquo;
-                </button>
-              </div>
-            </div>
+          <div className="overflow-x-auto">
+            <Table columns={columns} data={paginatedCompanies} />
           </div>
         ) : (
           /* CARD VIEW - Using modular CompanyCard component */
@@ -765,6 +689,81 @@ export const Companies = () => {
             )}
           </div>
         )}
+
+        {/* Pagination Controls (Applies to BOTH Table & Card views) */}
+        <div className="px-4 py-3 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-slate-600 bg-white">
+          <div className="flex items-center gap-2">
+            <span>Rows per page:</span>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value))
+                setCurrentPage(1)
+              }}
+              className="px-2 py-1 rounded border border-slate-300 text-xs bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            >
+              <option value={4}>4</option>
+              <option value={8}>8</option>
+              <option value={12}>12</option>
+              <option value={20}>20</option>
+            </select>
+            <span className="text-slate-500 ml-2">
+              Showing {totalItems > 0 ? (currentPage - 1) * rowsPerPage + 1 : 0} to{' '}
+              {Math.min(currentPage * rowsPerPage, totalItems)} of {totalItems} items
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage(1)}
+              className="px-2 py-1 rounded border border-slate-200 text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              &laquo; First
+            </button>
+            <button
+              type="button"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className="px-2 py-1 rounded border border-slate-200 text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              &lsaquo; Prev
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                type="button"
+                onClick={() => setCurrentPage(page)}
+                className={`w-7 h-7 rounded text-xs font-bold transition-colors cursor-pointer ${
+                  currentPage === page
+                    ? 'bg-[#0F0E2B] text-white shadow-xs'
+                    : 'border border-slate-200 text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              className="px-2 py-1 rounded border border-slate-200 text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              Next &rsaquo;
+            </button>
+            <button
+              type="button"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage(totalPages)}
+              className="px-2 py-1 rounded border border-slate-200 text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              Last &raquo;
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* MODAL: ADD COMPANY */}

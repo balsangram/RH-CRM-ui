@@ -698,25 +698,25 @@ export const Packages = () => {
                   {/* Card Body */}
                   <div className="p-3 flex-1 flex flex-col justify-between space-y-2.5">
                     <div>
-                      <h3 className="font-bold text-xs sm:text-sm text-main group-hover:text-primary transition-colors leading-snug">
+                      <h3 className="font-bold text-xs text-main group-hover:text-primary transition-colors leading-snug">
                         {pkg.name}
                       </h3>
 
-                      <div className="flex items-center gap-2 text-[11px] text-muted mt-1 font-medium">
+                      <div className="flex items-center gap-2 text-[10px] text-muted mt-1 font-medium">
                         <span>⏱ {pkg.duration}</span>
                       </div>
 
                       {/* Price */}
-                      <div className="mt-2 flex items-baseline gap-1">
-                        <span className="text-base font-black text-main">
+                      <div className="mt-1.5 flex items-baseline gap-1">
+                        <span className="text-sm font-bold text-main">
                           ₹{Number(pkg.price).toLocaleString('en-IN')}
                         </span>
-                        <span className="text-[10px] text-muted">{pkg.priceUnit || 'per person'}</span>
+                        <span className="text-[9px] text-muted">{pkg.priceUnit || 'per person'}</span>
                       </div>
 
                       {/* Inclusions summary */}
-                      <div className="mt-2 p-2 rounded-lg bg-slate-50 border border-slate-100 text-[10px] text-muted">
-                        <span className="font-bold text-main uppercase tracking-wider block mb-0.5">
+                      <div className="mt-1.5 p-2 rounded-lg bg-slate-50 border border-slate-100 text-[10px] text-muted">
+                        <span className="font-bold text-main uppercase tracking-wider block mb-0.5 text-[9px]">
                           Inclusions:
                         </span>
                         <p className="line-clamp-2 leading-relaxed">
@@ -730,7 +730,7 @@ export const Packages = () => {
                       <button
                         type="button"
                         onClick={() => navigate(ROUTES.PACKAGES_HOLIDAY_DETAIL.replace(':id', pkg.id))}
-                        className="flex-1 py-1.5 px-2.5 text-xs font-semibold rounded bg-[#0F0E2B] hover:bg-[#181445] text-white shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-1"
+                        className="flex-1 py-1 px-2 text-[11px] font-semibold rounded bg-[#0F0E2B] hover:bg-[#181445] text-white shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-1"
                       >
                         <span>View Details</span>
                         <span>&rarr;</span>
@@ -741,14 +741,14 @@ export const Packages = () => {
                           <button
                             type="button"
                             onClick={() => handleOpenEditHoliday(pkg)}
-                            className="py-1.5 px-2.5 text-xs font-medium rounded border border-slate-300 bg-white hover:bg-slate-50 text-main transition-colors cursor-pointer"
+                            className="py-1 px-2 text-[11px] font-medium rounded border border-slate-300 bg-white hover:bg-slate-50 text-main transition-colors cursor-pointer"
                           >
                             Edit
                           </button>
                           <button
                             type="button"
                             onClick={() => handleToggleHolidayStatus(pkg)}
-                            className="py-1.5 px-2 text-xs font-medium rounded border border-slate-300 bg-white hover:bg-rose-50 hover:text-rose-700 text-muted transition-colors cursor-pointer"
+                            className="py-1 px-1.5 text-[11px] font-medium rounded border border-slate-300 bg-white hover:bg-rose-50 hover:text-rose-700 text-muted transition-colors cursor-pointer"
                           >
                             {pkg.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
                           </button>
