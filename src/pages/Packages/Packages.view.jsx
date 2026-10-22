@@ -6,17 +6,20 @@ import Pagination from '../../components/Pagination/Pagination.component'
 import ImageUpload from '../../components/ImageUpload/ImageUpload.component'
 import usePermission from '../../hooks/usePermission'
 import packagesService from '../../services/packages'
+import masterWorkflowTemplatesService from '../../services/masterWorkflowTemplates'
+import MasterStageConfigTab from './components/MasterStageConfigTab.component'
 
 export const Packages = () => {
   const navigate = useNavigate()
   const { isAdmin, role } = usePermission()
 
-  // Active Tab: 'VISA' (11.1) or 'HOLIDAYS' (11.2)
+  // Active Tab: 'VISA' (11.1), 'HOLIDAYS' (11.2), or 'MASTER_STAGES' (11.3)
   const [activeTab, setActiveTab] = useState('VISA')
 
   // Data states
   const [visaPackages, setVisaPackages] = useState(() => packagesService.getVisaPackages())
   const [holidayPackages, setHolidayPackages] = useState(() => packagesService.getHolidayPackages())
+  const [masterTemplatesCount, setMasterTemplatesCount] = useState(() => masterWorkflowTemplatesService.getTemplates().length)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL') // 'ALL' | 'ACTIVE' | 'INACTIVE'
 
@@ -339,7 +342,7 @@ export const Packages = () => {
       {/* ------------------------------------------------------------- */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         {/* Segmented Tabs */}
-        <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs shadow-2xs">
+        <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs shadow-2xs flex-wrap">
           <button
             type="button"
             onClick={() => {
@@ -383,6 +386,28 @@ export const Packages = () => {
               {holidayPackages.length}
             </span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('MASTER_STAGES')
+              setMasterTemplatesCount(masterWorkflowTemplatesService.getTemplates().length)
+            }}
+            className={`px-3.5 py-1.5 rounded-lg font-bold transition-all flex items-center gap-2 cursor-pointer text-xs ${
+              activeTab === 'MASTER_STAGES'
+                ? 'bg-[#181445] text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+            }`}
+          >
+            <span>11.3 Master Stage & Workflow Config</span>
+            <span
+              className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                activeTab === 'MASTER_STAGES' ? 'bg-[#E11D2E] text-white' : 'bg-slate-200 text-slate-700'
+              }`}
+            >
+              {masterTemplatesCount}
+            </span>
+          </button>
         </div>
 
         {/* Admin Add Buttons */}
@@ -412,68 +437,70 @@ export const Packages = () => {
       {/* ------------------------------------------------------------- */}
       {/* 3. SEARCH & FILTER CONTROLS BAR (COMPACT)                     */}
       {/* ------------------------------------------------------------- */}
-      <div className="p-2.5 sm:p-3 rounded-xl bg-white border border-border shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-        <div className="flex items-center gap-2">
-          <h2 className="text-xs sm:text-sm font-bold text-main">
-            {activeTab === 'VISA' ? 'Visa Packages & Countries Offered' : 'Holiday / Tour Packages'}
-          </h2>
-          <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200">
-            {activeTab === 'VISA' ? `${filteredVisaPackages.length} Countries` : `${filteredHolidayPackages.length} Packages`}
-          </span>
-        </div>
+      {activeTab !== 'MASTER_STAGES' && (
+        <div className="p-2.5 sm:p-3 rounded-xl bg-white border border-border shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xs sm:text-sm font-bold text-main">
+              {activeTab === 'VISA' ? 'Visa Packages & Countries Offered' : 'Holiday / Tour Packages'}
+            </h2>
+            <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200">
+              {activeTab === 'VISA' ? `${filteredVisaPackages.length} Countries` : `${filteredHolidayPackages.length} Packages`}
+            </span>
+          </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value)
-              setVisaPage(1)
-              setHolidayPage(1)
-            }}
-            className="px-2.5 py-1 text-xs font-medium rounded-lg border border-border bg-slate-50 text-main focus:outline-none focus:border-primary cursor-pointer"
-          >
-            <option value="ALL">All Statuses</option>
-            <option value="ACTIVE">Active Only</option>
-            <option value="INACTIVE">Inactive Only</option>
-          </select>
-
-          {/* Search Box */}
-          <div className="relative min-w-[200px]">
-            <input
-              type="text"
-              value={searchQuery}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Status Filter */}
+            <select
+              value={statusFilter}
               onChange={(e) => {
-                setSearchQuery(e.target.value)
+                setStatusFilter(e.target.value)
                 setVisaPage(1)
                 setHolidayPage(1)
               }}
-              placeholder={activeTab === 'VISA' ? 'Search country, code...' : 'Search package, destination...'}
-              className="w-full pl-7 pr-3 py-1 text-xs rounded-lg bg-slate-50 border border-border text-main placeholder-muted focus:outline-none focus:border-primary"
-            />
-            <svg
-              className="w-3.5 h-3.5 text-muted absolute left-2 top-1/2 -translate-y-1/2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+              className="px-2.5 py-1 text-xs font-medium rounded-lg border border-border bg-slate-50 text-main focus:outline-none focus:border-primary cursor-pointer"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery('')
+              <option value="ALL">All Statuses</option>
+              <option value="ACTIVE">Active Only</option>
+              <option value="INACTIVE">Inactive Only</option>
+            </select>
+
+            {/* Search Box */}
+            <div className="relative min-w-[200px]">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
                   setVisaPage(1)
+                  setHolidayPage(1)
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-main text-xs cursor-pointer"
+                placeholder={activeTab === 'VISA' ? 'Search country, code...' : 'Search package, destination...'}
+                className="w-full pl-7 pr-3 py-1 text-xs rounded-lg bg-slate-50 border border-border text-main placeholder-muted focus:outline-none focus:border-primary"
+              />
+              <svg
+                className="w-3.5 h-3.5 text-muted absolute left-2 top-1/2 -translate-y-1/2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                ✕
-              </button>
-            )}
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery('')
+                    setVisaPage(1)
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-main text-xs cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* ------------------------------------------------------------- */}
       {/* 4. TAB 1: VISA PACKAGES & COUNTRIES TABLE (COMPACT + PAGINATED)*/}
@@ -777,6 +804,13 @@ export const Packages = () => {
             />
           </div>
         </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* 6. TAB 3: 11.3 MASTER STAGE & WORKFLOW CONFIG                 */}
+      {/* ------------------------------------------------------------- */}
+      {activeTab === 'MASTER_STAGES' && (
+        <MasterStageConfigTab isAdmin={isAdmin} />
       )}
 
       {/* ------------------------------------------------------------- */}

@@ -3,6 +3,7 @@ import { VISA_STAGES } from '../../../services/visaCases'
 import { HOLIDAY_STAGES } from '../../../services/holidayCases'
 import companiesService from '../../../services/companies'
 import CaseDetailsSideDrawer from '../../../components/Drawers/CaseDetailsSideDrawer.component'
+import CaseStageCard from '../../../components/Kanban/CaseStageCard.component'
 import {
   downloadApplicationDossier,
   downloadInvoice,
@@ -323,101 +324,24 @@ export const CompanyApplicationsTab = ({
                     </div>
                   ) : (
                     stageApps.map((app) => (
-                      <div
+                      <CaseStageCard
                         key={app.id}
-                        className="bg-white rounded-xl border border-slate-200/90 p-2.5 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all space-y-1.5 text-left group"
-                      >
-                        {/* Top Pill Row */}
-                        <div className="flex items-center justify-between gap-1 text-[9px]">
-                          <span
-                            className={`px-1.5 py-0.5 rounded-md font-bold border ${
-                              isVisa
-                                ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                : 'bg-purple-50 text-purple-700 border-purple-200'
-                            }`}
-                          >
-                            {isVisa ? '🛂 Visa' : '🌴 Holiday'}
-                          </span>
-                          <span className="font-mono font-bold text-slate-400 text-[9px]">
-                            {app.id}
-                          </span>
-                        </div>
-
-                        {/* Applicant Name & Service */}
-                        <div>
-                          <h4
-                            onClick={() => setSelectedCaseModal({ item: app, type: isVisa ? 'VISA' : 'HOLIDAY' })}
-                            className="text-[11px] font-bold text-slate-900 leading-snug truncate hover:text-indigo-600 transition-colors cursor-pointer"
-                          >
-                            {app.applicantName}
-                          </h4>
-                          <p className="text-[10px] text-slate-700 font-medium mt-0.5 flex items-center gap-1 truncate">
-                            <span>📍</span> {app.country} &bull; {app.serviceRequired}
-                          </p>
-                        </div>
-
-                        {/* Officer & Date */}
-                        <div className="flex items-center justify-between text-[9px] text-slate-500 pt-1 border-t border-slate-100">
-                          <span className="truncate max-w-[140px]">
-                            👤 {app.assignedOfficer}
-                          </span>
-                          <span className="font-mono">
-                            📅 {app.applicationDate}
-                          </span>
-                        </div>
-
-                        {/* Bottom Actions: Previous / Side Sheet / Advance */}
-                        <div className="pt-1.5 border-t border-slate-100 flex items-center gap-1">
-                          <button
-                            type="button"
-                            disabled={stageIdx === 0}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              const prevStageId = currentStages[stageIdx - 1]?.id
-                              if (prevStageId) {
-                                handleAdvanceStage(app, prevStageId)
-                              }
-                            }}
-                            className="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[9px] cursor-pointer"
-                            title="Move back to previous stage"
-                          >
-                            &larr;
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setSelectedCaseModal({ item: app, type: isVisa ? 'VISA' : 'HOLIDAY' })}
-                            className="flex-1 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-[9px] transition-colors cursor-pointer text-center"
-                          >
-                            Side Sheet & Details
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              downloadApplicationDossier(app, isVisa ? 'visa' : 'holiday')
-                            }}
-                            className="px-1.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-[9px] cursor-pointer transition-colors"
-                            title="Download Application Dossier"
-                          >
-                            📄
-                          </button>
-
-                          <button
-                            type="button"
-                            disabled={!stage.nextStage}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleAdvanceStage(app, stage.nextStage)
-                            }}
-                            className="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[9px] cursor-pointer"
-                            title="Advance to next stage"
-                          >
-                            &rarr;
-                          </button>
-                        </div>
-                      </div>
+                        caseItem={app}
+                        caseType={isVisa ? 'VISA' : 'HOLIDAY'}
+                        stages={currentStages}
+                        stageIdx={stageIdx}
+                        onOpenDetails={(item) =>
+                          setSelectedCaseModal({ item, type: isVisa ? 'VISA' : 'HOLIDAY' })
+                        }
+                        onAdvanceStage={(item) => handleAdvanceStage(item, stage.nextStage)}
+                        onPreviousStage={(item) => {
+                          const prevStageId = currentStages[stageIdx - 1]?.id
+                          if (prevStageId) handleAdvanceStage(item, prevStageId)
+                        }}
+                        onDownloadDossier={(item) =>
+                          downloadApplicationDossier(item, isVisa ? 'visa' : 'holiday')
+                        }
+                      />
                     ))
                   )}
                 </div>

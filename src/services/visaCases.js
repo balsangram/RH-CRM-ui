@@ -489,7 +489,8 @@ class VisaCasesService {
     if (!currentCase) return { success: false, error: 'Case not found' }
 
     // Check mandatory checklist validation for current stage
-    const currentStageDef = VISA_STAGES.find((s) => s.id === currentCase.stage)
+    const activeStages = currentCase.stages || VISA_STAGES
+    const currentStageDef = activeStages.find((s) => s.id === currentCase.stage)
     if (currentStageDef && targetStageId !== 'REJECTED') {
       const mandatoryItems = currentStageDef.checklist.filter((item) => item.mandatory)
       const checks = currentCase.completedChecklists || {}
@@ -507,22 +508,22 @@ class VisaCasesService {
     const updates = {
       stage: targetStageId,
       docStatus:
-        targetStageId === 'PAYMENT'
+        targetStageId === 'PAYMENT' || targetStageId === 'PAYMENT_BRIEFING'
           ? 'PAYMENT SETTLED'
           : targetStageId === 'APPROVED'
           ? 'APPROVED'
           : targetStageId === 'REJECTED'
           ? 'REJECTED'
-          : targetStageId === 'INTERVIEW'
+          : targetStageId === 'INTERVIEW' || targetStageId === 'INTERVIEW_PREP'
           ? 'INTERVIEW SCHEDULED'
-          : targetStageId === 'DOCS_VERIFIED'
+          : targetStageId === 'DOCS_VERIFIED' || targetStageId === 'FINANCIAL_PROOF'
           ? 'DOCS_VERIFIED'
-          : targetStageId === 'SUBMITTED'
+          : targetStageId === 'SUBMITTED' || targetStageId === 'PORTAL_FILING'
           ? 'SUBMITTED'
           : 'PROCESSING',
     }
 
-    if (targetStageId === 'PAYMENT') {
+    if (targetStageId === 'PAYMENT' || targetStageId === 'PAYMENT_BRIEFING') {
       updates.paymentStatus = 'COMPLETED'
       updates.paidAmount = currentCase.amount || updates.paidAmount
     }
@@ -535,6 +536,7 @@ class VisaCasesService {
   createCase(caseData) {
     const list = this.getCases()
     const nextNum = 300 + list.length + 1
+    const initialStage = caseData.stage || (caseData.stages && caseData.stages[0]?.id) || 'UNDER_REVIEW'
     const newCase = {
       id: caseData.id || `VISA-${nextNum}`,
       applicant: caseData.applicant || 'New Applicant',
@@ -544,7 +546,10 @@ class VisaCasesService {
       passportExp: caseData.passportExp || '2030-01-01',
       country: caseData.country || 'United Kingdom',
       visaType: caseData.visaType || 'Standard Visitor',
-      stage: caseData.stage || 'UNDER_REVIEW',
+      stage: initialStage,
+      stages: caseData.stages || null,
+      templateId: caseData.templateId || null,
+      category: caseData.category || null,
       officer: caseData.officer || 'Amit Verma',
       officerId: caseData.officerId || 'CO-101',
       amount: Number(caseData.amount) || 20000,
@@ -563,17 +568,20 @@ class VisaCasesService {
     return newCase
   }
 
-  createCaseFromLead(lead) {
+  createCaseFromLead(lead, customCaseData = {}) {
     return this.createCase({
       applicant: lead.name,
       phone: lead.phone,
       email: lead.email,
-      country: lead.country || 'Schengen (France)',
-      visaType: lead.visaType || lead.purpose || 'Tourist C',
-      officer: lead.assignedStaff || 'Amit Verma',
-      amount: lead.expectedValue || lead.quotation?.totalAmount || 22000,
+      country: lead.country || lead.targetCountry || 'Schengen (France)',
+      visaType: customCaseData.visaType || lead.visaType || lead.serviceRequired || lead.purpose || 'Tourist C',
+      officer: customCaseData.specialist || lead.assignedStaff || 'Amit Verma',
+      amount: customCaseData.amount || lead.value || lead.expectedValue || lead.quotation?.total || 22000,
       paidAmount: 0,
-      stage: 'UNDER_REVIEW',
+      stage: customCaseData.stage || (customCaseData.stages && customCaseData.stages[0]?.id) || 'UNDER_REVIEW',
+      stages: customCaseData.stages || null,
+      templateId: customCaseData.templateId || null,
+      category: customCaseData.category || null,
     })
   }
 

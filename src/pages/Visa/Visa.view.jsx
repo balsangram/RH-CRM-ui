@@ -6,6 +6,9 @@ import AddPaymentModal from '../../components/Modal/AddPaymentModal.component'
 import { downloadApplicationDossier, downloadInvoice, downloadVisaDocument } from '../../utils/documentGenerators'
 import useAuth from '../../hooks/useAuth'
 import Pagination from '../../components/Pagination/Pagination.component'
+import CaseStageCard from '../../components/Kanban/CaseStageCard.component'
+import CaseDetailsSideDrawer from '../../components/Drawers/CaseDetailsSideDrawer.component'
+import masterWorkflowTemplatesService from '../../services/masterWorkflowTemplates'
 
 export const Visa = () => {
   const navigate = useNavigate()
@@ -42,14 +45,19 @@ export const Visa = () => {
 
 // New Case Modal state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const defaultVisaTpl = masterWorkflowTemplatesService.getTemplates('VISA')[0]
   const [newCaseForm, setNewCaseForm] = useState({
     applicant: '',
     phone: '',
     email: '',
     country: 'United Kingdom',
-    visaType: 'Standard Visitor',
+    visaType: defaultVisaTpl?.categoryName || 'Student Visa / Study Permit',
+    category: defaultVisaTpl?.category || 'STUDENT_VISA',
+    templateId: defaultVisaTpl?.id || null,
+    stages: defaultVisaTpl?.stages || null,
+    stage: defaultVisaTpl?.stages ? defaultVisaTpl.stages[0]?.id : 'UNDER_REVIEW',
     officer: 'Amit Verma',
-    amount: 24000,
+    amount: defaultVisaTpl?.defaultFee || 35000,
     paidAmount: 10000,
     paymentType: 'Postpaid',
     passport: '',
@@ -223,14 +231,19 @@ return { totalValue, approvedCount, rejectedCount, stageMap }
     e.preventDefault()
     visaCasesService.createCase(newCaseForm)
     setIsAddModalOpen(false)
+    const defTpl = masterWorkflowTemplatesService.getTemplates('VISA')[0]
     setNewCaseForm({
       applicant: '',
       phone: '',
       email: '',
       country: 'United Kingdom',
-      visaType: 'Standard Visitor',
+      visaType: defTpl?.categoryName || 'Student Visa / Study Permit',
+      category: defTpl?.category || 'STUDENT_VISA',
+      templateId: defTpl?.id || null,
+      stages: defTpl?.stages || null,
+      stage: defTpl?.stages ? defTpl.stages[0]?.id : 'UNDER_REVIEW',
       officer: 'Amit Verma',
-      amount: 24000,
+      amount: defTpl?.defaultFee || 35000,
       paidAmount: 10000,
       paymentType: 'Postpaid',
       passport: '',
@@ -674,115 +687,32 @@ return (
                       No cases in this stage
                     </div>
                   ) : (
-                    stageCases.map((caseItem) => {
-                      const paidPercent =
-                        caseItem.amount > 0
-                          ? Math.round(((caseItem.paidAmount || 0) / caseItem.amount) * 100)
-                          : 0
-
-return (
-                        <div
-                          key={caseItem.id}
-                          className="bg-white rounded-xl border border-slate-200/90 p-2.5 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all space-y-1.5"
-                        >
-                          {/* Card Top Pill Row */}
-                          <div className="flex items-center justify-between gap-1 text-[9px]">
-                            <span className="px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold border border-blue-200">
-                              {caseItem.visaType}
-                            </span>
-                            <span className="font-mono font-bold text-slate-400 text-[9px]">
-                              {caseItem.id}
-                            </span>
-                          </div>
-
-{/* Applicant Name & Destination */}
-                          <div>
-                            <h4 className="text-[11px] font-bold text-slate-900 leading-snug truncate">
-                              {caseItem.applicant}
-                            </h4>
-                            <p className="text-[10px] text-slate-600 font-medium mt-0.5 flex items-center gap-1 truncate">
-                              <span>📍</span> {caseItem.country}
-                            </p>
-                          </div>
-
-{/* Amount & Paid Progress */}
-                          <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
-                            <span className="font-bold text-slate-900">
-                              {formatINR(caseItem.amount)}
-                            </span>
-                            <span
-                              className={`text-[9px] font-bold ${
-                                paidPercent === 100
-                                  ? 'text-emerald-600'
-                                  : paidPercent > 0
-                                  ? 'text-amber-600'
-                                  : 'text-slate-400'
-                              }`}
-                            >
-                              {paidPercent}% paid ({caseItem.paymentType})
-                            </span>
-                          </div>
-
-{/* Case Officer & Document Status */}
-                          <div className="flex items-center justify-between text-[9px] text-slate-500">
-                            <span className="flex items-center gap-1 truncate font-medium max-w-[130px]">
-                              <span>👤</span> {caseItem.officer}
-                            </span>
-                            <span
-                              className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border shrink-0 ${
-                                caseItem.docStatus === 'DOCS_VERIFIED'
-                                  ? 'border-blue-300 text-blue-700 bg-blue-50'
-                                  : caseItem.docStatus === 'APPROVED'
-                                  ? 'border-emerald-300 text-emerald-700 bg-emerald-50'
-                                  : 'border-amber-300 text-amber-700 bg-amber-50'
-                              }`}
-                            >
-                              {caseItem.docStatus.replace('_', ' ')}
-                            </span>
-                          </div>
-
-{/* Bottom Actions: Previous / Side Sheet / Advance */}
-                          <div className="pt-1.5 border-t border-slate-100 flex items-center gap-1">
-                            <button
-                              type="button"
-                              disabled={stageIdx === 0}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handlePreviousStage(caseItem, VISA_STAGES[stageIdx - 1]?.id)
-                              }}
-                              className="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[9px] cursor-pointer"
-                              title="Move back to previous stage"
-                            >
-                              &larr;
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedCaseId(caseItem.id)
-                                setDrawerAlert('')
-                              }}
-                              className="flex-1 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-[9px] transition-colors cursor-pointer text-center"
-                            >
-                              Side Sheet & Details
-                            </button>
-
-                            <button
-                              type="button"
-                              disabled={!stage.nextStage}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleAdvanceStage(caseItem, stage.nextStage)
-                              }}
-                              className="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[9px] cursor-pointer"
-                              title="Advance to next stage"
-                            >
-                              &rarr;
-                            </button>
-                          </div>
-                        </div>
-                      )
-                    })
+                    stageCases.map((caseItem) => (
+                      <CaseStageCard
+                        key={caseItem.id}
+                        caseItem={caseItem}
+                        caseType="VISA"
+                        stages={caseItem.stages || VISA_STAGES}
+                        stageIdx={stageIdx}
+                        onOpenDetails={(item) => {
+                          setSelectedCaseId(item.id)
+                          setDrawerAlert('')
+                        }}
+                        onAdvanceStage={(item) => {
+                          const activeStages = item.stages || VISA_STAGES
+                          const curIdx = activeStages.findIndex((s) => s.id === item.stage)
+                          const nextId = activeStages[curIdx]?.nextStage || activeStages[curIdx + 1]?.id
+                          handleAdvanceStage(item, nextId)
+                        }}
+                        onPreviousStage={(item) => {
+                          const activeStages = item.stages || VISA_STAGES
+                          const curIdx = activeStages.findIndex((s) => s.id === item.stage)
+                          const prevId = curIdx > 0 ? activeStages[curIdx - 1]?.id : null
+                          if (prevId) handlePreviousStage(item, prevId)
+                        }}
+                        onDownloadDossier={(item) => downloadApplicationDossier(item, 'visa')}
+                      />
+                    ))
                   )}
                 </div>
               </div>
@@ -791,366 +721,24 @@ return (
         </div>
       )}
 
-{/* RIGHT SIDE SHEET DRAWER (Matching Screenshot 2) */}
-      {selectedCase && (
-        <div className="fixed inset-0 z-50 overflow-hidden font-sans">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
-            onClick={() => {
-              setSelectedCaseId(null)
-              setDrawerAlert('')
-            }}
-          />
-
-<div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-            <div className="w-screen max-w-lg bg-white shadow-2xl border-l border-slate-200 flex flex-col animate-in slide-in-from-right duration-200">
-              {/* Drawer Top Header */}
-              <div className="p-4 sm:p-5 border-b border-slate-200 bg-white shrink-0">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-                      {selectedCase.applicant}
-                    </h3>
-                    <p className="text-xs font-mono font-bold text-slate-500 mt-0.5">
-                      {selectedCase.id}
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedCaseId(null)
-                      setDrawerAlert('')
-                    }}
-                    className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
-                  >
-                    <span>✕</span> Close
-                  </button>
-                </div>
-                {/* Download Application Button */}
-                <button
-                  type="button"
-                  onClick={() => downloadApplicationDossier(selectedCase, 'visa')}
-                  className="mt-2.5 w-full py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold text-[11px] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
-                >
-                  <span>📄</span>
-                  <span>Download Application</span>
-                </button>
-              </div>
-
-{/* Drawer Scrollable Content */}
-              <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-5 text-xs">
-                {/* Validation Alert Notice if checklist blocked */}
-                {drawerAlert && (
-                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-start gap-2 animate-in fade-in duration-150">
-                    <span className="text-rose-600 font-bold text-sm">⚠</span>
-                    <span>{drawerAlert}</span>
-                  </div>
-                )}
-
-{/* SECTION 1: STAGE CHECKLIST */}
-                {(() => {
-                  const currentStageDef =
-                    VISA_STAGES.find((s) => s.id === selectedCase.stage) || VISA_STAGES[0]
-
-return (
-                    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 font-black text-slate-800 uppercase tracking-wider text-[11px]">
-                          <span>📋</span>
-                          <span>Stage Checklist ({currentStageDef.shortTitle})</span>
-                        </div>
-                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-200 text-slate-700">
-                          Side Sheet Rule: Mandatory
-                        </span>
-                      </div>
-
-<p className="text-[11px] text-slate-500 italic">
-                        &ldquo;Without completing mandatory items, cannot move stages.&rdquo;
-                      </p>
-
-<div className="space-y-2 pt-1">
-                        {currentStageDef.checklist.map((chk) => {
-                          const isChecked = Boolean(
-                            selectedCase.completedChecklists &&
-                              selectedCase.completedChecklists[chk.id]
-                          )
-
-return (
-                            <label
-                              key={chk.id}
-                              className="flex items-start gap-2.5 p-2 rounded-lg bg-white border border-slate-200/90 hover:border-slate-300 transition-colors cursor-pointer"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={(e) =>
-                                  handleToggleChecklist(selectedCase.id, chk.id, e.target.checked)
-                                }
-                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 mt-0.5 cursor-pointer"
-                              />
-                              <span
-                                className={`flex-1 text-xs font-medium leading-snug ${
-                                  isChecked ? 'text-slate-900 line-through/10' : 'text-slate-700'
-                                }`}
-                              >
-                                {chk.label}
-                              </span>
-                              <span
-                                className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                                  chk.mandatory
-                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                    : 'bg-slate-100 text-slate-500'
-                                }`}
-                              >
-                                {chk.mandatory ? 'Mandatory' : 'Optional'}
-                              </span>
-                            </label>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )
-                })()}
-
-{/* SECTION 2: APPLICANT INFORMATION */}
-                <div className="space-y-2.5">
-                  <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
-                    Applicant Information
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl border border-slate-200 bg-white">
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Applicant Name</p>
-                      <p className="text-xs font-bold text-slate-900 mt-0.5">{selectedCase.applicant}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Case ID</p>
-                      <p className="text-xs font-mono font-bold text-slate-900 mt-0.5">{selectedCase.id}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Phone</p>
-                      <p className="text-xs font-medium text-slate-800 mt-0.5">{selectedCase.phone}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Email</p>
-                      <p className="text-xs font-medium text-slate-800 mt-0.5 truncate">{selectedCase.email}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Passport</p>
-                      <p className="text-xs font-mono font-semibold text-slate-800 mt-0.5">
-                        {selectedCase.passport || 'P3492819'} (Exp: {selectedCase.passportExp || '2029-08-20'})
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Application Date</p>
-                      <p className="text-xs font-mono font-semibold text-slate-800 mt-0.5">{selectedCase.appliedDate}</p>
-                    </div>
-                  </div>
-                </div>
-
-{/* SECTION 3: VISA DETAILS */}
-                <div className="space-y-2.5">
-                  <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
-                    Visa Details
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl border border-slate-200 bg-white">
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Target Country</p>
-                      <p className="text-xs font-bold text-slate-900 mt-0.5">{selectedCase.country}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Visa Type</p>
-                      <p className="text-xs font-bold text-slate-900 mt-0.5">{selectedCase.visaType}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Case Officer</p>
-                      <p className="text-xs font-semibold text-slate-800 mt-0.5">{selectedCase.officer}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Officer ID</p>
-                      <p className="text-xs font-mono font-semibold text-slate-800 mt-0.5">{selectedCase.officerId || 'CO-101'}</p>
-                    </div>
-                    <div className="col-span-2 pt-1 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-bold text-slate-400">Document Status</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-blue-300 text-blue-700 bg-blue-50">
-                        {selectedCase.docStatus.replace('_', ' ')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-{/* SECTION 4: PAYMENT SUMMARY */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
-                      Payment Summary
-                    </h4>
-                    <button
-                      type="button"
-                      onClick={() => setIsPaymentModalOpen(true)}
-                      className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center gap-1"
-                    >
-                      <span>+</span>
-                      <span>Add Payment</span>
-                    </button>
-                  </div>
-                  <div className="p-3.5 rounded-xl border border-slate-200 bg-white space-y-3">
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                        <p className="text-[9px] uppercase font-bold text-slate-400">Total Fee</p>
-                        <p className="text-xs sm:text-sm font-black text-slate-900 mt-0.5">
-                          {formatINR(selectedCase.amount)}
-                        </p>
-                      </div>
-                      <div className="p-2.5 rounded-lg bg-emerald-50/70 border border-emerald-200 text-center">
-                        <p className="text-[9px] uppercase font-bold text-emerald-700">Paid</p>
-                        <p className="text-xs sm:text-sm font-black text-emerald-700 mt-0.5">
-                          {formatINR(selectedCase.paidAmount || 0)}
-                        </p>
-                      </div>
-                      <div className="p-2.5 rounded-lg bg-rose-50/70 border border-rose-200 text-center">
-                        <p className="text-[9px] uppercase font-bold text-rose-700">Pending</p>
-                        <p className="text-xs sm:text-sm font-black text-rose-700 mt-0.5">
-                          {formatINR(
-                            Math.max(0, selectedCase.amount - (selectedCase.paidAmount || 0))
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-[11px] text-slate-500 font-medium flex items-center justify-between pt-1 border-t border-slate-100">
-                      <span>Type: <strong className="text-slate-800">{selectedCase.paymentType}</strong></span>
-                      <span>Status: <strong className="text-slate-800">{selectedCase.paymentStatus.replace('_', ' ')}</strong></span>
-                      <span className="font-mono text-[10px]">Ref: {selectedCase.txnId || 'TXN-998144'}</span>
-                    </div>
-                    {/* Download Invoice Button */}
-                    <button
-                      type="button"
-                      onClick={() => downloadInvoice(selectedCase, 'visa')}
-                      className="w-full mt-2 py-2 px-3 rounded-lg bg-gradient-to-r from-slate-700 to-slate-900 hover:from-slate-800 hover:to-black text-white font-bold text-[10px] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
-                    >
-                      <span>🧾</span>
-                      <span>Download Invoice</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* SECTION 4b: VISA DOCUMENT ACTIONS (only after Payment stage) */}
-                {(() => {
-                  const stageOrder = ['UNDER_REVIEW', 'DOCS_VERIFIED', 'SUBMITTED', 'PROCESSING', 'INTERVIEW', 'APPROVED', 'PAYMENT']
-                  const currentIdx = stageOrder.indexOf(selectedCase.stage)
-                  const paymentIdx = stageOrder.indexOf('PAYMENT')
-                  const isAfterPayment = currentIdx >= paymentIdx
-
-                  if (!isAfterPayment) return null
-
-                  return (
-                    <div className="space-y-2.5">
-                      <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
-                        📋 Visa Document
-                      </h4>
-                      <div className="p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/40 space-y-3">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2.5 h-2.5 rounded-full ${visaDocUploaded ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-                          <span className="text-xs font-semibold text-slate-700">
-                            {visaDocUploaded ? 'Visa Document Uploaded' : 'No visa document uploaded yet'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {/* Upload Visa */}
-                          <label className="flex-1 py-2 px-3 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-50 text-indigo-700 font-bold text-[10px] transition-all cursor-pointer flex items-center justify-center gap-1.5">
-                            <span>⬆️</span>
-                            <span>Upload Visa</span>
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              className="hidden"
-                              onChange={() => setVisaDocUploaded(true)}
-                            />
-                          </label>
-                          {/* View Visa */}
-                          <button
-                            type="button"
-                            disabled={!visaDocUploaded}
-                            onClick={() => alert('Visa document preview would open here.')}
-                            className="flex-1 py-2 px-3 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-50 text-indigo-700 font-bold text-[10px] transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none"
-                          >
-                            <span>👁️</span>
-                            <span>View Visa</span>
-                          </button>
-                          {/* Download Visa */}
-                          <button
-                            type="button"
-                            onClick={() => downloadVisaDocument(selectedCase)}
-                            className="flex-1 py-2 px-3 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-50 text-indigo-700 font-bold text-[10px] transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                          >
-                            <span>⬇️</span>
-                            <span>Download Visa</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })()}
-
-{/* SECTION 5: ADVANCE STAGE ACTIONS */}
-                <div className="space-y-2.5 pt-2 border-t border-slate-200">
-                  <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
-                    Advance Stage
-                  </h4>
-                  {(() => {
-                    const currentStageDef =
-                      VISA_STAGES.find((s) => s.id === selectedCase.stage) || VISA_STAGES[0]
-
-return (
-                      <div className="flex items-center gap-2">
-                        {currentStageDef.nextStage ? (
-                          <button
-                            type="button"
-                            onClick={() => handleAdvanceStage(selectedCase, currentStageDef.nextStage)}
-                            className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#0F0E2B] to-[#2E2B6E] hover:from-[#181445] hover:to-[#221F56] text-white font-bold text-xs transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
-                          >
-                            <span>Move to {currentStageDef.nextButtonText.replace('→ ', '')}</span>
-                            <span>&rarr;</span>
-                          </button>
-                        ) : (
-                          <div className="flex-1 py-2 text-center text-xs font-semibold text-slate-400 bg-slate-100 rounded-xl">
-                            Final Stage Reached
-                          </div>
-                        )}
-
-{selectedCase.stage !== 'REJECTED' && (
-                          <button
-                            type="button"
-                            onClick={() => handleAdvanceStage(selectedCase, 'REJECTED')}
-                            className="py-2.5 px-3.5 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 font-bold text-xs transition-colors cursor-pointer"
-                          >
-                            Mark as Rejected
-                          </button>
-                        )}
-                      </div>
-                    )
-                  })()}
-                </div>
-
-{/* View Full Case Details Button */}
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setProfileModalCase(selectedCase)
-                      setSelectedCaseId(null)
-                    }}
-                    className="w-full py-2.5 rounded-xl border-2 border-slate-900 bg-white hover:bg-slate-900 hover:text-white text-slate-900 font-bold text-xs transition-all cursor-pointer text-center"
-                  >
-                    View Full Case Details &rarr;
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* RIGHT SIDE SHEET DRAWER (Unified Component) */}
+      <CaseDetailsSideDrawer
+        isOpen={!!selectedCase}
+        onClose={() => {
+          setSelectedCaseId(null)
+          setDrawerAlert('')
+        }}
+        caseItem={selectedCase}
+        caseType="VISA"
+        onAdvanceStage={handleAdvanceStage}
+        onRecordPayment={(cItem, paymentData) => handleRecordPayment(paymentData)}
+        onToggleChecklist={handleToggleChecklist}
+        onViewFullDetails={(item) => {
+          setProfileModalCase(item)
+          setSelectedCaseId(null)
+        }}
+        drawerAlert={drawerAlert}
+      />
 
 {/* FULL PROFILE / CASE DETAILS MODAL */}
       {profileModalCase && (
@@ -1429,18 +1017,32 @@ return (
 <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
-                    Visa Type *
+                    Workflow Template / Visa Category *
                   </label>
                   <select
-                    value={newCaseForm.visaType}
-                    onChange={(e) => setNewCaseForm({ ...newCaseForm, visaType: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 focus:ring-1 focus:ring-indigo-500"
+                    value={newCaseForm.templateId || ''}
+                    onChange={(e) => {
+                      const tplList = masterWorkflowTemplatesService.getTemplates('VISA')
+                      const sel = tplList.find((t) => t.id === e.target.value)
+                      if (sel) {
+                        setNewCaseForm({
+                          ...newCaseForm,
+                          templateId: sel.id,
+                          category: sel.category,
+                          visaType: sel.categoryName,
+                          stages: sel.stages,
+                          stage: sel.stages[0]?.id,
+                          amount: sel.defaultFee,
+                        })
+                      }
+                    }}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 font-bold text-slate-800 focus:ring-1 focus:ring-indigo-500"
                   >
-                    <option value="Standard Visitor">Standard Visitor</option>
-                    <option value="Tourist C">Tourist C</option>
-                    <option value="B1/B2 Business">B1/B2 Business</option>
-                    <option value="Student Visa">Student Visa</option>
-                    <option value="Work Permit">Work Permit</option>
+                    {masterWorkflowTemplatesService.getTemplates('VISA').map((tpl) => (
+                      <option key={tpl.id} value={tpl.id}>
+                        {tpl.name} ({tpl.stages?.length || 0} Stages • {tpl.estimatedDays})
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -1457,6 +1059,19 @@ return (
                     <option value="Priya Singh">Priya Singh (CO-102)</option>
                     <option value="Rohan Das">Rohan Das (CO-103)</option>
                   </select>
+                </div>
+
+                {/* Auto Config Banner */}
+                <div className="col-span-2 p-2 rounded-lg bg-indigo-50/80 border border-indigo-200 flex items-center justify-between text-[11px]">
+                  <span className="font-semibold text-indigo-900 flex items-center gap-1">
+                    <span>✓</span>
+                    <span>
+                      Template Auto-Configured: <strong>{newCaseForm.stages?.length || 7} Stages</strong> &amp; <strong>{newCaseForm.stages?.reduce((a, s) => a + (s.checklist?.length || 0), 0) || 18} Checklists</strong> from Master Stage Config
+                    </span>
+                  </span>
+                  <span className="text-[10px] font-bold text-indigo-700 bg-white px-2 py-0.5 rounded border border-indigo-200">
+                    Stage Details Auto-Set
+                  </span>
                 </div>
               </div>
 

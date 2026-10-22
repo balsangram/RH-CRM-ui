@@ -3,6 +3,7 @@ import { VISA_STAGES } from '../../../services/visaCases'
 import { HOLIDAY_STAGES } from '../../../services/holidayCases'
 import travellersService from '../../../services/travellers'
 import CaseDetailsSideDrawer from '../../../components/Drawers/CaseDetailsSideDrawer.component'
+import CaseStageCard from '../../../components/Kanban/CaseStageCard.component'
 import {
   downloadApplicationDossier,
   downloadInvoice,
@@ -430,122 +431,44 @@ export const TravellerProfileView = ({
                     </div>
                   ) : (
                     matchedItems.map((item) => (
-                      <div
+                      <CaseStageCard
                         key={item.id}
-                        className="bg-white rounded-xl border border-slate-200/90 p-2.5 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all space-y-1.5 text-left"
-                      >
-                        {/* Top tag & ID */}
-                        <div className="flex items-center justify-between gap-1 text-[9px]">
-                          <span
-                            className={`px-1.5 py-0.5 rounded-md font-bold border ${
-                              isVisa
-                                ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            }`}
-                          >
-                            {isVisa ? item.visaType || 'Visa' : item.duration || 'Holiday'}
-                          </span>
-                          <span className="font-mono font-bold text-slate-400 text-[9px]">
-                            {item.id}
-                          </span>
-                        </div>
-
-                        {/* Case Title / Destination */}
-                        <div>
-                          <h5
-                            onClick={() => setSelectedCaseModal({ item, type: pipelineType })}
-                            className="text-[11px] font-bold text-slate-900 leading-snug truncate hover:text-indigo-600 cursor-pointer"
-                          >
-                            {isVisa ? item.country : item.packageName || item.destination}
-                          </h5>
-                          <p className="text-[10px] text-slate-600 mt-0.5 flex items-center gap-1">
-                            <span>👤</span> {item.officer || item.assignedOfficer || 'Amit Verma (CO-101)'}
-                          </p>
-                        </div>
-
-                        {/* Date & Payment Tag */}
-                        <div className="flex items-center justify-between text-[9px] text-slate-500 pt-1 border-t border-slate-100">
-                          <span className="font-mono">
-                            📅 {item.applicationDate || item.bookingDate || '2026-10-01'}
-                          </span>
-                          {isVisa ? (
-                            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border bg-slate-50 text-slate-700">
-                              {item.paymentType || 'PREPAID'}
-                            </span>
-                          ) : (
-                            <span className="font-bold text-slate-800">
-                              ₹{Number(item.price || 0).toLocaleString('en-IN')}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Bottom Actions: Previous / Side Sheet / Advance */}
-                        <div className="pt-1.5 border-t border-slate-100 flex items-center gap-1">
-                          <button
-                            type="button"
-                            disabled={stageIdx === 0}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              const prevStageId = currentStages[stageIdx - 1]?.id
-                              if (prevStageId) {
-                                if (isVisa) {
-                                  handleAdvanceVisaStage(item, prevStageId)
-                                } else {
-                                  handleAdvanceHolidayStage(item, prevStageId)
-                                }
-                              }
-                            }}
-                            className="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[9px] cursor-pointer"
-                            title="Move back to previous stage"
-                          >
-                            &larr;
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setSelectedCaseModal({ item, type: pipelineType })}
-                            className="flex-1 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-[9px] transition-colors cursor-pointer text-center"
-                          >
-                            Side Sheet & Details
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              downloadApplicationDossier({
-                                ...item,
-                                applicantName: item.applicantName || traveller.name,
-                                phone: item.phone || traveller.phone,
-                                email: item.email || traveller.email,
-                                passport: item.passport || traveller.passport,
-                                passportExp: item.passportExp || traveller.expiry,
-                              }, isVisa ? 'visa' : 'holiday')
-                            }}
-                            className="px-1.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-[9px] cursor-pointer transition-colors"
-                            title="Download Application Dossier"
-                          >
-                            📄
-                          </button>
-
-                          <button
-                            type="button"
-                            disabled={!stage.nextStage}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              if (isVisa) {
-                                handleAdvanceVisaStage(item, stage.nextStage)
-                              } else {
-                                handleAdvanceHolidayStage(item, stage.nextStage)
-                              }
-                            }}
-                            className="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[9px] cursor-pointer"
-                            title="Advance to next stage"
-                          >
-                            &rarr;
-                          </button>
-                        </div>
-                      </div>
+                        caseItem={item}
+                        caseType={pipelineType}
+                        stages={currentStages}
+                        stageIdx={stageIdx}
+                        onOpenDetails={(cItem) => setSelectedCaseModal({ item: cItem, type: pipelineType })}
+                        onAdvanceStage={(cItem) => {
+                          if (isVisa) {
+                            handleAdvanceVisaStage(cItem, stage.nextStage)
+                          } else {
+                            handleAdvanceHolidayStage(cItem, stage.nextStage)
+                          }
+                        }}
+                        onPreviousStage={(cItem) => {
+                          const prevStageId = currentStages[stageIdx - 1]?.id
+                          if (prevStageId) {
+                            if (isVisa) {
+                              handleAdvanceVisaStage(cItem, prevStageId)
+                            } else {
+                              handleAdvanceHolidayStage(cItem, prevStageId)
+                            }
+                          }
+                        }}
+                        onDownloadDossier={(cItem) =>
+                          downloadApplicationDossier(
+                            {
+                              ...cItem,
+                              applicantName: cItem.applicantName || traveller.name,
+                              phone: cItem.phone || traveller.phone,
+                              email: cItem.email || traveller.email,
+                              passport: cItem.passport || traveller.passport,
+                              passportExp: cItem.passportExp || traveller.expiry,
+                            },
+                            isVisa ? 'visa' : 'holiday'
+                          )
+                        }
+                      />
                     ))
                   )}
                 </div>

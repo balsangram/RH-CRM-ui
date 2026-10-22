@@ -6,6 +6,9 @@ import AddPaymentModal from '../../components/Modal/AddPaymentModal.component'
 import { downloadApplicationDossier, downloadInvoice } from '../../utils/documentGenerators'
 import useAuth from '../../hooks/useAuth'
 import Pagination from '../../components/Pagination/Pagination.component'
+import CaseStageCard from '../../components/Kanban/CaseStageCard.component'
+import CaseDetailsSideDrawer from '../../components/Drawers/CaseDetailsSideDrawer.component'
+import masterWorkflowTemplatesService from '../../services/masterWorkflowTemplates'
 
 export const Holidays = () => {
   const navigate = useNavigate()
@@ -39,15 +42,20 @@ export const Holidays = () => {
 
   // Add Booking Modal state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const defaultHolidayTpl = masterWorkflowTemplatesService.getTemplates('HOLIDAY')[0]
   const [newBookingForm, setNewBookingForm] = useState({
     customer: '',
     phone: '',
     email: '',
-    packageName: '',
+    packageName: defaultHolidayTpl?.name || 'International Luxury Tour',
+    category: defaultHolidayTpl?.category || 'INTERNATIONAL_LUXURY',
+    templateId: defaultHolidayTpl?.id || null,
+    stages: defaultHolidayTpl?.stages || null,
+    stage: defaultHolidayTpl?.stages ? defaultHolidayTpl.stages[0]?.id : 'BOOKING_CREATED',
     destination: 'Bali, Indonesia',
     duration: '6 Days / 5 Nights',
-    price: 95000,
-    paidAmount: 30000,
+    price: defaultHolidayTpl?.defaultFee || 185000,
+    paidAmount: 50000,
     paymentType: 'Postpaid',
     departureDate: '2026-11-20',
     officer: 'Priya Singh',
@@ -207,15 +215,20 @@ export const Holidays = () => {
     e.preventDefault()
     holidayCasesService.createCase(newBookingForm)
     setIsAddModalOpen(false)
+    const defTpl = masterWorkflowTemplatesService.getTemplates('HOLIDAY')[0]
     setNewBookingForm({
       customer: '',
       phone: '',
       email: '',
-      packageName: '',
+      packageName: defTpl?.name || 'International Luxury Tour',
+      category: defTpl?.category || 'INTERNATIONAL_LUXURY',
+      templateId: defTpl?.id || null,
+      stages: defTpl?.stages || null,
+      stage: defTpl?.stages ? defTpl.stages[0]?.id : 'BOOKING_CREATED',
       destination: 'Bali, Indonesia',
       duration: '6 Days / 5 Nights',
-      price: 95000,
-      paidAmount: 30000,
+      price: defTpl?.defaultFee || 185000,
+      paidAmount: 50000,
       paymentType: 'Postpaid',
       departureDate: '2026-11-20',
       officer: 'Priya Singh',
@@ -510,124 +523,32 @@ export const Holidays = () => {
                       No bookings in this stage
                     </div>
                   ) : (
-                    stageCases.map((caseItem) => {
-                      const paidPercent =
-                        caseItem.price > 0
-                          ? Math.round(((caseItem.paidAmount || 0) / caseItem.price) * 100)
-                          : 0
-
-                      const stageDef =
-                        HOLIDAY_STAGES.find((s) => s.id === caseItem.stage) || HOLIDAY_STAGES[0]
-                      const totalChecklist = stageDef.checklist.length
-                      const completedCount = stageDef.checklist.filter(
-                        (chk) =>
-                          caseItem.completedChecklists && caseItem.completedChecklists[chk.id]
-                      ).length
-
-                      return (
-                        <div
-                          key={caseItem.id}
-                          className="bg-white rounded-xl border border-slate-200/90 p-2.5 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all space-y-1.5"
-                        >
-                          {/* Top Badges */}
-                          <div className="flex items-center justify-between text-[9px]">
-                            <span className="px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
-                              🌴 Holiday
-                            </span>
-                            <span className="font-mono font-bold text-slate-400 text-[9px]">
-                              {caseItem.id}
-                            </span>
-                          </div>
-
-                          {/* Package Title & Customer */}
-                          <div>
-                            <h4 className="text-[11px] font-bold text-slate-900 leading-snug truncate">
-                              {caseItem.packageName}
-                            </h4>
-                            <p className="text-[10px] text-slate-700 font-medium mt-0.5 flex items-center gap-1 truncate">
-                              <span>👤</span> {caseItem.customer}
-                            </p>
-                            <p className="text-[9px] text-slate-500 font-medium mt-0.5 flex items-center gap-1 truncate">
-                              <span>📍</span> {caseItem.destination} &bull; {caseItem.duration}
-                            </p>
-                          </div>
-
-                          {/* Price & Paid Percentage */}
-                          <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
-                            <span className="font-bold text-slate-900">
-                              {formatINR(caseItem.price)}
-                            </span>
-                            <span
-                              className={`text-[9px] font-bold ${
-                                paidPercent === 100
-                                  ? 'text-emerald-600'
-                                  : paidPercent > 0
-                                  ? 'text-amber-600'
-                                  : 'text-slate-400'
-                              }`}
-                            >
-                              {paidPercent}% paid ({caseItem.paymentType})
-                            </span>
-                          </div>
-
-                          {/* Case Officer & Checklist */}
-                          <div className="flex items-center justify-between text-[9px] text-slate-500">
-                            <span className="flex items-center gap-1 truncate font-medium max-w-[130px]">
-                              <span>👤</span> {caseItem.officer}
-                            </span>
-                            <span
-                              className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase border shrink-0 ${
-                                completedCount === totalChecklist
-                                  ? 'border-emerald-300 text-emerald-700 bg-emerald-50'
-                                  : 'border-amber-300 text-amber-700 bg-amber-50'
-                              }`}
-                            >
-                              {completedCount}/{totalChecklist} done
-                            </span>
-                          </div>
-
-                          {/* Bottom Actions: Previous / Side Sheet / Advance */}
-                          <div className="pt-1.5 border-t border-slate-100 flex items-center gap-1">
-                            <button
-                              type="button"
-                              disabled={stageIdx === 0}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handlePreviousStage(caseItem, HOLIDAY_STAGES[stageIdx - 1]?.id)
-                              }}
-                              className="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[9px] cursor-pointer"
-                              title="Move back to previous stage"
-                            >
-                              &larr;
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedCaseId(caseItem.id)
-                                setDrawerAlert('')
-                              }}
-                              className="flex-1 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-[9px] transition-colors cursor-pointer text-center"
-                            >
-                              Side Sheet & Details
-                            </button>
-
-                            <button
-                              type="button"
-                              disabled={!stage.nextStage}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleAdvanceStage(caseItem, stage.nextStage)
-                              }}
-                              className="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none text-slate-700 font-bold text-[9px] cursor-pointer"
-                              title="Advance to next stage"
-                            >
-                              &rarr;
-                            </button>
-                          </div>
-                        </div>
-                      )
-                    })
+                    stageCases.map((caseItem) => (
+                      <CaseStageCard
+                        key={caseItem.id}
+                        caseItem={caseItem}
+                        caseType="HOLIDAY"
+                        stages={caseItem.stages || HOLIDAY_STAGES}
+                        stageIdx={stageIdx}
+                        onOpenDetails={(item) => {
+                          setSelectedCaseId(item.id)
+                          setDrawerAlert('')
+                        }}
+                        onAdvanceStage={(item) => {
+                          const activeStages = item.stages || HOLIDAY_STAGES
+                          const curIdx = activeStages.findIndex((s) => s.id === item.stage)
+                          const nextId = activeStages[curIdx]?.nextStage || activeStages[curIdx + 1]?.id
+                          handleAdvanceStage(item, nextId)
+                        }}
+                        onPreviousStage={(item) => {
+                          const activeStages = item.stages || HOLIDAY_STAGES
+                          const curIdx = activeStages.findIndex((s) => s.id === item.stage)
+                          const prevId = curIdx > 0 ? activeStages[curIdx - 1]?.id : null
+                          if (prevId) handlePreviousStage(item, prevId)
+                        }}
+                        onDownloadDossier={(item) => downloadApplicationDossier(item, 'holiday')}
+                      />
+                    ))
                   )}
                 </div>
               </div>
@@ -799,326 +720,24 @@ export const Holidays = () => {
         </div>
       )}
 
-      {/* RIGHT SIDE SHEET DRAWER (Matching Screenshot 3) */}
-      {selectedCase && (
-        <div className="fixed inset-0 z-50 overflow-hidden font-sans">
-          <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
-            onClick={() => {
-              setSelectedCaseId(null)
-              setDrawerAlert('')
-            }}
-          />
-
-          <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-            <div className="w-screen max-w-lg bg-white shadow-2xl border-l border-slate-200 flex flex-col animate-in slide-in-from-right duration-200">
-              {/* Drawer Top Header */}
-              <div className="p-4 sm:p-5 border-b border-slate-200 bg-white shrink-0">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-                      {selectedCase.packageName}
-                    </h3>
-                    <p className="text-xs font-mono font-bold text-slate-500 mt-0.5">
-                      {selectedCase.id} &bull; Customer: {selectedCase.customer}
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedCaseId(null)
-                      setDrawerAlert('')
-                    }}
-                    className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
-                  >
-                    <span>✕</span> Close
-                  </button>
-                </div>
-                {/* Download Application Button */}
-                <button
-                  type="button"
-                  onClick={() => downloadApplicationDossier(selectedCase, 'holiday')}
-                  className="mt-2.5 w-full py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold text-[11px] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
-                >
-                  <span>📄</span>
-                  <span>Download Application Dossier</span>
-                </button>
-              </div>
-
-              {/* Drawer Scrollable Content */}
-              <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-5 text-xs">
-                {/* Stage Banner */}
-                {(() => {
-                  const currentStageDef =
-                    HOLIDAY_STAGES.find((s) => s.id === selectedCase.stage) || HOLIDAY_STAGES[0]
-
-                  return (
-                    <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200">
-                      <p className="text-xs font-black text-amber-900">
-                        {currentStageDef.title}
-                      </p>
-                      <p className="text-[11px] text-amber-700 mt-0.5 font-medium">
-                        {currentStageDef.subtitle}
-                      </p>
-                    </div>
-                  )
-                })()}
-
-                {/* Validation Alert */}
-                {drawerAlert && (
-                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-start gap-2 animate-in fade-in duration-150">
-                    <span className="text-rose-600 font-bold text-sm">⚠</span>
-                    <span>{drawerAlert}</span>
-                  </div>
-                )}
-
-                {/* SECTION 1: STAGE CHECKLIST */}
-                {(() => {
-                  const currentStageDef =
-                    HOLIDAY_STAGES.find((s) => s.id === selectedCase.stage) || HOLIDAY_STAGES[0]
-
-                  return (
-                    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 font-black text-slate-800 uppercase tracking-wider text-[11px]">
-                          <span>📋</span>
-                          <span>Stage Checklist ({currentStageDef.shortTitle})</span>
-                        </div>
-                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-slate-200 text-slate-700">
-                          Side Sheet Rule: Mandatory
-                        </span>
-                      </div>
-
-                      <p className="text-[11px] text-slate-500 italic">
-                        &ldquo;Without completing mandatory items, cannot move stages.&rdquo;
-                      </p>
-
-                      <div className="space-y-2 pt-1">
-                        {currentStageDef.checklist.map((chk) => {
-                          const isChecked = Boolean(
-                            selectedCase.completedChecklists &&
-                              selectedCase.completedChecklists[chk.id]
-                          )
-
-                          return (
-                            <label
-                              key={chk.id}
-                              className="flex items-start gap-2.5 p-2 rounded-lg bg-white border border-slate-200/90 hover:border-slate-300 transition-colors cursor-pointer"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={(e) =>
-                                  handleToggleChecklist(selectedCase.id, chk.id, e.target.checked)
-                                }
-                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 mt-0.5 cursor-pointer"
-                              />
-                              <span
-                                className={`flex-1 text-xs font-medium leading-snug ${
-                                  isChecked ? 'text-slate-900' : 'text-slate-700'
-                                }`}
-                              >
-                                {chk.label}
-                              </span>
-                              <span
-                                className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                                  chk.mandatory
-                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                    : 'bg-slate-100 text-slate-500'
-                                }`}
-                              >
-                                {chk.mandatory ? 'Mandatory' : 'Optional'}
-                              </span>
-                            </label>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )
-                })()}
-
-                {/* SECTION 2: BOOKING & PACKAGE INFORMATION */}
-                <div className="space-y-2.5">
-                  <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
-                    Booking & Package Information
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl border border-slate-200 bg-white">
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Package ID</p>
-                      <p className="text-xs font-mono font-bold text-slate-900 mt-0.5">{selectedCase.id}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Destination</p>
-                      <p className="text-xs font-bold text-slate-900 mt-0.5">{selectedCase.destination}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Duration</p>
-                      <p className="text-xs font-medium text-slate-800 mt-0.5">{selectedCase.duration}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Departure Date</p>
-                      <p className="text-xs font-mono font-semibold text-slate-800 mt-0.5">{selectedCase.departureDate}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Booking Date</p>
-                      <p className="text-xs font-mono font-semibold text-slate-800 mt-0.5">{selectedCase.bookingDate}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Case Officer</p>
-                      <p className="text-xs font-semibold text-slate-800 mt-0.5">
-                        {selectedCase.officer} ({selectedCase.officerId || 'CO-102'})
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* SECTION 3: CUSTOMER DETAILS */}
-                <div className="space-y-2.5">
-                  <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
-                    Customer Details
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl border border-slate-200 bg-white">
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Customer Name</p>
-                      <p className="text-xs font-bold text-slate-900 mt-0.5">{selectedCase.customer}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Contact Phone</p>
-                      <p className="text-xs font-medium text-slate-800 mt-0.5">{selectedCase.phone}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Email</p>
-                      <p className="text-xs font-medium text-slate-800 mt-0.5 truncate">{selectedCase.email}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Invoice Ref</p>
-                      <p className="text-xs font-mono font-semibold text-slate-800 mt-0.5">{selectedCase.invoiceRef || 'INV-2026-0865'}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* SECTION 4: PAYMENT OVERVIEW */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
-                      Payment Overview
-                    </h4>
-                    <button
-                      type="button"
-                      onClick={() => setIsPaymentModalOpen(true)}
-                      className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center gap-1"
-                    >
-                      <span>+</span>
-                      <span>Add Payment</span>
-                    </button>
-                  </div>
-                  <div className="p-3.5 rounded-xl border border-slate-200 bg-white space-y-3">
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                        <p className="text-[9px] uppercase font-bold text-slate-400">Total Price</p>
-                        <p className="text-xs sm:text-sm font-black text-slate-900 mt-0.5">
-                          {formatINR(selectedCase.price)}
-                        </p>
-                      </div>
-                      <div className="p-2.5 rounded-lg bg-emerald-50/70 border border-emerald-200 text-center">
-                        <p className="text-[9px] uppercase font-bold text-emerald-700">Paid Amount</p>
-                        <p className="text-xs sm:text-sm font-black text-emerald-700 mt-0.5">
-                          {formatINR(selectedCase.paidAmount || 0)}
-                        </p>
-                      </div>
-                      <div className="p-2.5 rounded-lg bg-rose-50/70 border border-rose-200 text-center">
-                        <p className="text-[9px] uppercase font-bold text-rose-700">Pending</p>
-                        <p className="text-xs sm:text-sm font-black text-rose-700 mt-0.5">
-                          {formatINR(
-                            Math.max(0, selectedCase.price - (selectedCase.paidAmount || 0))
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-[11px] text-slate-500 font-medium flex items-center justify-between pt-1 border-t border-slate-100">
-                      <span>Order Type: <strong className="text-slate-800">{selectedCase.paymentType}</strong></span>
-                      <span>Payment Status: <strong className="text-slate-800">{selectedCase.paymentStatus}</strong></span>
-                    </div>
-                    {/* Download Invoice Button */}
-                    <button
-                      type="button"
-                      onClick={() => downloadInvoice(selectedCase, 'holiday')}
-                      className="w-full mt-2 py-2 px-3 rounded-lg bg-gradient-to-r from-slate-700 to-slate-900 hover:from-slate-800 hover:to-black text-white font-bold text-[10px] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
-                    >
-                      <span>🧾</span>
-                      <span>Download Invoice</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* SECTION 5: PIPELINE PROGRESSION CONTROLS */}
-                <div className="space-y-2.5 pt-2 border-t border-slate-200">
-                  <h4 className="text-[11px] font-black uppercase text-slate-700 tracking-wider">
-                    Pipeline Progression Controls
-                  </h4>
-                  {(() => {
-                    const currentStageDef =
-                      HOLIDAY_STAGES.find((s) => s.id === selectedCase.stage) || HOLIDAY_STAGES[0]
-
-                    return (
-                      <div className="flex items-center gap-2">
-                        {currentStageDef.nextStage ? (
-                          <button
-                            type="button"
-                            onClick={() => handleAdvanceStage(selectedCase, currentStageDef.nextStage)}
-                            className="flex-1 py-2.5 px-4 rounded-xl bg-black hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
-                          >
-                            <span>&rarr; Advance to {currentStageDef.nextButtonText.replace('→ ', '')}</span>
-                          </button>
-                        ) : (
-                          <div className="flex-1 py-2 text-center text-xs font-semibold text-slate-400 bg-slate-100 rounded-xl">
-                            Final Stage Completed
-                          </div>
-                        )}
-
-                        {selectedCase.stage !== 'CANCELLED' && (
-                          <button
-                            type="button"
-                            onClick={() => handleAdvanceStage(selectedCase, 'CANCELLED')}
-                            className="py-2.5 px-3.5 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 font-bold text-xs transition-colors cursor-pointer"
-                          >
-                            ✕ Mark as Cancelled
-                          </button>
-                        )}
-                      </div>
-                    )
-                  })()}
-                </div>
-
-                {/* Bottom Action Buttons */}
-                <div className="pt-2 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDetailsModalCase(selectedCase)
-                      setSelectedCaseId(null)
-                    }}
-                    className="flex-1 py-2.5 rounded-xl border-2 border-slate-900 bg-white hover:bg-slate-900 hover:text-white text-slate-900 font-bold text-xs transition-all cursor-pointer text-center"
-                  >
-                    View Full Booking Details &rarr;
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDetailsModalCase(selectedCase)
-                      setSelectedCaseId(null)
-                    }}
-                    className="py-2.5 px-3.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition-colors cursor-pointer text-center"
-                  >
-                    Extend Duration
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* RIGHT SIDE SHEET DRAWER (Unified Component) */}
+      <CaseDetailsSideDrawer
+        isOpen={!!selectedCase}
+        onClose={() => {
+          setSelectedCaseId(null)
+          setDrawerAlert('')
+        }}
+        caseItem={selectedCase}
+        caseType="HOLIDAY"
+        onAdvanceStage={handleAdvanceStage}
+        onRecordPayment={(cItem, paymentData) => handleRecordPayment(paymentData)}
+        onToggleChecklist={handleToggleChecklist}
+        onViewFullDetails={(item) => {
+          setDetailsModalCase(item)
+          setSelectedCaseId(null)
+        }}
+        drawerAlert={drawerAlert}
+      />
 
       {/* FULL DETAILS MODAL */}
       {detailsModalCase && (
@@ -1311,6 +930,37 @@ export const Holidays = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
+                    Workflow Template / Tour Category *
+                  </label>
+                  <select
+                    value={newBookingForm.templateId || ''}
+                    onChange={(e) => {
+                      const tplList = masterWorkflowTemplatesService.getTemplates('HOLIDAY')
+                      const sel = tplList.find((t) => t.id === e.target.value)
+                      if (sel) {
+                        setNewBookingForm({
+                          ...newBookingForm,
+                          templateId: sel.id,
+                          category: sel.category,
+                          packageName: sel.name,
+                          stages: sel.stages,
+                          stage: sel.stages[0]?.id,
+                          price: sel.defaultFee,
+                        })
+                      }
+                    }}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 font-bold text-slate-800 focus:ring-1 focus:ring-indigo-500"
+                  >
+                    {masterWorkflowTemplatesService.getTemplates('HOLIDAY').map((tpl) => (
+                      <option key={tpl.id} value={tpl.id}>
+                        {tpl.name} ({tpl.stages?.length || 0} Stages • {tpl.estimatedDays})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-slate-600 mb-1">
                     Package Name *
@@ -1320,7 +970,7 @@ export const Holidays = () => {
                     required
                     value={newBookingForm.packageName}
                     onChange={(e) => setNewBookingForm({ ...newBookingForm, packageName: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 focus:ring-1 focus:ring-indigo-500"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 focus:ring-1 focus:ring-indigo-500 font-medium"
                     placeholder="e.g. Bali Island Beach Getaway"
                   />
                 </div>
@@ -1334,9 +984,22 @@ export const Holidays = () => {
                     required
                     value={newBookingForm.destination}
                     onChange={(e) => setNewBookingForm({ ...newBookingForm, destination: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 focus:ring-1 focus:ring-indigo-500"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 focus:ring-1 focus:ring-indigo-500 font-medium"
                     placeholder="e.g. Bali, Indonesia"
                   />
+                </div>
+
+                {/* Auto Config Info Banner */}
+                <div className="col-span-2 p-2 rounded-lg bg-indigo-50/80 border border-indigo-200 flex items-center justify-between text-[11px]">
+                  <span className="font-semibold text-indigo-900 flex items-center gap-1">
+                    <span>✓</span>
+                    <span>
+                      Template Auto-Configured: <strong>{newBookingForm.stages?.length || 6} Stages</strong> &amp; <strong>{newBookingForm.stages?.reduce((a, s) => a + (s.checklist?.length || 0), 0) || 16} Checklists</strong> from Master Stage Config
+                    </span>
+                  </span>
+                  <span className="text-[10px] font-bold text-indigo-700 bg-white px-2 py-0.5 rounded border border-indigo-200">
+                    Stage Details Auto-Set
+                  </span>
                 </div>
               </div>
 

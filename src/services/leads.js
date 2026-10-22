@@ -769,6 +769,9 @@ export const leadsService = {
       priority: casePayload.priority || 'Normal',
       createdAt: new Date().toISOString().slice(0, 10),
       notes: casePayload.notes || `Converted from lead ${lead.id} (${lead.name})`,
+      templateId: casePayload.templateId || null,
+      category: casePayload.category || null,
+      templateName: casePayload.templateName || null,
     }
 
     const updatedLead = this.updateLead(leadId, {
@@ -780,19 +783,25 @@ export const leadsService = {
 
     if (lead.type === 'VISA') {
       try {
-        visaCasesService.createCaseFromLead({
-          ...lead,
-          assignedStaff: specialist,
-        })
+        visaCasesService.createCaseFromLead(
+          {
+            ...lead,
+            assignedStaff: specialist,
+          },
+          casePayload
+        )
       } catch (e) {
         console.warn('Sync to visa cases error:', e)
       }
     } else {
       try {
-        holidayCasesService.createCaseFromLead({
-          ...lead,
-          assignedStaff: specialist,
-        })
+        holidayCasesService.createCaseFromLead(
+          {
+            ...lead,
+            assignedStaff: specialist,
+          },
+          casePayload
+        )
       } catch (e) {
         console.warn('Sync to holiday cases error:', e)
       }

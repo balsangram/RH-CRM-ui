@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import ROUTES from '../../config/routes'
 import Modal from '../../components/Modal/Modal.component'
 import leadsService, { STAFF_MEMBERS } from '../../services/leads'
+import masterWorkflowTemplatesService from '../../services/masterWorkflowTemplates'
 
 export const Leads = () => {
   const navigate = useNavigate()
@@ -246,16 +247,49 @@ export const Leads = () => {
     reloadData()
   }
 
-  // Open Case Conversion Modal (Assigns Case Specialist)
+  // Open Case Conversion Modal (Assigns Case Specialist & Master Workflow Template)
   const handleOpenCaseModal = (lead, e) => {
     e?.stopPropagation()
     setCaseLead(lead)
+
+    // Lookup matching master workflow template for this lead
+    const leadType = lead.type === 'VISA' ? 'VISA' : 'HOLIDAY'
+    const availableTemplates = masterWorkflowTemplatesService.getTemplates(leadType)
+
+    // Intelligent auto-matching based on serviceRequired / purpose
+    const reqText = (lead.serviceRequired || lead.purpose || lead.targetCountry || '').toLowerCase()
+    let matched = availableTemplates.find((t) => {
+      if (reqText.includes('student') || reqText.includes('study') || reqText.includes('university') || reqText.includes('cas') || reqText.includes('i-20')) {
+        return t.category === 'STUDENT_VISA'
+      }
+      if (reqText.includes('business') || reqText.includes('corp') || reqText.includes('deputation') || reqText.includes('conference')) {
+        return t.category === 'BUSINESS_CORP'
+      }
+      if (reqText.includes('work') || reqText.includes('permit') || reqText.includes('employment')) {
+        return t.category === 'WORK_PERMIT'
+      }
+      if (reqText.includes('luxury') || reqText.includes('honeymoon') || reqText.includes('overwater')) {
+        return t.category === 'INTERNATIONAL_LUXURY'
+      }
+      return false
+    })
+
+    if (!matched) {
+      matched = availableTemplates.find((t) => t.isDefault) || availableTemplates[0]
+    }
+
     setCaseFormData({
       caseId: lead.caseId || `CASE-${3000 + Math.floor(Math.random() * 900)}`,
       caseType: lead.type === 'VISA' ? 'Visa Application Filing' : 'Holiday Tour Execution',
-      specialist: lead.caseDetails?.specialist || 'Amit Verma',
+      specialist: lead.caseDetails?.specialist || lead.assignedStaff || 'Amit Verma',
       priority: 'Normal',
-      notes: `Converted from lead ${lead.id} (${lead.name})`,
+      notes: `Converted from lead ${lead.id} (${lead.name}) - Applied Master Workflow: ${matched?.name || ''}`,
+      templateId: matched?.id || null,
+      category: matched?.category || null,
+      templateName: matched?.name || null,
+      stages: matched?.stages || null,
+      stage: matched?.stages ? matched.stages[0]?.id : (lead.type === 'VISA' ? 'UNDER_REVIEW' : 'BOOKING_CREATED'),
+      amount: lead.value || matched?.defaultFee || 25000,
     })
     setIsCaseModalOpen(true)
   }
@@ -1522,80 +1556,154 @@ export const Leads = () => {
       {/* ------------------------------------------------------------- */}
       {/* 9. MODAL: OPERATIONS CASE CONVERSION & REASSIGNMENT            */}
       {/* ------------------------------------------------------------- */}
-      {isCaseModalOpen && caseLead && (
-        <Modal
-          isOpen={isCaseModalOpen}
-          onClose={() => setIsCaseModalOpen(false)}
-          title={`Operations Case Setup: ${caseLead.name}`}
-          size="md"
-        >
-          <form onSubmit={handleSaveCaseConversion} className="space-y-3.5 font-sans text-xs">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Case Tracking ID</label>
-              <input
-                type="text"
-                required
-                value={caseFormData.caseId}
-                onChange={(e) => setCaseFormData({ ...caseFormData, caseId: e.target.value })}
-                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 font-mono font-bold"
-              />
-            </div>
+      {isCaseModalOpen && caseLead && (() => {
+        const leadType = caseLead.type === 'VISA' ? 'VISA' : 'HOLIDAY'
+        const availableTemplates = masterWorkflowTemplatesService.getTemplates(leadType)
+        const currentTemplate = availableTemplates.find((t) => t.id === caseFormData.templateId) || availableTemplates[0]
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Case Category</label>
-              <select
-                value={caseFormData.caseType}
-                onChange={(e) => setCaseFormData({ ...caseFormData, caseType: e.target.value })}
-                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50"
-              >
-                <option value="Visa Application Filing">Visa Application Filing (Embassy Operations)</option>
-                <option value="Holiday Tour Execution">Holiday Tour Execution (Leisure & Vouchers)</option>
-              </select>
-            </div>
+        const handleSelectTemplate = (tplId) => {
+          const tpl = availableTemplates.find((t) => t.id === tplId)
+          if (!tpl) return
+          setCaseFormData({
+            ...caseFormData,
+            templateId: tpl.id,
+            category: tpl.category,
+            templateName: tpl.name,
+            stages: tpl.stages,
+            stage: tpl.stages[0]?.id,
+            amount: caseFormData.amount || tpl.defaultFee,
+            notes: `Converted from lead ${caseLead.id} (${caseLead.name}) - Applied Master Workflow: ${tpl.name}`,
+          })
+        }
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Assigned Specialist Officer</label>
-              <select
-                value={caseFormData.specialist}
-                onChange={(e) => setCaseFormData({ ...caseFormData, specialist: e.target.value })}
-                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 font-bold"
-              >
-                {STAFF_MEMBERS.map((st) => (
-                  <option key={st.id} value={st.name}>
-                    {st.name} ({st.role})
-                  </option>
-                ))}
-              </select>
-            </div>
+        return (
+          <Modal
+            isOpen={isCaseModalOpen}
+            onClose={() => setIsCaseModalOpen(false)}
+            title={`Operations Case Setup: ${caseLead.name}`}
+            size="lg"
+          >
+            <form onSubmit={handleSaveCaseConversion} className="space-y-3.5 font-sans text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Case Tracking ID</label>
+                  <input
+                    type="text"
+                    required
+                    value={caseFormData.caseId}
+                    onChange={(e) => setCaseFormData({ ...caseFormData, caseId: e.target.value })}
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 font-mono font-bold"
+                  />
+                </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Case Notes & Handoff Instructions</label>
-              <textarea
-                rows={3}
-                value={caseFormData.notes}
-                onChange={(e) => setCaseFormData({ ...caseFormData, notes: e.target.value })}
-                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50"
-              />
-            </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Assigned Specialist Officer</label>
+                  <select
+                    value={caseFormData.specialist}
+                    onChange={(e) => setCaseFormData({ ...caseFormData, specialist: e.target.value })}
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 font-bold"
+                  >
+                    {STAFF_MEMBERS.map((st) => (
+                      <option key={st.id} value={st.name}>
+                        {st.name} ({st.role})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
-              <button
-                type="button"
-                onClick={() => setIsCaseModalOpen(false)}
-                className="px-3.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 font-semibold cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-1.5 rounded-lg bg-emerald-700 text-white hover:bg-emerald-800 font-bold cursor-pointer"
-              >
-                Confirm & Create Case
-              </button>
-            </div>
-          </form>
-        </Modal>
-      )}
+              {/* Master Stage Config Template Selector */}
+              <div className="p-3.5 rounded-xl bg-indigo-50/60 border border-indigo-200 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-indigo-950 uppercase tracking-wider">
+                    ⚙️ Master Stage & Workflow Template Config
+                  </label>
+                  <span className="text-[10px] font-bold text-indigo-700 bg-white px-2 py-0.5 rounded border border-indigo-200">
+                    Auto-Populated by Category
+                  </span>
+                </div>
+
+                <div>
+                  <select
+                    value={caseFormData.templateId || currentTemplate?.id}
+                    onChange={(e) => handleSelectTemplate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-indigo-300 bg-white font-bold text-slate-900 shadow-2xs focus:ring-1 focus:ring-indigo-500 cursor-pointer text-xs"
+                  >
+                    {availableTemplates.map((tpl) => (
+                      <option key={tpl.id} value={tpl.id}>
+                        {tpl.name} ({tpl.categoryName} • {tpl.stages?.length || 0} Stages • {tpl.estimatedDays})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Live Template Stepper Preview */}
+                {currentTemplate && (
+                  <div className="p-2.5 rounded-lg bg-white border border-indigo-100 space-y-2">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-bold text-slate-900">
+                        {currentTemplate.name}
+                      </span>
+                      <span className="font-semibold text-emerald-700">
+                        Base Fee: ₹{Number(currentTemplate.defaultFee || 0).toLocaleString('en-IN')} • SLA: {currentTemplate.estimatedDays}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 overflow-x-auto py-1">
+                      {currentTemplate.stages?.map((st, sIdx) => (
+                        <React.Fragment key={st.id || sIdx}>
+                          <div className="flex items-center gap-1 px-2 py-1 rounded bg-slate-50 border border-slate-200 text-[10px] shrink-0 font-medium text-slate-800">
+                            <span className={`w-3.5 h-3.5 rounded text-[8px] flex items-center justify-center font-bold ${st.colorBadge || 'bg-slate-700 text-white'}`}>
+                              {st.stepNumber || sIdx + 1}
+                            </span>
+                            <span>{st.shortTitle}</span>
+                            <span className="text-[8px] px-1 py-0.2 rounded bg-slate-200 text-slate-700 font-bold">
+                              {st.checklist?.filter((c) => c.mandatory)?.length || 0} req
+                            </span>
+                          </div>
+                          {sIdx < currentTemplate.stages.length - 1 && (
+                            <span className="text-slate-300 text-[10px]">&rarr;</span>
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </div>
+
+                    <p className="text-[10px] text-slate-500 italic">
+                      ✔ Upon conversion, this case will automatically inherit all {currentTemplate.stages?.length || 0} stages and {currentTemplate.stages?.reduce((acc, s) => acc + (s.checklist?.length || 0), 0)} checklist items from the master template.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Case Notes & Handoff Instructions</label>
+                <textarea
+                  rows={2}
+                  value={caseFormData.notes}
+                  onChange={(e) => setCaseFormData({ ...caseFormData, notes: e.target.value })}
+                  className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setIsCaseModalOpen(false)}
+                  className="px-3.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 font-semibold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 rounded-lg bg-emerald-700 text-white hover:bg-emerald-800 font-bold cursor-pointer shadow-xs"
+                >
+                  Confirm & Create Case
+                </button>
+              </div>
+            </form>
+          </Modal>
+        )
+      })()}
 
       {/* ------------------------------------------------------------- */}
       {/* 10. MODAL: MANAGE PIPELINE STAGES (Dynamic & Configurable)    */}

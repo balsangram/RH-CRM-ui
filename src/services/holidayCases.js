@@ -418,7 +418,8 @@ class HolidayCasesService {
     if (!currentCase) return { success: false, error: 'Booking case not found' }
 
     // Check mandatory checklist validation for current stage
-    const currentStageDef = HOLIDAY_STAGES.find((s) => s.id === currentCase.stage)
+    const activeStages = currentCase.stages || HOLIDAY_STAGES
+    const currentStageDef = activeStages.find((s) => s.id === currentCase.stage)
     if (currentStageDef && targetStageId !== 'CANCELLED') {
       const mandatoryItems = currentStageDef.checklist.filter((item) => item.mandatory)
       const checks = currentCase.completedChecklists || {}
@@ -443,6 +444,7 @@ class HolidayCasesService {
   createCase(caseData) {
     const list = this.getCases()
     const nextNum = 700 + list.length + 1
+    const initialStage = caseData.stage || (caseData.stages && caseData.stages[0]?.id) || 'BOOKING_CREATED'
     const newCase = {
       id: caseData.id || `PKG-${nextNum}`,
       customer: caseData.customer || 'New Traveler',
@@ -451,7 +453,10 @@ class HolidayCasesService {
       packageName: caseData.packageName || 'Custom Holiday Experience',
       destination: caseData.destination || 'Bali, Indonesia',
       duration: caseData.duration || '6 Days / 5 Nights',
-      stage: caseData.stage || 'BOOKING_CREATED',
+      stage: initialStage,
+      stages: caseData.stages || null,
+      templateId: caseData.templateId || null,
+      category: caseData.category || null,
       price: Number(caseData.price) || 120000,
       paidAmount: Number(caseData.paidAmount) || 0,
       paymentType: caseData.paymentType || 'Postpaid',
@@ -470,17 +475,20 @@ class HolidayCasesService {
     return newCase
   }
 
-  createCaseFromLead(lead) {
+  createCaseFromLead(lead, customCaseData = {}) {
     return this.createCase({
       customer: lead.name,
       phone: lead.phone,
       email: lead.email,
-      destination: lead.destination || lead.country || 'Bali, Indonesia',
-      packageName: lead.tourPackage || lead.purpose || 'Custom Leisure Tour',
-      officer: lead.assignedStaff || 'Priya Singh',
-      price: lead.expectedValue || lead.quotation?.totalAmount || 150000,
+      destination: lead.destination || lead.targetCountry || lead.country || 'Bali, Indonesia',
+      packageName: customCaseData.packageName || lead.tourPackage || lead.serviceRequired || lead.purpose || 'Custom Leisure Tour',
+      officer: customCaseData.specialist || lead.assignedStaff || 'Priya Singh',
+      price: customCaseData.amount || lead.value || lead.expectedValue || lead.quotation?.total || 150000,
       paidAmount: 0,
-      stage: 'BOOKING_CREATED',
+      stage: customCaseData.stage || (customCaseData.stages && customCaseData.stages[0]?.id) || 'BOOKING_CREATED',
+      stages: customCaseData.stages || null,
+      templateId: customCaseData.templateId || null,
+      category: customCaseData.category || null,
     })
   }
 
